@@ -4,14 +4,19 @@ struct ContentView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
 
+    @StateObject private var onboardingVM = OnboardingViewModel()
+
     var body: some View {
         Group {
             if appState.isLoading {
-                loadingView
+                SplashView(onFinish: {})
             } else if !appState.isOnboardingComplete {
-                onboardingPlaceholder
+                onboardingFlow
             } else if !appState.isAuthenticated {
-                authPlaceholder
+                AuthView(
+                    viewModel: AuthViewModel(authService: appState.authService),
+                    onComplete: {}
+                )
             } else {
                 MainTabView()
             }
@@ -21,50 +26,58 @@ struct ContentView: View {
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isOnboardingComplete)
     }
 
-    // MARK: - Loading
+    // MARK: - Onboarding Flow
 
-    private var loadingView: some View {
-        ZStack {
-            Color(.systemBackground)
-                .ignoresSafeArea()
-            ProgressView()
-                .scaleEffect(1.5)
-        }
-    }
+    @ViewBuilder
+    private var onboardingFlow: some View {
+        switch onboardingVM.currentStep {
+        case .splash:
+            SplashView {
+                onboardingVM.finishSplash()
+            }
+            .transition(.opacity)
 
-    // MARK: - Placeholders (replaced in Step 6: Onboarding & Auth Flow)
+        case .pages:
+            OnboardingContainerView(viewModel: onboardingVM)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
 
-    private var onboardingPlaceholder: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "figure.run")
-                .font(.system(size: 64))
-                .foregroundStyle(.tint)
+        case .locationPermission:
+            PermissionRequestView(
+                type: .location,
+                onAllow: { onboardingVM.requestLocationPermission() },
+                onSkip: { onboardingVM.skipLocationPermission() }
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .move(edge: .leading)
+            ))
 
-            Text("RunDom")
-                .font(.largeTitle.bold())
+        case .notificationPermission:
+            PermissionRequestView(
+                type: .notification,
+                onAllow: { onboardingVM.requestNotificationPermission() },
+                onSkip: { onboardingVM.skipNotificationPermission() }
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .move(edge: .leading)
+            ))
 
-            Text("onboarding.slide1.subtitle".localized)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, AppConstants.UI.screenPadding)
-
-            Button("onboarding.getStarted".localized) {
+        case .auth:
+            AuthView(
+                viewModel: AuthViewModel(authService: appState.authService),
+                onComplete: {}
+            )
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .opacity
+            ))
+            .onAppear {
                 appState.completeOnboarding()
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-        }
-    }
-
-    private var authPlaceholder: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "person.crop.circle.badge.plus")
-                .font(.system(size: 64))
-                .foregroundStyle(.tint)
-
-            Text("auth.signInApple".localized)
-                .font(.title2.bold())
         }
     }
 }
