@@ -1,14 +1,9 @@
-//
-//  RunDomApp.swift
-//  RunDom
-//
-//  Created by Mehmet Mert Mazıcı on 1.03.2026.
-//
-
 import SwiftUI
 
 @main
 struct RunDomApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     var body: some Scene {
         WindowGroup {
             ContentView()
