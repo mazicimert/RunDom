@@ -1,0 +1,128 @@
+/* Localizable.strings (Turkish) — RunDom */
+
+// MARK: - Common
+"common.ok" = "Tamam";
+"common.cancel" = "Vazgeç";
+"common.done" = "Bitti";
+"common.error" = "Hata";
+"common.retry" = "Tekrar Dene";
+"common.save" = "Kaydet";
+"common.delete" = "Sil";
+"common.share" = "Paylaş";
+"common.loading" = "Yükleniyor...";
+"common.back" = "Geri";
+"common.next" = "İleri";
+"common.skip" = "Atla";
+"common.continue" = "Devam";
+
+// MARK: - Tab Bar
+"tab.map" = "Harita";
+"tab.run" = "Koş";
+"tab.profile" = "Profil";
+"tab.leaderboard" = "Sıralama";
+"tab.stats" = "İstatistik";
+
+// MARK: - Trail Unit
+"trail.unit" = "İz";
+"trail.points" = "%@ İz";
+
+// MARK: - Onboarding
+"onboarding.slide1.title" = "Şehrini Fethet";
+"onboarding.slide1.subtitle" = "Gerçek dünya bölgelerinde koş ve onları kendi toprakların yap.";
+"onboarding.slide2.title" = "İz Puanı Kazan";
+"onboarding.slide2.subtitle" = "Ne kadar hızlı ve uzun koşarsan, o kadar çok İz kazanırsın.";
+"onboarding.slide3.title" = "Yarış ve Domine Et";
+"onboarding.slide3.subtitle" = "Sıralamalarda yüksel, rozetler topla ve bölgelerini savun.";
+"onboarding.getStarted" = "Başla";
+
+// MARK: - Permissions
+"permission.location.title" = "Konum Erişimi";
+"permission.location.subtitle" = "RunDom, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
+"permission.location.button" = "Konum Erişimine İzin Ver";
+"permission.notification.title" = "Oyunda Kal";
+"permission.notification.subtitle" = "Bölgelerin saldırı altındayken veya dropzone'lar belirdiğinde bildirim al.";
+"permission.notification.button" = "Bildirimleri Aç";
+
+// MARK: - Auth
+"auth.signInApple" = "Apple ile Giriş Yap";
+"auth.signInGoogle" = "Google ile Giriş Yap";
+"auth.signOut" = "Çıkış Yap";
+"auth.signOutConfirm" = "Çıkış yapmak istediğinize emin misiniz?";
+
+// MARK: - Run
+"run.start" = "Koşuya Başla";
+"run.stop" = "Bitir";
+"run.pause" = "Duraklat";
+"run.resume" = "Devam Et";
+"run.modeNormal" = "Normal";
+"run.modeBoost" = "Boost";
+"run.boostThreshold" = "Boost'u korumak için %@ üzerinde kal";
+"run.distance" = "Mesafe";
+"run.duration" = "Süre";
+"run.pace" = "Tempo";
+"run.avgSpeed" = "Ort. Hız";
+"run.trailEarned" = "Kazanılan İz";
+"run.territoriesCaptured" = "Fethedilen Bölge";
+"run.summary" = "Koşu Özeti";
+"run.boostActive" = "Boost Aktif";
+"run.boostCancelled" = "Boost İptal";
+
+// MARK: - Map
+"map.myTerritory" = "Benim Bölgem";
+"map.defense" = "Savunma Seviyesi";
+"map.owner" = "Sahip";
+"map.noTerritories" = "Henüz fethedilmiş bölge yok.";
+"map.noTerritories.subtitle" = "İlk bölgeni fethetmek için koşuya başla!";
+
+// MARK: - Profile
+"profile.totalTrail" = "Toplam İz";
+"profile.streak" = "Seri";
+"profile.streakDays" = "%d günlük seri";
+"profile.badges" = "Rozetler";
+"profile.editProfile" = "Profili Düzenle";
+"profile.settings" = "Ayarlar";
+
+// MARK: - Leaderboard
+"leaderboard.global" = "Global";
+"leaderboard.neighborhood" = "Mahalle";
+"leaderboard.empty" = "Henüz sıralama yok.";
+"leaderboard.empty.subtitle" = "Sıralamada yer almak için koşu tamamla.";
+
+// MARK: - Stats
+"stats.thisWeek" = "Bu Hafta";
+"stats.thisMonth" = "Bu Ay";
+"stats.runHistory" = "Koşu Geçmişi";
+"stats.weeklyReport" = "Haftalık Rapor";
+"stats.noRuns" = "Henüz koşu yok.";
+"stats.noRuns.subtitle" = "Koşu geçmişin burada görünecek.";
+"stats.totalDistance" = "Toplam Mesafe";
+"stats.totalTrail" = "Toplam İz";
+"stats.weekOverWeek" = "geçen haftaya göre";
+
+// MARK: - Dropzone
+"dropzone.active" = "Dropzone Aktif!";
+"dropzone.hint" = "Dropzone %@ içinde beliriyor";
+"dropzone.claimed" = "Alındı";
+"dropzone.reward" = "3 gün boyunca x2 çarpan";
+
+// MARK: - Badges
+"badge.locked" = "Kilitli";
+"badge.secret" = "Gizli Rozet";
+
+// MARK: - Notifications
+"notification.territoryCaptured" = "Bölgen ele geçirildi!";
+"notification.dropzoneActive" = "Yakınında bir Dropzone aktif!";
+"notification.defenseDropping" = "Bölge savunman düşüyor.";
+"notification.streakWarning" = "Serini korumak için bugün koş!";
+
+// MARK: - Errors
+"error.locationDenied" = "Konum erişimi gerekli. Lütfen Ayarlar'dan etkinleştirin.";
+"error.networkOffline" = "Çevrimdışısın. Koşun bağlantı sağlanınca senkronize edilecek.";
+"error.gpsSignalLost" = "GPS sinyali kayboldu. Koşu devam ediyor.";
+"error.generic" = "Bir şeyler ters gitti. Lütfen tekrar dene.";
+
+// MARK: - Settings
+"settings.title" = "Ayarlar";
+"settings.notifications" = "Bildirimler";
+"settings.about" = "Hakkında";
+"settings.version" = "Sürüm";

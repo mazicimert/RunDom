@@ -1,0 +1,128 @@
+/* Localizable.strings (English) — RunDom */
+
+// MARK: - Common
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.done" = "Done";
+"common.error" = "Error";
+"common.retry" = "Retry";
+"common.save" = "Save";
+"common.delete" = "Delete";
+"common.share" = "Share";
+"common.loading" = "Loading...";
+"common.back" = "Back";
+"common.next" = "Next";
+"common.skip" = "Skip";
+"common.continue" = "Continue";
+
+// MARK: - Tab Bar
+"tab.map" = "Map";
+"tab.run" = "Run";
+"tab.profile" = "Profile";
+"tab.leaderboard" = "Leaderboard";
+"tab.stats" = "Stats";
+
+// MARK: - Trail Unit
+"trail.unit" = "Trail";
+"trail.points" = "%@ Trail";
+
+// MARK: - Onboarding
+"onboarding.slide1.title" = "Conquer Your City";
+"onboarding.slide1.subtitle" = "Run through real-world territories and claim them as your own.";
+"onboarding.slide2.title" = "Earn Trail Points";
+"onboarding.slide2.subtitle" = "The faster and farther you run, the more Trail you earn.";
+"onboarding.slide3.title" = "Compete & Dominate";
+"onboarding.slide3.subtitle" = "Climb leaderboards, collect badges, and defend your zones.";
+"onboarding.getStarted" = "Get Started";
+
+// MARK: - Permissions
+"permission.location.title" = "Enable Location";
+"permission.location.subtitle" = "RunDom needs your location to track runs and conquer territories in real time.";
+"permission.location.button" = "Allow Location Access";
+"permission.notification.title" = "Stay in the Game";
+"permission.notification.subtitle" = "Get notified when your territories are under attack or dropzones appear.";
+"permission.notification.button" = "Enable Notifications";
+
+// MARK: - Auth
+"auth.signInApple" = "Sign in with Apple";
+"auth.signInGoogle" = "Sign in with Google";
+"auth.signOut" = "Sign Out";
+"auth.signOutConfirm" = "Are you sure you want to sign out?";
+
+// MARK: - Run
+"run.start" = "Start Run";
+"run.stop" = "Stop";
+"run.pause" = "Pause";
+"run.resume" = "Resume";
+"run.modeNormal" = "Normal";
+"run.modeBoost" = "Boost";
+"run.boostThreshold" = "Keep above %@ to maintain Boost";
+"run.distance" = "Distance";
+"run.duration" = "Duration";
+"run.pace" = "Pace";
+"run.avgSpeed" = "Avg Speed";
+"run.trailEarned" = "Trail Earned";
+"run.territoriesCaptured" = "Territories Captured";
+"run.summary" = "Run Summary";
+"run.boostActive" = "Boost Active";
+"run.boostCancelled" = "Boost Cancelled";
+
+// MARK: - Map
+"map.myTerritory" = "My Territory";
+"map.defense" = "Defense Level";
+"map.owner" = "Owner";
+"map.noTerritories" = "No territories conquered yet.";
+"map.noTerritories.subtitle" = "Start a run to claim your first zone!";
+
+// MARK: - Profile
+"profile.totalTrail" = "Total Trail";
+"profile.streak" = "Streak";
+"profile.streakDays" = "%d day streak";
+"profile.badges" = "Badges";
+"profile.editProfile" = "Edit Profile";
+"profile.settings" = "Settings";
+
+// MARK: - Leaderboard
+"leaderboard.global" = "Global";
+"leaderboard.neighborhood" = "Neighborhood";
+"leaderboard.empty" = "No rankings yet.";
+"leaderboard.empty.subtitle" = "Complete runs to appear on the leaderboard.";
+
+// MARK: - Stats
+"stats.thisWeek" = "This Week";
+"stats.thisMonth" = "This Month";
+"stats.runHistory" = "Run History";
+"stats.weeklyReport" = "Weekly Report";
+"stats.noRuns" = "No runs yet.";
+"stats.noRuns.subtitle" = "Your run history will appear here.";
+"stats.totalDistance" = "Total Distance";
+"stats.totalTrail" = "Total Trail";
+"stats.weekOverWeek" = "vs last week";
+
+// MARK: - Dropzone
+"dropzone.active" = "Dropzone Active!";
+"dropzone.hint" = "Dropzone appearing in %@";
+"dropzone.claimed" = "Claimed";
+"dropzone.reward" = "x2 multiplier for 3 days";
+
+// MARK: - Badges
+"badge.locked" = "Locked";
+"badge.secret" = "Secret Badge";
+
+// MARK: - Notifications
+"notification.territoryCaptured" = "Your territory was captured!";
+"notification.dropzoneActive" = "A Dropzone is now active nearby!";
+"notification.defenseDropping" = "Your territory defense is dropping.";
+"notification.streakWarning" = "Run today to keep your streak!";
+
+// MARK: - Errors
+"error.locationDenied" = "Location access is required. Please enable it in Settings.";
+"error.networkOffline" = "You're offline. Your run will sync when connected.";
+"error.gpsSignalLost" = "GPS signal lost. Run continues.";
+"error.generic" = "Something went wrong. Please try again.";
+
+// MARK: - Settings
+"settings.title" = "Settings";
+"settings.notifications" = "Notifications";
+"settings.about" = "About";
+"settings.version" = "Version";
