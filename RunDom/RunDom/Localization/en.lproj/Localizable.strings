@@ -126,3 +126,6 @@
 "settings.notifications" = "Notifications";
 "settings.about" = "About";
 "settings.version" = "Version";
+
+// MARK: - Runner
+"runner.defaultName" = "Runner";

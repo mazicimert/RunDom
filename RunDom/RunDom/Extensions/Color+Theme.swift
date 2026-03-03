@@ -1,16 +1,6 @@
 import SwiftUI
 
-extension Color {
-    // MARK: - Territory Colors
-    static let territoryBlue = Color("TerritoryBlue")
-    static let territoryRed = Color("TerritoryRed")
-
-    // MARK: - Boost Speed Indicator
-    static let boostGreen = Color("BoostGreen")
-    static let boostYellow = Color("BoostYellow")
-    static let boostRed = Color("BoostRed")
-
-    // MARK: - Surface
-    static let cardBackground = Color("CardBackground")
-    static let surfacePrimary = Color("SurfacePrimary")
-}
+// Color assets (TerritoryBlue, TerritoryRed, BoostGreen, BoostYellow,
+// BoostRed, CardBackground, SurfacePrimary) are defined in
+// Assets.xcassets/Colors and automatically available as Color.territoryBlue etc.
+// No manual extension needed — Xcode generates accessors from the Asset Catalog.

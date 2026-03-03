@@ -126,3 +126,6 @@
 "settings.notifications" = "Bildirimler";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
+
+// MARK: - Runner
+"runner.defaultName" = "Koşucu";

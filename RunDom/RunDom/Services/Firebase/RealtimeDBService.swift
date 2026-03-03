@@ -91,7 +91,8 @@ final class RealtimeDBService {
         }
 
         let captured: Bool
-        if let dict = result.snapshot.value as? [String: Any] {
+        let (_, snapshot) = result
+        if let dict = snapshot.value as? [String: Any] {
             captured = (dict["ownerId"] as? String) == userId
         } else {
             captured = false
