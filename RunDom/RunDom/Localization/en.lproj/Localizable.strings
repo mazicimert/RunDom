@@ -129,3 +129,6 @@
 
 // MARK: - Runner
 "runner.defaultName" = "Runner";
+
+// MARK: - Accessibility
+"avatar" = "Avatar";
