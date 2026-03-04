@@ -15,6 +15,7 @@ final class AppState: ObservableObject {
 
     let authService: AuthService
     let firestoreService: FirestoreService
+    let locationManager: LocationManager
 
     // MARK: - Private
 
@@ -25,6 +26,7 @@ final class AppState: ObservableObject {
     init() {
         self.authService = AuthService()
         self.firestoreService = FirestoreService()
+        self.locationManager = LocationManager()
         self.isOnboardingComplete = UserDefaults.standard.bool(
             forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete
         )

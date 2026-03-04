@@ -73,6 +73,10 @@
 "map.owner" = "Owner";
 "map.noTerritories" = "No territories conquered yet.";
 "map.noTerritories.subtitle" = "Start a run to claim your first zone!";
+"map.territoryDetail" = "Territory Detail";
+"map.decaying" = "Decaying";
+"map.defenseDecaying" = "Defense is decaying due to inactivity.";
+"map.lastActive" = "Last Active";
 
 // MARK: - Profile
 "profile.totalTrail" = "Total Trail";
@@ -104,6 +108,10 @@
 "dropzone.hint" = "Dropzone appearing in %@";
 "dropzone.claimed" = "Claimed";
 "dropzone.reward" = "x2 multiplier for 3 days";
+"dropzone.rewardDesc" = "Claim this dropzone to earn double Trail points for 3 days.";
+"dropzone.spotsLeft" = "Spots Left";
+"dropzone.expiresIn" = "Expires In";
+"dropzone.claim" = "Claim Dropzone";
 
 // MARK: - Badges
 "badge.locked" = "Locked";

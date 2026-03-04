@@ -73,6 +73,10 @@
 "map.owner" = "Sahip";
 "map.noTerritories" = "Henüz fethedilmiş bölge yok.";
 "map.noTerritories.subtitle" = "İlk bölgeni fethetmek için koşuya başla!";
+"map.territoryDetail" = "Bölge Detayı";
+"map.decaying" = "Zayıflıyor";
+"map.defenseDecaying" = "Hareketsizlik nedeniyle savunma zayıflıyor.";
+"map.lastActive" = "Son Aktivite";
 
 // MARK: - Profile
 "profile.totalTrail" = "Toplam İz";
@@ -104,6 +108,10 @@
 "dropzone.hint" = "Dropzone %@ içinde beliriyor";
 "dropzone.claimed" = "Alındı";
 "dropzone.reward" = "3 gün boyunca x2 çarpan";
+"dropzone.rewardDesc" = "Bu dropzone'u al ve 3 gün boyunca çift İz puanı kazan.";
+"dropzone.spotsLeft" = "Kalan Yer";
+"dropzone.expiresIn" = "Bitiş Süresi";
+"dropzone.claim" = "Dropzone'u Al";
 
 // MARK: - Badges
 "badge.locked" = "Kilitli";

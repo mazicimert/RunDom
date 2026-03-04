@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
             // Map Tab
             NavigationStack {
-                MapPlaceholderView()
+                MapTabView(locationManager: appState.locationManager)
             }
             .tabItem {
                 Label("tab.map".localized, systemImage: "map.fill")
@@ -82,14 +83,6 @@ struct MainTabView: View {
 
 /// Placeholder views will be replaced in their respective feature steps.
 
-private struct MapPlaceholderView: View {
-    var body: some View {
-        Text("tab.map".localized)
-            .font(.largeTitle.bold())
-            .navigationTitle("tab.map".localized)
-    }
-}
-
 private struct LeaderboardPlaceholderView: View {
     var body: some View {
         Text("tab.leaderboard".localized)
@@ -126,5 +119,6 @@ private struct ProfilePlaceholderView: View {
 
 #Preview {
     MainTabView()
+        .environmentObject(AppState())
         .environmentObject(AppRouter())
 }
