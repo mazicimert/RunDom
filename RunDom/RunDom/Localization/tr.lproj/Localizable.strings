@@ -114,11 +114,19 @@
 
 // MARK: - Profile
 "profile.totalTrail" = "Toplam İz";
+"profile.totalRuns" = "Koşu";
+"profile.totalDistance" = "Mesafe";
 "profile.streak" = "Seri";
 "profile.streakDays" = "%d günlük seri";
+"profile.streakMultiplier" = "Seri bonusu: %@";
 "profile.badges" = "Rozetler";
+"profile.noBadges" = "Henüz rozet yok";
+"profile.noBadges.subtitle" = "Rozet kazanmak için koşu tamamla ve görevleri yerine getir.";
 "profile.editProfile" = "Profili Düzenle";
 "profile.settings" = "Ayarlar";
+"profile.changePhoto" = "Fotoğrafı Değiştir";
+"profile.displayName" = "Görünen Ad";
+"profile.email" = "E-posta";
 
 // MARK: - Leaderboard
 "leaderboard.global" = "Global";
@@ -150,6 +158,11 @@
 // MARK: - Badges
 "badge.locked" = "Kilitli";
 "badge.secret" = "Gizli Rozet";
+"badge.category.performance" = "Performans";
+"badge.category.territory" = "Bölge";
+"badge.category.dropzone" = "Dropzone";
+"badge.category.exploration" = "Keşif";
+"badge.category.streak" = "Seri";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Bölgen ele geçirildi!";
@@ -166,6 +179,11 @@
 // MARK: - Settings
 "settings.title" = "Ayarlar";
 "settings.notifications" = "Bildirimler";
+"settings.enabled" = "Açık";
+"settings.enable" = "Aç";
+"settings.account" = "Hesap";
+"settings.deleteAccount" = "Hesabı Sil";
+"settings.deleteAccountConfirm" = "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
 

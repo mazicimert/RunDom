@@ -21,7 +21,7 @@ struct MainTabView: View {
 
                 // Leaderboard Tab
                 NavigationStack {
-                    LeaderboardPlaceholderView()
+                    LeaderboardTabView()
                 }
                 .tabItem {
                     Label("tab.leaderboard".localized, systemImage: "trophy.fill")
@@ -50,7 +50,7 @@ struct MainTabView: View {
 
                 // Profile Tab
                 NavigationStack {
-                    ProfilePlaceholderView()
+                    ProfileTabView()
                 }
                 .tabItem {
                     Label("tab.profile".localized, systemImage: "person.fill")
@@ -113,12 +113,21 @@ struct MainTabView: View {
             Text("map.myTerritory".localized)
         case .dropzoneDetail:
             Text("dropzone.active".localized)
-        case .badgeDetail:
-            Text("profile.badges".localized)
+        case .badgeDetail(let badgeId):
+            BadgeDetailView(badge: Badge(
+                id: badgeId,
+                nameKey: badgeId,
+                descriptionKey: badgeId,
+                iconName: "rosette",
+                category: .performance,
+                isSecret: false
+            ))
         case .editProfile:
-            Text("profile.editProfile".localized)
+            EditProfileView()
+                .environmentObject(appState)
         case .settings:
-            Text("settings.title".localized)
+            SettingsView()
+                .environmentObject(appState)
         }
     }
 }
@@ -127,27 +136,11 @@ struct MainTabView: View {
 
 /// Placeholder views will be replaced in their respective feature steps.
 
-private struct LeaderboardPlaceholderView: View {
-    var body: some View {
-        Text("tab.leaderboard".localized)
-            .font(.largeTitle.bold())
-            .navigationTitle("tab.leaderboard".localized)
-    }
-}
-
 private struct StatsPlaceholderView: View {
     var body: some View {
         Text("tab.stats".localized)
             .font(.largeTitle.bold())
             .navigationTitle("tab.stats".localized)
-    }
-}
-
-private struct ProfilePlaceholderView: View {
-    var body: some View {
-        Text("tab.profile".localized)
-            .font(.largeTitle.bold())
-            .navigationTitle("tab.profile".localized)
     }
 }
 

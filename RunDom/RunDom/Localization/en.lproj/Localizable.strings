@@ -114,11 +114,19 @@
 
 // MARK: - Profile
 "profile.totalTrail" = "Total Trail";
+"profile.totalRuns" = "Runs";
+"profile.totalDistance" = "Distance";
 "profile.streak" = "Streak";
 "profile.streakDays" = "%d day streak";
+"profile.streakMultiplier" = "Streak bonus: %@";
 "profile.badges" = "Badges";
+"profile.noBadges" = "No badges yet";
+"profile.noBadges.subtitle" = "Complete runs and challenges to earn badges.";
 "profile.editProfile" = "Edit Profile";
 "profile.settings" = "Settings";
+"profile.changePhoto" = "Change Photo";
+"profile.displayName" = "Display Name";
+"profile.email" = "Email";
 
 // MARK: - Leaderboard
 "leaderboard.global" = "Global";
@@ -150,6 +158,11 @@
 // MARK: - Badges
 "badge.locked" = "Locked";
 "badge.secret" = "Secret Badge";
+"badge.category.performance" = "Performance";
+"badge.category.territory" = "Territory";
+"badge.category.dropzone" = "Dropzone";
+"badge.category.exploration" = "Exploration";
+"badge.category.streak" = "Streak";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Your territory was captured!";
@@ -166,6 +179,11 @@
 // MARK: - Settings
 "settings.title" = "Settings";
 "settings.notifications" = "Notifications";
+"settings.enabled" = "Enabled";
+"settings.enable" = "Enable";
+"settings.account" = "Account";
+"settings.deleteAccount" = "Delete Account";
+"settings.deleteAccountConfirm" = "This action cannot be undone. All your data will be permanently deleted.";
 "settings.about" = "About";
 "settings.version" = "Version";
 
