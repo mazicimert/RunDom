@@ -4,56 +4,100 @@ struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
 
+    @State private var activeRunSession: RunSession?
+    @State private var completedRunSession: RunSession?
+
     var body: some View {
-        TabView(selection: $router.selectedTab) {
-            // Map Tab
-            NavigationStack {
-                MapTabView(locationManager: appState.locationManager)
-            }
-            .tabItem {
-                Label("tab.map".localized, systemImage: "map.fill")
-            }
-            .tag(AppRouter.Tab.map)
+        ZStack {
+            TabView(selection: $router.selectedTab) {
+                // Map Tab
+                NavigationStack {
+                    MapTabView(locationManager: appState.locationManager)
+                }
+                .tabItem {
+                    Label("tab.map".localized, systemImage: "map.fill")
+                }
+                .tag(AppRouter.Tab.map)
 
-            // Leaderboard Tab
-            NavigationStack {
-                LeaderboardPlaceholderView()
-            }
-            .tabItem {
-                Label("tab.leaderboard".localized, systemImage: "trophy.fill")
-            }
-            .tag(AppRouter.Tab.leaderboard)
+                // Leaderboard Tab
+                NavigationStack {
+                    LeaderboardPlaceholderView()
+                }
+                .tabItem {
+                    Label("tab.leaderboard".localized, systemImage: "trophy.fill")
+                }
+                .tag(AppRouter.Tab.leaderboard)
 
-            // Run Tab (center)
-            NavigationStack {
-                RunPlaceholderView()
-            }
-            .tabItem {
-                Label("tab.run".localized, systemImage: "figure.run")
-            }
-            .tag(AppRouter.Tab.run)
+                // Run Tab (center)
+                NavigationStack {
+                    PreRunView(locationManager: appState.locationManager) { mode in
+                        startRun(mode: mode)
+                    }
+                }
+                .tabItem {
+                    Label("tab.run".localized, systemImage: "figure.run")
+                }
+                .tag(AppRouter.Tab.run)
 
-            // Stats Tab
-            NavigationStack {
-                StatsPlaceholderView()
-            }
-            .tabItem {
-                Label("tab.stats".localized, systemImage: "chart.bar.fill")
-            }
-            .tag(AppRouter.Tab.stats)
+                // Stats Tab
+                NavigationStack {
+                    StatsPlaceholderView()
+                }
+                .tabItem {
+                    Label("tab.stats".localized, systemImage: "chart.bar.fill")
+                }
+                .tag(AppRouter.Tab.stats)
 
-            // Profile Tab
-            NavigationStack {
-                ProfilePlaceholderView()
+                // Profile Tab
+                NavigationStack {
+                    ProfilePlaceholderView()
+                }
+                .tabItem {
+                    Label("tab.profile".localized, systemImage: "person.fill")
+                }
+                .tag(AppRouter.Tab.profile)
             }
-            .tabItem {
-                Label("tab.profile".localized, systemImage: "person.fill")
+
+            // Full-screen active run overlay
+            if router.isRunActive, let userId = appState.currentUser?.id,
+               let userColor = appState.currentUser?.color {
+                ActiveRunView(
+                    viewModel: ActiveRunViewModel(
+                        mode: activeRunSession?.mode ?? .normal,
+                        userId: userId,
+                        userColor: userColor,
+                        locationManager: appState.locationManager
+                    ),
+                    onFinish: { session in
+                        completedRunSession = session
+                        router.isRunActive = false
+                    }
+                )
+                .transition(.move(edge: .bottom))
+                .zIndex(1)
             }
-            .tag(AppRouter.Tab.profile)
         }
         .sheet(item: $router.presentedSheet) { sheet in
             sheetContent(for: sheet)
         }
+        .fullScreenCover(item: $completedRunSession) { session in
+            PostRunSummaryView(session: session) {
+                completedRunSession = nil
+            }
+            .environmentObject(appState)
+        }
+    }
+
+    // MARK: - Run Actions
+
+    private func startRun(mode: RunMode) {
+        activeRunSession = RunSession(
+            id: UUID().uuidString,
+            userId: appState.currentUser?.id ?? "",
+            mode: mode,
+            startDate: Date()
+        )
+        router.isRunActive = true
     }
 
     // MARK: - Sheet Content
@@ -88,14 +132,6 @@ private struct LeaderboardPlaceholderView: View {
         Text("tab.leaderboard".localized)
             .font(.largeTitle.bold())
             .navigationTitle("tab.leaderboard".localized)
-    }
-}
-
-private struct RunPlaceholderView: View {
-    var body: some View {
-        Text("tab.run".localized)
-            .font(.largeTitle.bold())
-            .navigationTitle("tab.run".localized)
     }
 }
 

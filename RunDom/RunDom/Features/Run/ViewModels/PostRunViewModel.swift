@@ -1,0 +1,127 @@
+import SwiftUI
+
+@MainActor
+final class PostRunViewModel: ObservableObject {
+
+    // MARK: - Published State
+
+    @Published var trailResult: TrailCalculator.TrailResult?
+    @Published var isSaving = false
+    @Published var isSaved = false
+    @Published var errorMessage: String?
+
+    // MARK: - Properties
+
+    var session: RunSession
+
+    // MARK: - Services
+
+    private let trailCalculator: TrailCalculator
+    private let firestoreService: FirestoreService
+    private let streakService: StreakService
+    private let antiCheatService: AntiCheatService
+
+    // MARK: - Init
+
+    init(
+        session: RunSession,
+        trailCalculator: TrailCalculator = TrailCalculator(),
+        firestoreService: FirestoreService = FirestoreService(),
+        streakService: StreakService = StreakService(),
+        antiCheatService: AntiCheatService = AntiCheatService()
+    ) {
+        self.session = session
+        self.trailCalculator = trailCalculator
+        self.firestoreService = firestoreService
+        self.streakService = streakService
+        self.antiCheatService = antiCheatService
+    }
+
+    // MARK: - Calculate & Save
+
+    func processRun(user: User) async {
+        // 1. Anti-cheat validation
+        let validation = antiCheatService.validateRoute(
+            points: session.route,
+            visitedZones: Array(repeating: "", count: session.totalZonesVisited) // Simplified
+        )
+
+        guard validation.isValid else {
+            errorMessage = "run.invalidRun".localized
+            AppLogger.run.warning("Run rejected by anti-cheat: \(validation.flags)")
+            return
+        }
+
+        // 2. Calculate trail points
+        let todayTrail = (try? await firestoreService.getTodayTrail(userId: user.id)) ?? 0
+
+        let result = trailCalculator.calculate(
+            session: session,
+            streakDays: user.streakDays,
+            hasDropzoneBoost: user.hasActiveDropzoneBoost,
+            todayTrail: todayTrail
+        )
+
+        trailResult = result
+        session.trail = result.totalTrail
+
+        // 3. Save to Firebase
+        isSaving = true
+        do {
+            try await firestoreService.saveRun(session)
+            try await firestoreService.incrementUserTrail(
+                userId: user.id,
+                trail: result.totalTrail,
+                distance: session.distance
+            )
+
+            // 4. Update streak
+            let newStreakDays = streakService.updateStreak(
+                currentStreakDays: user.streakDays,
+                lastRunDate: user.lastRunDate
+            )
+            try await streakService.saveStreakUpdate(userId: user.id, newStreakDays: newStreakDays)
+
+            isSaved = true
+            AppLogger.run.info("Run saved: \(self.session.id), trail=\(result.totalTrail)")
+        } catch {
+            errorMessage = "run.saveFailed".localized
+            AppLogger.run.error("Failed to save run: \(error.localizedDescription)")
+        }
+
+        isSaving = false
+    }
+
+    // MARK: - Computed
+
+    var distanceKm: Double {
+        session.distance / 1000.0
+    }
+
+    var durationText: String {
+        let duration = session.duration
+        let hours = Int(duration) / 3600
+        let minutes = Int(duration) % 3600 / 60
+        let seconds = Int(duration) % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    var avgSpeedText: String {
+        session.avgSpeed.formattedSpeed
+    }
+
+    var trailText: String {
+        (trailResult?.totalTrail ?? 0).formattedTrail
+    }
+
+    var modeText: String {
+        switch session.mode {
+        case .normal: return "run.normalMode".localized
+        case .boost:
+            return session.isBoostActive ? "run.boostMode".localized : "run.boostCancelled".localized
+        }
+    }
+}
