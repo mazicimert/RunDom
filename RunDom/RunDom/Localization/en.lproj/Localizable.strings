@@ -141,9 +141,19 @@
 "stats.weeklyReport" = "Weekly Report";
 "stats.noRuns" = "No runs yet.";
 "stats.noRuns.subtitle" = "Your run history will appear here.";
+"stats.noData" = "No data";
 "stats.totalDistance" = "Total Distance";
 "stats.totalTrail" = "Total Trail";
 "stats.weekOverWeek" = "vs last week";
+"stats.trailChart" = "Trail Points";
+"stats.date" = "Date";
+"stats.uniqueZones" = "Unique Zones";
+"stats.week" = "Week %d, %d";
+"stats.gained" = "Gained";
+"stats.lost" = "Lost";
+"stats.net" = "Net";
+"stats.rankings" = "Rankings";
+"stats.longestRun" = "Longest Run";
 
 // MARK: - Dropzone
 "dropzone.active" = "Dropzone Active!";

@@ -41,7 +41,7 @@ struct MainTabView: View {
 
                 // Stats Tab
                 NavigationStack {
-                    StatsPlaceholderView()
+                    StatsTabView()
                 }
                 .tabItem {
                     Label("tab.stats".localized, systemImage: "chart.bar.fill")
@@ -129,18 +129,6 @@ struct MainTabView: View {
             SettingsView()
                 .environmentObject(appState)
         }
-    }
-}
-
-// MARK: - Placeholder Views
-
-/// Placeholder views will be replaced in their respective feature steps.
-
-private struct StatsPlaceholderView: View {
-    var body: some View {
-        Text("tab.stats".localized)
-            .font(.largeTitle.bold())
-            .navigationTitle("tab.stats".localized)
     }
 }
 

@@ -5,7 +5,15 @@ enum RunMode: String, Codable, CaseIterable {
     case boost
 }
 
-struct RunSession: Codable, Identifiable, Equatable {
+struct RunSession: Codable, Identifiable, Equatable, Hashable {
+    static func == (lhs: RunSession, rhs: RunSession) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
     let id: String
     let userId: String
     let mode: RunMode

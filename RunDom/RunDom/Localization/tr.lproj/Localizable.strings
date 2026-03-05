@@ -141,9 +141,19 @@
 "stats.weeklyReport" = "Haftalık Rapor";
 "stats.noRuns" = "Henüz koşu yok.";
 "stats.noRuns.subtitle" = "Koşu geçmişin burada görünecek.";
+"stats.noData" = "Veri yok";
 "stats.totalDistance" = "Toplam Mesafe";
 "stats.totalTrail" = "Toplam İz";
 "stats.weekOverWeek" = "geçen haftaya göre";
+"stats.trailChart" = "İz Puanları";
+"stats.date" = "Tarih";
+"stats.uniqueZones" = "Benzersiz Bölge";
+"stats.week" = "Hafta %d, %d";
+"stats.gained" = "Kazanılan";
+"stats.lost" = "Kaybedilen";
+"stats.net" = "Net";
+"stats.rankings" = "Sıralama";
+"stats.longestRun" = "En Uzun Koşu";
 
 // MARK: - Dropzone
 "dropzone.active" = "Dropzone Aktif!";
