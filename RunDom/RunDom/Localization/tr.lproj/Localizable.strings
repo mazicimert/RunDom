@@ -176,9 +176,16 @@
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Bölgen ele geçirildi!";
+"notification.territoryCaptured.title" = "Bölge Saldırı Altında";
 "notification.dropzoneActive" = "Yakınında bir Dropzone aktif!";
+"notification.dropzoneActive.title" = "Dropzone Uyarısı";
+"notification.dropzoneActive.location" = "%@ bölgesinde bir Dropzone aktif!";
 "notification.defenseDropping" = "Bölge savunman düşüyor.";
+"notification.defenseDropping.title" = "Savunma Zayıflıyor";
+"notification.defenseDropping.location" = "%@ bölgesindeki savunman düşüyor.";
 "notification.streakWarning" = "Serini korumak için bugün koş!";
+"notification.streakWarning.title" = "Seri Risk Altında";
+"notification.streakWarning.body" = "%d günlük serin var. Korumak için bugün koş!";
 
 // MARK: - Errors
 "error.locationDenied" = "Konum erişimi gerekli. Lütfen Ayarlar'dan etkinleştirin.";

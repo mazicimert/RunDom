@@ -64,7 +64,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) async {
         let userInfo = response.notification.request.content.userInfo
-        AppLogger.firebase.info("Notification tapped: \(userInfo)")
+        AppLogger.notification.info("Notification tapped: \(userInfo)")
+
+        guard let destination = NotificationService.shared.destination(for: userInfo) else { return }
+        NotificationCenter.default.post(
+            name: .notificationTapped,
+            object: nil,
+            userInfo: ["destination": destination]
+        )
     }
 }
 
@@ -72,4 +79,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 extension Notification.Name {
     static let fcmTokenReceived = Notification.Name("fcmTokenReceived")
+    static let notificationTapped = Notification.Name("notificationTapped")
 }

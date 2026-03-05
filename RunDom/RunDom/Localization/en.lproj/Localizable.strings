@@ -176,9 +176,16 @@
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Your territory was captured!";
+"notification.territoryCaptured.title" = "Territory Under Attack";
 "notification.dropzoneActive" = "A Dropzone is now active nearby!";
+"notification.dropzoneActive.title" = "Dropzone Alert";
+"notification.dropzoneActive.location" = "A Dropzone is now active in %@!";
 "notification.defenseDropping" = "Your territory defense is dropping.";
+"notification.defenseDropping.title" = "Defense Weakening";
+"notification.defenseDropping.location" = "Your territory defense in %@ is dropping.";
 "notification.streakWarning" = "Run today to keep your streak!";
+"notification.streakWarning.title" = "Streak at Risk";
+"notification.streakWarning.body" = "You have a %d-day streak. Run today to keep it!";
 
 // MARK: - Errors
 "error.locationDenied" = "Location access is required. Please enable it in Settings.";
