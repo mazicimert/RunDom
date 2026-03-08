@@ -1,3 +1,4 @@
+import GoogleSignIn
 import SwiftUI
 
 @main
@@ -11,6 +12,9 @@ struct RunDomApp: App {
             ContentView()
                 .environmentObject(appState)
                 .environmentObject(router)
+                .onOpenURL { url in
+                    GIDSignIn.sharedInstance.handle(url)
+                }
         }
     }
 }

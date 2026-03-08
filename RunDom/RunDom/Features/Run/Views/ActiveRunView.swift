@@ -54,6 +54,7 @@ struct ActiveRunView: View {
                 HStack(spacing: 24) {
                     // Pause button
                     Button {
+                        Haptics.impact(.medium)
                         viewModel.pauseRun()
                     } label: {
                         Image(systemName: "pause.fill")
@@ -64,9 +65,11 @@ struct ActiveRunView: View {
                             .clipShape(Circle())
                             .shadow(radius: 4)
                     }
+                    .accessibilityLabel("run.pause".localized)
 
                     // Stop button
                     Button {
+                        Haptics.impact(.heavy)
                         let session = viewModel.stopRun()
                         onFinish(session)
                     } label: {
@@ -78,6 +81,7 @@ struct ActiveRunView: View {
                             .clipShape(Circle())
                             .shadow(radius: 4)
                     }
+                    .accessibilityLabel("run.stop".localized)
                 }
                 .padding(.top, 16)
                 .padding(.bottom, 40)
@@ -99,6 +103,12 @@ struct ActiveRunView: View {
         }
         .onAppear {
             viewModel.startRun()
+        }
+        .onChange(of: viewModel.gpsSignalLost) { _, isLost in
+            if isLost { Haptics.notification(.warning) }
+        }
+        .onChange(of: viewModel.territoriesCaptured) { oldValue, newValue in
+            if newValue > oldValue { Haptics.notification(.success) }
         }
         .statusBarHidden(viewModel.runState == .running)
     }
@@ -136,13 +146,20 @@ struct RunMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        // Update route overlay
         guard routePoints.count >= 2 else { return }
 
-        // Remove old overlays
-        mapView.removeOverlays(mapView.overlays)
+        let coordinator = context.coordinator
+        let newCount = routePoints.count
 
-        // Draw route polyline
+        // Only redraw when a new point has been added (throttle to every 5 points)
+        guard newCount != coordinator.lastRenderedPointCount,
+              newCount % 5 == 0 || newCount - coordinator.lastRenderedPointCount >= 5 else {
+            return
+        }
+
+        coordinator.lastRenderedPointCount = newCount
+
+        mapView.removeOverlays(mapView.overlays)
         let coordinates = routePoints.map(\.coordinate)
         let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         mapView.addOverlay(polyline)
@@ -153,6 +170,8 @@ struct RunMapView: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        var lastRenderedPointCount = 0
+
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)

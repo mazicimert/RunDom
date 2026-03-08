@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct MapTabView: View {
     @EnvironmentObject private var appState: AppState
@@ -29,7 +29,9 @@ struct MapTabView: View {
                     ErrorBannerView(
                         message: error,
                         onDismiss: { viewModel.dismissError() },
-                        onRetry: { Task { await viewModel.onAppear(currentUser: appState.currentUser) } }
+                        onRetry: {
+                            Task { await viewModel.onAppear(currentUser: appState.currentUser) }
+                        }
                     )
                     .padding(.top, 8)
                 }
@@ -97,12 +99,17 @@ struct MapTabView: View {
         .padding(.vertical, 8)
         .background(.ultraThinMaterial, in: Capsule())
         .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 0.5))
+        .accessibilityLabel(
+            "accessibility.map.territoryCount".localized(with: viewModel.userTerritoryCount)
+        )
+        .accessibilityAddTraits(.isStaticText)
     }
 
     // MARK: - Center Button
 
     private var centerButton: some View {
         Button {
+            Haptics.selection()
             viewModel.centerOnUser()
         } label: {
             Image(systemName: "location.fill")
@@ -112,6 +119,7 @@ struct MapTabView: View {
                 .background(.ultraThinMaterial, in: Circle())
                 .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 0.5))
         }
+        .accessibilityLabel("accessibility.map.centerOnUser".localized)
     }
 
     // MARK: - Actions
@@ -163,6 +171,21 @@ struct TerritoryMapView: UIViewRepresentable {
         context.coordinator.onTerritoryTapped = onTerritoryTapped
         context.coordinator.onDropzoneTapped = onDropzoneTapped
 
+        // Apply programmatic region changes
+        let currentCenter = mapView.region.center
+        let targetCenter = region.center
+        let threshold = 0.0001  // ~11 meters
+        if abs(currentCenter.latitude - targetCenter.latitude) > threshold
+            || abs(currentCenter.longitude - targetCenter.longitude) > threshold
+        {
+            context.coordinator.isUpdatingRegion = true
+            mapView.setRegion(region, animated: true)
+            // Reset flag after animation completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                context.coordinator.isUpdatingRegion = false
+            }
+        }
+
         updateOverlays(mapView)
         updateAnnotations(mapView)
     }
@@ -189,7 +212,8 @@ struct TerritoryMapView: UIViewRepresentable {
         let existingAnnotations = mapView.annotations.compactMap { $0 as? DropzoneAnnotation }
         mapView.removeAnnotations(existingAnnotations)
 
-        let annotations = dropzones
+        let annotations =
+            dropzones
             .filter { $0.isActive || $0.isHintVisible }
             .map { DropzoneAnnotation(dropzone: $0) }
         mapView.addAnnotations(annotations)
@@ -203,6 +227,7 @@ struct TerritoryMapView: UIViewRepresentable {
         var dropzones: [Dropzone] = []
         var onTerritoryTapped: ((Territory) -> Void)?
         var onDropzoneTapped: ((Dropzone) -> Void)?
+        var isUpdatingRegion = false
 
         init(_ parent: TerritoryMapView) {
             self.parent = parent
@@ -212,8 +237,9 @@ struct TerritoryMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let polygon = overlay as? MKPolygon,
-                  let h3Index = polygon.title,
-                  let territory = territories.first(where: { $0.h3Index == h3Index }) else {
+                let h3Index = polygon.title,
+                let territory = territories.first(where: { $0.h3Index == h3Index })
+            else {
                 return MKOverlayRenderer(overlay: overlay)
             }
 
@@ -231,7 +257,8 @@ struct TerritoryMapView: UIViewRepresentable {
             guard let dropzoneAnnotation = annotation as? DropzoneAnnotation else { return nil }
 
             let identifier = "DropzoneAnnotation"
-            let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            let annotationView =
+                mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
                 ?? MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
 
             annotationView.annotation = annotation
@@ -254,6 +281,7 @@ struct TerritoryMapView: UIViewRepresentable {
         // MARK: - Region Change
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            guard !isUpdatingRegion else { return }
             parent.region = mapView.region
         }
 
@@ -267,7 +295,8 @@ struct TerritoryMapView: UIViewRepresentable {
             // Check dropzone annotations first
             for annotation in mapView.annotations {
                 guard let dropzoneAnnotation = annotation as? DropzoneAnnotation else { continue }
-                let annotationPoint = mapView.convert(dropzoneAnnotation.coordinate, toPointTo: mapView)
+                let annotationPoint = mapView.convert(
+                    dropzoneAnnotation.coordinate, toPointTo: mapView)
                 let distance = hypot(point.x - annotationPoint.x, point.y - annotationPoint.y)
                 if distance < 44 {
                     onDropzoneTapped?(dropzoneAnnotation.dropzone)

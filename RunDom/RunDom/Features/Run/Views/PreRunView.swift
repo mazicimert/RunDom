@@ -59,6 +59,7 @@ struct PreRunView: View {
             // Start Button
             Button {
                 guard viewModel.canStartRun() else { return }
+                Haptics.impact(.medium)
                 onStartRun(viewModel.selectedMode)
             } label: {
                 Label("run.start".localized, systemImage: "play.fill")
@@ -70,6 +71,7 @@ struct PreRunView: View {
             .disabled(!viewModel.isLocationReady)
             .padding(.horizontal, AppConstants.UI.screenPadding)
             .padding(.bottom, 8)
+            .accessibilityHint("accessibility.run.startHint".localized)
 
             // Error
             if let error = viewModel.errorMessage {
@@ -92,6 +94,7 @@ struct PreRunView: View {
         let isSelected = viewModel.selectedMode == mode
 
         Button {
+            Haptics.selection()
             withAnimation(.easeInOut(duration: AppConstants.Animation.quick)) {
                 viewModel.selectedMode = mode
             }
@@ -132,6 +135,9 @@ struct PreRunView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityValue(isSelected ? "accessibility.selected".localized : "accessibility.notSelected".localized)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     // MARK: - Streak Banner

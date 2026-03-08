@@ -64,6 +64,12 @@ struct PostRunSummaryView: View {
                     await viewModel.processRun(user: user)
                 }
             }
+            .onChange(of: viewModel.isSaved) { _, saved in
+                if saved { Haptics.notification(.success) }
+            }
+            .onChange(of: viewModel.errorMessage) { _, message in
+                if message != nil { Haptics.notification(.error) }
+            }
         }
     }
 
@@ -87,10 +93,12 @@ struct PostRunSummaryView: View {
             Text(viewModel.trailText)
                 .font(.system(size: 56, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.accentColor)
+                .accessibilityLabel("\(viewModel.trailText) \("run.trailEarned".localized)")
 
             Text("run.trailEarned".localized)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
             // Mode badge
             Text(viewModel.modeText)

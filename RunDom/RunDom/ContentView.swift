@@ -24,6 +24,9 @@ struct ContentView: View {
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isLoading)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isAuthenticated)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isOnboardingComplete)
+        .onAppear {
+            onboardingVM.locationManager = appState.locationManager
+        }
     }
 
     // MARK: - Onboarding Flow

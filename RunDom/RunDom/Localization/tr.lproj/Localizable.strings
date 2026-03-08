@@ -46,8 +46,27 @@
 // MARK: - Auth
 "auth.signInApple" = "Apple ile Giriş Yap";
 "auth.signInGoogle" = "Google ile Giriş Yap";
+"auth.signInEmail" = "E-posta ile Giriş Yap";
 "auth.signOut" = "Çıkış Yap";
 "auth.signOutConfirm" = "Çıkış yapmak istediğinize emin misiniz?";
+"auth.email.placeholder" = "E-posta";
+"auth.email.password" = "Şifre";
+"auth.email.confirmPassword" = "Şifre Tekrar";
+"auth.email.signIn" = "Giriş Yap";
+"auth.email.signUp" = "Hesap Oluştur";
+"auth.email.forgotPassword" = "Şifremi Unuttum";
+"auth.email.hasAccount" = "Zaten hesabın var mı? Giriş Yap";
+"auth.email.noAccount" = "Hesabın yok mu? Kayıt Ol";
+"auth.email.otherMethods" = "Diğer giriş yöntemleri";
+"auth.email.resetSent" = "Şifre sıfırlama e-postası gönderildi. Gelen kutunu kontrol et.";
+"auth.email.enterEmail" = "Önce e-posta adresini gir.";
+"auth.email.fillAllFields" = "Lütfen tüm alanları doldur.";
+"auth.email.invalidEmail" = "Lütfen geçerli bir e-posta adresi gir.";
+"auth.email.passwordTooShort" = "Şifre en az 6 karakter olmalıdır.";
+"auth.email.passwordMismatch" = "Şifreler eşleşmiyor.";
+"auth.email.wrongPassword" = "Şifre hatalı. Lütfen tekrar dene.";
+"auth.email.userNotFound" = "Bu e-posta ile kayıtlı hesap bulunamadı.";
+"auth.email.alreadyInUse" = "Bu e-posta adresi zaten kullanımda.";
 
 // MARK: - Run
 "run.start" = "Koşuya Başla";
@@ -209,3 +228,14 @@
 
 // MARK: - Accessibility
 "avatar" = "Avatar";
+"accessibility.selected" = "Seçili";
+"accessibility.notSelected" = "Seçili değil";
+"accessibility.run.startHint" = "Koşuyu başlatmak için çift dokunun";
+"accessibility.map.centerOnUser" = "Haritayı konumuma ortala";
+"accessibility.map.territoryCount" = "%d bölge fethedildi";
+"accessibility.badge.locked" = "Kilitli rozet";
+"accessibility.badge.unlocked" = "Açılmış rozet";
+"accessibility.leaderboard.rank" = "%d. sıra";
+"accessibility.stat.trail" = "%@ İz puanı";
+"accessibility.stat.distance" = "%@ mesafe";
+"accessibility.stat.runs" = "%d koşu";

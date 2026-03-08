@@ -1,5 +1,6 @@
-import SwiftUI
+import Combine
 import CoreLocation
+import SwiftUI
 import UserNotifications
 
 @MainActor
@@ -19,6 +20,11 @@ final class OnboardingViewModel: ObservableObject {
     @Published var currentPage: Int = 0
 
     let totalPages = 3
+
+    // MARK: - Dependencies
+
+    var locationManager: LocationManager?
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Page Data
 
@@ -44,7 +50,7 @@ final class OnboardingViewModel: ObservableObject {
                 icon: "trophy.fill",
                 title: "onboarding.slide3.title".localized,
                 subtitle: "onboarding.slide3.subtitle".localized
-            )
+            ),
         ]
     }
 
@@ -75,12 +81,23 @@ final class OnboardingViewModel: ObservableObject {
     // MARK: - Permissions
 
     func requestLocationPermission() {
-        CLLocationManager().requestAlwaysAuthorization()
-        UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
+        locationManager?.requestAlwaysAuthorization()
+        UserDefaults.standard.set(
+            true, forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.advanceStep()
+        // Kullanıcının cevabını bekle — authorizationStatus değiştiğinde ilerle
+        guard let locationManager = locationManager else {
+            advanceStep()
+            return
         }
+        locationManager.$authorizationStatus
+            .dropFirst()  // Mevcut değeri atla
+            .first()  // Sadece ilk değişikliği al
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (_: CLAuthorizationStatus) in
+                self?.advanceStep()
+            }
+            .store(in: &cancellables)
     }
 
     func skipLocationPermission() {
@@ -91,7 +108,8 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             let center = UNUserNotificationCenter.current()
             _ = try? await center.requestAuthorization(options: [.alert, .badge, .sound])
-            UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission)
+            UserDefaults.standard.set(
+                true, forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission)
             advanceStep()
         }
     }

@@ -64,6 +64,27 @@ final class AuthService: ObservableObject {
         AppLogger.auth.info("Google Sign In successful: \(result.user.uid)")
     }
 
+    // MARK: - Email Sign In
+
+    func signInWithEmail(email: String, password: String) async throws {
+        let result = try await Auth.auth().signIn(withEmail: email, password: password)
+        AppLogger.auth.info("Email Sign In successful: \(result.user.uid)")
+    }
+
+    // MARK: - Email Sign Up
+
+    func signUpWithEmail(email: String, password: String) async throws {
+        let result = try await Auth.auth().createUser(withEmail: email, password: password)
+        AppLogger.auth.info("Email Sign Up successful: \(result.user.uid)")
+    }
+
+    // MARK: - Password Reset
+
+    func sendPasswordReset(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email)
+        AppLogger.auth.info("Password reset email sent to \(email)")
+    }
+
     // MARK: - Sign Out
 
     func signOut() throws {

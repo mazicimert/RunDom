@@ -77,6 +77,9 @@ struct MainTabView: View {
                 .zIndex(1)
             }
         }
+        .onChange(of: router.selectedTab) {
+            Haptics.selection()
+        }
         .sheet(item: $router.presentedSheet) { sheet in
             sheetContent(for: sheet)
         }

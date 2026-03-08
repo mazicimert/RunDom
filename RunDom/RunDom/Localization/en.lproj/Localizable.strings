@@ -46,8 +46,27 @@
 // MARK: - Auth
 "auth.signInApple" = "Sign in with Apple";
 "auth.signInGoogle" = "Sign in with Google";
+"auth.signInEmail" = "Sign in with Email";
 "auth.signOut" = "Sign Out";
 "auth.signOutConfirm" = "Are you sure you want to sign out?";
+"auth.email.placeholder" = "Email";
+"auth.email.password" = "Password";
+"auth.email.confirmPassword" = "Confirm Password";
+"auth.email.signIn" = "Sign In";
+"auth.email.signUp" = "Create Account";
+"auth.email.forgotPassword" = "Forgot Password?";
+"auth.email.hasAccount" = "Already have an account? Sign In";
+"auth.email.noAccount" = "Don't have an account? Sign Up";
+"auth.email.otherMethods" = "Other sign-in methods";
+"auth.email.resetSent" = "Password reset email sent. Check your inbox.";
+"auth.email.enterEmail" = "Enter your email address first.";
+"auth.email.fillAllFields" = "Please fill in all fields.";
+"auth.email.invalidEmail" = "Please enter a valid email address.";
+"auth.email.passwordTooShort" = "Password must be at least 6 characters.";
+"auth.email.passwordMismatch" = "Passwords do not match.";
+"auth.email.wrongPassword" = "Incorrect password. Please try again.";
+"auth.email.userNotFound" = "No account found with this email.";
+"auth.email.alreadyInUse" = "This email is already in use.";
 
 // MARK: - Run
 "run.start" = "Start Run";
@@ -209,3 +228,14 @@
 
 // MARK: - Accessibility
 "avatar" = "Avatar";
+"accessibility.selected" = "Selected";
+"accessibility.notSelected" = "Not selected";
+"accessibility.run.startHint" = "Double tap to start your run";
+"accessibility.map.centerOnUser" = "Center map on my location";
+"accessibility.map.territoryCount" = "%d territories conquered";
+"accessibility.badge.locked" = "Locked badge";
+"accessibility.badge.unlocked" = "Unlocked badge";
+"accessibility.leaderboard.rank" = "Rank %d";
+"accessibility.stat.trail" = "%@ Trail points";
+"accessibility.stat.distance" = "%@ distance";
+"accessibility.stat.runs" = "%d runs";
