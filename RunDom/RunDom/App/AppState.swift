@@ -10,6 +10,7 @@ final class AppState: ObservableObject {
     @Published var isOnboardingComplete: Bool
     @Published var currentUser: User?
     @Published var isLoading = true
+    @Published var requiresProfileCompletion = false
 
     // MARK: - Services
 
@@ -61,18 +62,30 @@ final class AppState: ObservableObject {
         }
 
         do {
-            if let user = try await firestoreService.getUser(id: firebaseUser.uid) {
+            if var user = try await firestoreService.getUser(id: firebaseUser.uid) {
+                // Sync displayName from Firebase Auth if it changed
+                if let authDisplayName = firebaseUser.displayName,
+                   !authDisplayName.isEmpty,
+                   authDisplayName != user.displayName,
+                   !Self.isDefaultDisplayName(authDisplayName) {
+                    user.displayName = authDisplayName
+                    try await firestoreService.updateUser(user)
+                }
                 currentUser = user
+                requiresProfileCompletion = Self.isDefaultDisplayName(user.displayName)
             } else {
                 // First-time sign in — create user document
+                let displayName = firebaseUser.displayName ?? ""
+                let needsCompletion = displayName.isEmpty || Self.isDefaultDisplayName(displayName)
                 let newUser = User(
                     id: firebaseUser.uid,
-                    displayName: firebaseUser.displayName ?? "runner.defaultName".localized,
+                    displayName: displayName.isEmpty ? "runner.defaultName".localized : displayName,
                     email: firebaseUser.email ?? "",
                     color: Self.randomUserColor()
                 )
                 try await firestoreService.createUser(newUser)
                 currentUser = newUser
+                requiresProfileCompletion = needsCompletion
             }
         } catch {
             AppLogger.firebase.error("Failed to load user: \(error.localizedDescription)")
@@ -99,7 +112,26 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - Profile Completion
+
+    func completeProfile(displayName: String) async {
+        guard var user = currentUser else { return }
+        user.displayName = displayName
+        do {
+            try await firestoreService.updateUser(user)
+            currentUser = user
+            requiresProfileCompletion = false
+        } catch {
+            AppLogger.firebase.error("Failed to update profile: \(error.localizedDescription)")
+        }
+    }
+
     // MARK: - Helpers
+
+    private static func isDefaultDisplayName(_ name: String) -> Bool {
+        let defaults = ["runner.defaultName".localized, "Runner", "Koşucu"]
+        return defaults.contains(name)
+    }
 
     private static func randomUserColor() -> String {
         let colors = [

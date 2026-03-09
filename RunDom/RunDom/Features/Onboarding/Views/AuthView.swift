@@ -9,7 +9,7 @@ struct AuthView: View {
     @FocusState private var focusedField: EmailField?
 
     private enum EmailField {
-        case email, password, confirmPassword
+        case firstName, lastName, email, password, confirmPassword
     }
 
     var body: some View {
@@ -123,6 +123,25 @@ struct AuthView: View {
 
     private var emailAuthSection: some View {
         VStack(spacing: 16) {
+            // Name fields (sign up only)
+            if viewModel.isSignUpMode {
+                HStack(spacing: 12) {
+                    TextField("auth.email.firstName".localized, text: $viewModel.firstName)
+                        .textFieldStyle(AuthTextFieldStyle())
+                        .textContentType(.givenName)
+                        .focused($focusedField, equals: .firstName)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .lastName }
+
+                    TextField("auth.email.lastName".localized, text: $viewModel.lastName)
+                        .textFieldStyle(AuthTextFieldStyle())
+                        .textContentType(.familyName)
+                        .focused($focusedField, equals: .lastName)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .email }
+                }
+            }
+
             // Email field
             TextField("auth.email.placeholder".localized, text: $viewModel.email)
                 .textFieldStyle(AuthTextFieldStyle())
@@ -131,7 +150,7 @@ struct AuthView: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .focused($focusedField, equals: .email)
-                .submitLabel(viewModel.isSignUpMode ? .next : .next)
+                .submitLabel(.next)
                 .onSubmit { focusedField = .password }
 
             // Password field

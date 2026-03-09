@@ -14,9 +14,11 @@ struct ContentView: View {
                 onboardingFlow
             } else if !appState.isAuthenticated {
                 AuthView(
-                    viewModel: AuthViewModel(authService: appState.authService),
+                    viewModel: AuthViewModel(authService: appState.authService, appState: appState),
                     onComplete: {}
                 )
+            } else if appState.requiresProfileCompletion {
+                CompleteProfileView()
             } else {
                 MainTabView()
             }
@@ -24,6 +26,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isLoading)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isAuthenticated)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isOnboardingComplete)
+        .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.requiresProfileCompletion)
         .onAppear {
             onboardingVM.locationManager = appState.locationManager
         }
@@ -71,7 +74,7 @@ struct ContentView: View {
 
         case .auth:
             AuthView(
-                viewModel: AuthViewModel(authService: appState.authService),
+                viewModel: AuthViewModel(authService: appState.authService, appState: appState),
                 onComplete: {}
             )
             .transition(.asymmetric(

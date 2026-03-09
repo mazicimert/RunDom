@@ -1,4 +1,5 @@
 import AuthenticationServices
+import FirebaseAuth
 import FirebaseCore
 import GoogleSignIn
 import SwiftUI
@@ -16,13 +17,17 @@ final class AuthViewModel: ObservableObject {
     @Published var password = ""
     @Published var confirmPassword = ""
     @Published var passwordResetSent = false
+    @Published var firstName = ""
+    @Published var lastName = ""
 
     // MARK: - Dependencies
 
     private let authService: AuthService
+    private weak var appState: AppState?
 
-    init(authService: AuthService) {
+    init(authService: AuthService, appState: AppState? = nil) {
         self.authService = authService
+        self.appState = appState
     }
 
     // MARK: - Apple Sign In
@@ -128,6 +133,15 @@ final class AuthViewModel: ObservableObject {
             do {
                 if isSignUpMode {
                     try await authService.signUpWithEmail(email: email, password: password)
+                    // Set display name on Firebase Auth profile
+                    let trimmedFirst = firstName.trimmingCharacters(in: .whitespaces)
+                    let trimmedLast = lastName.trimmingCharacters(in: .whitespaces)
+                    let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+                    let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+                    changeRequest?.displayName = fullName
+                    try await changeRequest?.commitChanges()
+                    // Reload user to sync displayName to Firestore
+                    await appState?.loadCurrentUser()
                     AppLogger.auth.info("Email Sign Up completed")
                 } else {
                     try await authService.signInWithEmail(email: email, password: password)
@@ -167,10 +181,19 @@ final class AuthViewModel: ObservableObject {
         errorMessage = nil
         password = ""
         confirmPassword = ""
+        firstName = ""
+        lastName = ""
     }
 
     private func validateEmailFields() -> Bool {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if isSignUpMode {
+            guard !firstName.trimmingCharacters(in: .whitespaces).isEmpty else {
+                errorMessage = "auth.email.fillAllFields".localized
+                return false
+            }
+        }
 
         guard !trimmedEmail.isEmpty, !password.isEmpty else {
             errorMessage = "auth.email.fillAllFields".localized

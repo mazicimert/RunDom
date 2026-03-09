@@ -23,6 +23,7 @@ final class FirestoreService {
 
     func getUser(id: String) async throws -> User? {
         let snapshot = try await usersCollection.document(id).getDocument()
+        guard snapshot.exists else { return nil }
         return try snapshot.data(as: User.self)
     }
 
