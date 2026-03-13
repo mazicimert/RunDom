@@ -71,6 +71,42 @@ final class FirestoreService {
         return runs.reduce(0) { $0 + $1.trail }
     }
 
+    func deleteRun(_ run: RunSession) async throws {
+        try await runsCollection.document(run.id).delete()
+
+        var userUpdates: [String: Any] = [
+            "totalTrail": FieldValue.increment(-run.trail),
+            "totalDistance": FieldValue.increment(-run.distance),
+            "totalRuns": FieldValue.increment(Int64(-1)),
+            "currentSeasonTrail": FieldValue.increment(-run.trail)
+        ]
+
+        if let latestRunDate = try await latestRunStartDate(userId: run.userId) {
+            userUpdates["lastRunDate"] = latestRunDate
+        } else {
+            userUpdates["lastRunDate"] = FieldValue.delete()
+        }
+
+        try await usersCollection.document(run.userId).updateData(userUpdates)
+        AppLogger.firebase.info("Run deleted: \(run.id)")
+    }
+
+    private func latestRunStartDate(userId: String) async throws -> Date? {
+        let snapshot = try await runsCollection
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "startDate", descending: true)
+            .limit(to: 1)
+            .getDocuments()
+
+        guard let latest = snapshot.documents.first else { return nil }
+
+        if let timestamp = latest.data()["startDate"] as? Timestamp {
+            return timestamp.dateValue()
+        }
+
+        return try? latest.data(as: RunSession.self).startDate
+    }
+
     // MARK: - Badges
 
     func getBadges(userId: String) async throws -> [Badge] {
@@ -101,12 +137,15 @@ final class FirestoreService {
     // MARK: - Leaderboard
 
     func getLeaderboard(scope: LeaderboardScope, seasonId: String, neighborhood: String? = nil, limit: Int = 50) async throws -> [LeaderboardEntry] {
+        let normalizedNeighborhood = neighborhood?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
         var query: Query = leaderboardCollection
             .whereField("seasonId", isEqualTo: seasonId)
             .order(by: "trail", descending: true)
             .limit(to: limit)
 
-        if scope == .neighborhood, let hood = neighborhood {
+        if scope == .neighborhood, let hood = normalizedNeighborhood, !hood.isEmpty {
             query = leaderboardCollection
                 .whereField("seasonId", isEqualTo: seasonId)
                 .whereField("neighborhood", isEqualTo: hood)
@@ -115,11 +154,86 @@ final class FirestoreService {
         }
 
         let snapshot = try await query.getDocuments()
-        return try snapshot.documents.compactMap { try $0.data(as: LeaderboardEntry.self) }
+        let entries = try snapshot.documents.compactMap { try $0.data(as: LeaderboardEntry.self) }
+
+        // Fallback: some environments do not write to `leaderboard` yet.
+        // In that case derive rankings from users' current season trail values.
+        if !entries.isEmpty {
+            return assignRanks(entries)
+        }
+
+        let fallbackLimit = scope == .neighborhood ? max(limit * 4, 200) : limit
+        let usersSnapshot = try await usersCollection
+            .order(by: "currentSeasonTrail", descending: true)
+            .limit(to: fallbackLimit)
+            .getDocuments()
+
+        let users = try usersSnapshot.documents.compactMap { try $0.data(as: User.self) }
+
+        let filteredUsers: [User]
+        if scope == .neighborhood {
+            guard let hood = normalizedNeighborhood, !hood.isEmpty else {
+                return []
+            }
+
+            filteredUsers = users.filter { user in
+                user.totalRuns > 0 &&
+                user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == hood
+            }
+        } else {
+            filteredUsers = users.filter { $0.totalRuns > 0 }
+        }
+
+        let effectiveSeasonId = seasonId.isEmpty ? generatedSeasonIdForCurrentWeek() : seasonId
+        let derivedEntries = Array(filteredUsers.prefix(limit)).enumerated().map { index, user in
+            LeaderboardEntry(
+                id: user.id,
+                userId: user.id,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                color: user.color,
+                trail: user.currentSeasonTrail,
+                rank: index + 1,
+                neighborhood: user.neighborhood,
+                seasonId: effectiveSeasonId,
+                territoriesOwned: 0
+            )
+        }
+
+        return derivedEntries
     }
 
     func updateLeaderboardEntry(_ entry: LeaderboardEntry) async throws {
         try leaderboardCollection.document(entry.id).setData(from: entry, merge: true)
+    }
+
+    private func assignRanks(_ entries: [LeaderboardEntry]) -> [LeaderboardEntry] {
+        entries
+            .sorted { $0.trail > $1.trail }
+            .enumerated()
+            .map { index, entry in
+                LeaderboardEntry(
+                    id: entry.id,
+                    userId: entry.userId,
+                    displayName: entry.displayName,
+                    photoURL: entry.photoURL,
+                    color: entry.color,
+                    trail: entry.trail,
+                    rank: index + 1,
+                    neighborhood: entry.neighborhood,
+                    seasonId: entry.seasonId,
+                    territoriesOwned: entry.territoriesOwned
+                )
+            }
+    }
+
+    private func generatedSeasonIdForCurrentWeek() -> String {
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let now = Date()
+        let weekNumber = calendar.component(.weekOfYear, from: now)
+        let year = calendar.component(.yearForWeekOfYear, from: now)
+        return "season_\(year)_w\(weekNumber)"
     }
 
     // MARK: - Seasons

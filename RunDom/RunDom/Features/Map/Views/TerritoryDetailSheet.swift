@@ -106,6 +106,7 @@ struct TerritoryDetailSheet: View {
                 label: "run.distance".localized,
                 iconColor: .blue
             )
+            .frame(maxWidth: .infinity, minHeight: 160)
 
             StatCardView(
                 icon: "clock.fill",
@@ -113,6 +114,7 @@ struct TerritoryDetailSheet: View {
                 label: "map.lastActive".localized,
                 iconColor: .green
             )
+            .frame(maxWidth: .infinity, minHeight: 160)
         }
     }
 }

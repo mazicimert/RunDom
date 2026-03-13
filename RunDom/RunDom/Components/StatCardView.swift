@@ -14,6 +14,9 @@ struct StatCardView: View {
 
             Text(value)
                 .font(.title2.bold().monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .allowsTightening(true)
 
             Text(label)
                 .font(.caption)

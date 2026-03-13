@@ -125,6 +125,9 @@
 "run.territories" = "Bölgeler";
 "run.startPoint" = "Başlangıç";
 "run.endPoint" = "Bitiş";
+"run.delete.confirmTitle" = "Koşuyu silmek istiyor musun?";
+"run.delete.confirmMessage" = "Bu koşu kalıcı olarak silinir.";
+"run.delete.failed" = "Koşu silinemedi.";
 
 // MARK: - Map
 "map.myTerritory" = "Benim Bölgem";
@@ -152,6 +155,7 @@
 "profile.changePhoto" = "Fotoğrafı Değiştir";
 "profile.displayName" = "Görünen Ad";
 "profile.email" = "E-posta";
+"profile.selectColor" = "Renk Seç";
 
 // MARK: - Leaderboard
 "leaderboard.global" = "Global";
@@ -171,6 +175,7 @@
 "stats.totalTrail" = "Toplam İz";
 "stats.weekOverWeek" = "geçen haftaya göre";
 "stats.trailChart" = "İz Puanları";
+"stats.distanceChart" = "Mesafe (km)";
 "stats.date" = "Tarih";
 "stats.uniqueZones" = "Benzersiz Bölge";
 "stats.week" = "Hafta %d, %d";
@@ -223,6 +228,9 @@
 "settings.notifications" = "Bildirimler";
 "settings.enabled" = "Açık";
 "settings.enable" = "Aç";
+"settings.language" = "Dil";
+"settings.language.turkish" = "Türkçe";
+"settings.language.english" = "English";
 "settings.account" = "Hesap";
 "settings.deleteAccount" = "Hesabı Sil";
 "settings.deleteAccountConfirm" = "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.";

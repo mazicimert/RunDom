@@ -7,6 +7,9 @@ struct StatsTabView: View {
     @StateObject private var reportVM = WeeklyReportViewModel()
 
     @State private var selectedRun: RunSession?
+    @State private var pendingDeleteRun: RunSession?
+    @State private var showDeleteConfirmation = false
+    @State private var deleteErrorMessage: String?
 
     var body: some View {
         ScrollView {
@@ -27,6 +30,9 @@ struct StatsTabView: View {
                 // Trail Chart
                 chartSection
 
+                // Distance Chart
+                distanceChartSection
+
                 // Weekly Report Card
                 if let report = reportVM.latestReport {
                     weeklyReportCard(report: report)
@@ -38,24 +44,53 @@ struct StatsTabView: View {
             .padding(.vertical)
         }
         .navigationTitle("tab.stats".localized)
-        .task {
-            if let userId = appState.currentUser?.id {
-                async let stats: () = statsVM.loadStats(userId: userId)
-                async let history: () = historyVM.loadRuns(userId: userId)
-                async let reports: () = reportVM.loadReports(userId: userId)
-                _ = await (stats, history, reports)
-            }
+        .onAppear {
+            guard let userId = appState.currentUser?.id else { return }
+            Task { await reloadAll(userId: userId) }
         }
         .refreshable {
-            if let userId = appState.currentUser?.id {
-                async let stats: () = statsVM.loadStats(userId: userId)
-                async let history: () = historyVM.loadRuns(userId: userId)
-                async let reports: () = reportVM.loadReports(userId: userId)
-                _ = await (stats, history, reports)
-            }
+            guard let userId = appState.currentUser?.id else { return }
+            await reloadAll(userId: userId)
         }
         .navigationDestination(item: $selectedRun) { run in
             RunHistoryDetailView(run: run)
+        }
+        .confirmationDialog(
+            "run.delete.confirmTitle".localized,
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("common.delete".localized, role: .destructive) {
+                guard let run = pendingDeleteRun, let userId = appState.currentUser?.id else { return }
+                Task {
+                    do {
+                        try await historyVM.deleteRun(run)
+                        await reloadAll(userId: userId)
+                    } catch {
+                        deleteErrorMessage = "run.delete.failed".localized
+                        AppLogger.firebase.error("Failed to delete run: \(error.localizedDescription)")
+                    }
+                    pendingDeleteRun = nil
+                }
+            }
+            Button("common.cancel".localized, role: .cancel) {
+                pendingDeleteRun = nil
+            }
+        } message: {
+            Text("run.delete.confirmMessage".localized)
+        }
+        .alert(
+            "common.error".localized,
+            isPresented: Binding(
+                get: { deleteErrorMessage != nil },
+                set: { if !$0 { deleteErrorMessage = nil } }
+            )
+        ) {
+            Button("common.ok".localized, role: .cancel) {
+                deleteErrorMessage = nil
+            }
+        } message: {
+            Text(deleteErrorMessage ?? "")
         }
     }
 
@@ -71,7 +106,7 @@ struct StatsTabView: View {
             )
             StatCardView(
                 icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
-                value: statsVM.totalDistance.formattedDistance,
+                value: statsVM.totalDistanceText,
                 label: "stats.totalDistance".localized,
                 iconColor: .green
             )
@@ -99,6 +134,19 @@ struct StatsTabView: View {
                 .font(.headline)
 
             TrailChartView(data: statsVM.chartData)
+        }
+        .cardStyle()
+        .screenPadding()
+    }
+
+    // MARK: - Distance Chart Section
+
+    private var distanceChartSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("stats.distanceChart".localized)
+                .font(.headline)
+
+            TrailChartView(data: statsVM.distanceChartData, barColor: .green)
         }
         .cardStyle()
         .screenPadding()
@@ -152,9 +200,22 @@ struct StatsTabView: View {
                 },
                 onSelectRun: { run in
                     selectedRun = run
+                },
+                onDeleteRun: { run in
+                    pendingDeleteRun = run
+                    showDeleteConfirmation = true
                 }
             )
         }
+    }
+
+    // MARK: - Data Reload
+
+    private func reloadAll(userId: String) async {
+        async let stats: () = statsVM.loadStats(userId: userId)
+        async let history: () = historyVM.loadRuns(userId: userId)
+        async let reports: () = reportVM.loadReports(userId: userId)
+        _ = await (stats, history, reports)
     }
 }
 

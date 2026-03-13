@@ -62,15 +62,8 @@ final class AppState: ObservableObject {
         }
 
         do {
-            if var user = try await firestoreService.getUser(id: firebaseUser.uid) {
-                // Sync displayName from Firebase Auth if it changed
-                if let authDisplayName = firebaseUser.displayName,
-                   !authDisplayName.isEmpty,
-                   authDisplayName != user.displayName,
-                   !Self.isDefaultDisplayName(authDisplayName) {
-                    user.displayName = authDisplayName
-                    try await firestoreService.updateUser(user)
-                }
+            if let user = try await firestoreService.getUser(id: firebaseUser.uid) {
+                // Firestore is the source of truth for user profile data
                 currentUser = user
                 requiresProfileCompletion = Self.isDefaultDisplayName(user.displayName)
             } else {
@@ -134,11 +127,6 @@ final class AppState: ObservableObject {
     }
 
     private static func randomUserColor() -> String {
-        let colors = [
-            "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4",
-            "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F",
-            "#BB8FCE", "#85C1E9", "#F0B27A", "#82E0AA"
-        ]
-        return colors.randomElement() ?? "#4ECDC4"
+        AppConstants.UserColors.all.randomElement() ?? "#4ECDC4"
     }
 }

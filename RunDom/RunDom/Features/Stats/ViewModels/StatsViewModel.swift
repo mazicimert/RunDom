@@ -34,8 +34,16 @@ final class StatsViewModel: ObservableObject {
 
     // MARK: - Computed
 
-    var totalDistance: Double {
+    var totalDistanceMeters: Double {
         filteredRuns.reduce(0) { $0 + $1.distance }
+    }
+
+    var totalDistanceKm: Double {
+        totalDistanceMeters / 1000.0
+    }
+
+    var totalDistanceText: String {
+        totalDistanceMeters.formattedDistanceFromMeters
     }
 
     var totalTrail: Double {
@@ -47,10 +55,33 @@ final class StatsViewModel: ObservableObject {
     }
 
     var totalTerritories: Int {
-        filteredRuns.reduce(0) { $0 + $1.territoriesCaptured }
+        // Distinct territories visited in the selected period.
+        // Prefer route-based H3 cells for true uniqueness across all runs.
+        let uniqueVisitedCells = Set(
+            filteredRuns.flatMap { run in
+                run.route.map { point in
+                    point.coordinate.h3Index(resolution: AppConstants.Location.h3Resolution)
+                }
+            }
+        )
+
+        if !uniqueVisitedCells.isEmpty {
+            return uniqueVisitedCells.count
+        }
+
+        // Fallback for legacy runs that may not contain route points.
+        return filteredRuns.reduce(0) { $0 + $1.uniqueZonesVisited }
     }
 
     var chartData: [ChartDataPoint] {
+        buildChartData { $0.trail }
+    }
+
+    var distanceChartData: [ChartDataPoint] {
+        buildChartData { $0.distance / 1000.0 }
+    }
+
+    private func buildChartData(valueFor: (RunSession) -> Double) -> [ChartDataPoint] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: filteredRuns) { run -> Date in
             calendar.startOfDay(for: run.startDate)
@@ -62,8 +93,8 @@ final class StatsViewModel: ObservableObject {
         return (0..<days).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
             let dayRuns = grouped[date] ?? []
-            let trail = dayRuns.reduce(0) { $0 + $1.trail }
-            return ChartDataPoint(date: date, value: trail)
+            let value = dayRuns.reduce(0) { $0 + valueFor($1) }
+            return ChartDataPoint(date: date, value: value)
         }.reversed()
     }
 

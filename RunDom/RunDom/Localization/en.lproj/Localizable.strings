@@ -125,6 +125,9 @@
 "run.territories" = "Territories";
 "run.startPoint" = "Start";
 "run.endPoint" = "Finish";
+"run.delete.confirmTitle" = "Delete this run?";
+"run.delete.confirmMessage" = "This run will be permanently deleted.";
+"run.delete.failed" = "Failed to delete run.";
 
 // MARK: - Map
 "map.myTerritory" = "My Territory";
@@ -152,6 +155,7 @@
 "profile.changePhoto" = "Change Photo";
 "profile.displayName" = "Display Name";
 "profile.email" = "Email";
+"profile.selectColor" = "Select Color";
 
 // MARK: - Leaderboard
 "leaderboard.global" = "Global";
@@ -171,6 +175,7 @@
 "stats.totalTrail" = "Total Trail";
 "stats.weekOverWeek" = "vs last week";
 "stats.trailChart" = "Trail Points";
+"stats.distanceChart" = "Distance (km)";
 "stats.date" = "Date";
 "stats.uniqueZones" = "Unique Zones";
 "stats.week" = "Week %d, %d";
@@ -223,6 +228,9 @@
 "settings.notifications" = "Notifications";
 "settings.enabled" = "Enabled";
 "settings.enable" = "Enable";
+"settings.language" = "Language";
+"settings.language.turkish" = "Turkish";
+"settings.language.english" = "English";
 "settings.account" = "Account";
 "settings.deleteAccount" = "Delete Account";
 "settings.deleteAccountConfirm" = "This action cannot be undone. All your data will be permanently deleted.";

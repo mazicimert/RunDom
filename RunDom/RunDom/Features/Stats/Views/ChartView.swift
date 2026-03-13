@@ -5,6 +5,8 @@ struct TrailChartView: View {
     let data: [ChartDataPoint]
     var barColor: Color = .accentColor
 
+    private var isMonthly: Bool { data.count > 7 }
+
     var body: some View {
         if data.isEmpty {
             Text("stats.noData".localized)
@@ -21,11 +23,22 @@ struct TrailChartView: View {
                 .cornerRadius(4)
             }
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day)) { value in
-                    if let date = value.as(Date.self) {
-                        AxisValueLabel {
-                            Text(date, format: .dateTime.weekday(.abbreviated))
-                                .font(.caption2)
+                if isMonthly {
+                    AxisMarks(values: .stride(by: .day, count: 5)) { value in
+                        if let date = value.as(Date.self) {
+                            AxisValueLabel {
+                                Text(date, format: .dateTime.day().month(.defaultDigits))
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                } else {
+                    AxisMarks(values: .stride(by: .day)) { value in
+                        if let date = value.as(Date.self) {
+                            AxisValueLabel {
+                                Text(date, format: .dateTime.weekday(.abbreviated))
+                                    .font(.caption2)
+                            }
                         }
                     }
                 }

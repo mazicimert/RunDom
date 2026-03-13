@@ -63,6 +63,6 @@ final class TerritoryDetailViewModel: ObservableObject {
     }
 
     var totalDistanceText: String {
-        territory.totalDistance.formattedDistance
+        territory.totalDistance.formattedDistanceFromMeters
     }
 }

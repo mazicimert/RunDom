@@ -12,7 +12,7 @@ enum AppConstants {
 
     enum Game {
         static let basePointMultiplier: Double = 100
-        static let minSpeedKmh: Double = 6.0
+        static let minSpeedKmh: Double = 4.0
         static let maxSpeedKmh: Double = 18.0
         static let speedDivisor: Double = 10.0
         static let maxSpeedMultiplier: Double = 1.8
@@ -69,6 +69,7 @@ enum AppConstants {
         static let hasRequestedNotificationPermission = "hasRequestedNotificationPermission"
         static let lastKnownLatitude = "lastKnownLatitude"
         static let lastKnownLongitude = "lastKnownLongitude"
+        static let appLanguageCode = "appLanguageCode"
     }
 
     // MARK: - Animation Durations
@@ -77,6 +78,16 @@ enum AppConstants {
         static let standard: Double = 0.3
         static let quick: Double = 0.15
         static let splash: Double = 2.0
+    }
+
+    // MARK: - User Colors
+
+    enum UserColors {
+        static let all = [
+            "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4",
+            "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F",
+            "#BB8FCE", "#85C1E9", "#F0B27A", "#82E0AA"
+        ]
     }
 
     // MARK: - UI

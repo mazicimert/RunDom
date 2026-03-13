@@ -8,10 +8,12 @@ struct EditProfileView: View {
     @State private var displayName: String = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedImage: UIImage?
+    @State private var selectedColor: String = "#4ECDC4"
     @State private var isSaving = false
     @State private var errorMessage: String?
 
     private let storageService = StorageService()
+    private let colorColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 6)
 
     var body: some View {
         NavigationStack {
@@ -27,10 +29,14 @@ struct EditProfileView: View {
                                     .scaledToFill()
                                     .frame(width: 100, height: 100)
                                     .clipShape(Circle())
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color(hex: selectedColor) ?? .accentColor, lineWidth: 3)
+                                    )
                             } else {
                                 AvatarView(
                                     photoURL: appState.currentUser?.photoURL,
-                                    userColor: appState.currentUser?.color ?? "#4ECDC4",
+                                    userColor: selectedColor,
                                     size: 100
                                 )
                             }
@@ -47,6 +53,37 @@ struct EditProfileView: View {
                         Spacer()
                     }
                     .listRowBackground(Color.clear)
+                }
+
+                // Color Section
+                Section("profile.selectColor".localized) {
+                    LazyVGrid(columns: colorColumns, spacing: 12) {
+                        ForEach(AppConstants.UserColors.all, id: \.self) { hex in
+                            let isSelected = hex == selectedColor
+                            Circle()
+                                .fill(Color(hex: hex) ?? .gray)
+                                .frame(width: 44, height: 44)
+                                .overlay {
+                                    if isSelected {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundStyle(.white)
+                                            .shadow(color: .black.opacity(0.3), radius: 2)
+                                    }
+                                }
+                                .overlay(
+                                    Circle()
+                                        .stroke(.white.opacity(isSelected ? 1 : 0), lineWidth: 3)
+                                )
+                                .scaleEffect(isSelected ? 1.1 : 1.0)
+                                .animation(.easeInOut(duration: 0.2), value: selectedColor)
+                                .onTapGesture {
+                                    Haptics.impact(.light)
+                                    selectedColor = hex
+                                }
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
 
                 // Name Section
@@ -93,6 +130,7 @@ struct EditProfileView: View {
             }
             .onAppear {
                 displayName = appState.currentUser?.displayName ?? ""
+                selectedColor = appState.currentUser?.color ?? "#4ECDC4"
             }
             .alert("common.error".localized, isPresented: .init(
                 get: { errorMessage != nil },
@@ -125,8 +163,9 @@ struct EditProfileView: View {
                 user.photoURL = url
             }
 
-            // Update name
+            // Update name and color
             user.displayName = displayName.trimmingCharacters(in: .whitespaces)
+            user.color = selectedColor
 
             try await appState.firestoreService.updateUser(user)
             appState.currentUser = user

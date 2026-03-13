@@ -41,8 +41,13 @@ final class LeaderboardViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            let season = try await firestoreService.getCurrentSeason()
-            let seasonId = season?.id ?? ""
+            let seasonId: String
+            do {
+                seasonId = try await firestoreService.getCurrentSeason()?.id ?? ""
+            } catch {
+                AppLogger.firebase.warning("Failed to fetch current season for leaderboard, using fallback: \(error.localizedDescription)")
+                seasonId = ""
+            }
 
             entries = try await firestoreService.getLeaderboard(
                 scope: scope,

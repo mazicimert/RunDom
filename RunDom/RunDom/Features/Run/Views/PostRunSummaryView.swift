@@ -156,7 +156,7 @@ struct PostRunSummaryView: View {
             multiplierRow(label: "run.speedMultiplier".localized, value: String(format: "x%.2f", result.speedMultiplier))
             multiplierRow(label: "run.durationMultiplier".localized, value: String(format: "x%.2f", result.durationMultiplier))
             multiplierRow(label: "run.zoneMultiplier".localized, value: String(format: "x%.2f", result.zoneMultiplier))
-            multiplierRow(label: "run.streakMultiplier".localized, value: String(format: "x%.2f", result.streakMultiplier))
+            multiplierRow(label: "run.streakMultiplier.label".localized, value: String(format: "x%.2f", result.streakMultiplier))
 
             if result.modeMultiplier > 1.0 {
                 multiplierRow(label: "run.boostMultiplier".localized, value: String(format: "x%.1f", result.modeMultiplier))

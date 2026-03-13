@@ -5,6 +5,7 @@ final class RealtimeDBService {
     private let db: DatabaseReference
 
     private var territoryObservers: [String: DatabaseHandle] = [:]
+    private let iso8601 = ISO8601DateFormatter()
 
     init() {
         db = Database.database(url: AppConstants.Firebase.realtimeDBURL).reference()
@@ -25,8 +26,8 @@ final class RealtimeDBService {
     func getTerritory(seasonId: String, h3Index: String) async throws -> Territory? {
         let snapshot = try await territoryRef(seasonId: seasonId, h3Index: h3Index).getData()
         guard snapshot.exists(),
-              let data = try? JSONSerialization.data(withJSONObject: snapshot.value as Any),
-              let territory = try? JSONDecoder().decode(Territory.self, from: data) else {
+              let dict = snapshot.value as? [String: Any],
+              let territory = decodeTerritory(from: dict) else {
             return nil
         }
         return territory
@@ -35,7 +36,9 @@ final class RealtimeDBService {
     // MARK: - Write Territory
 
     func updateTerritory(_ territory: Territory, seasonId: String) async throws {
-        let data = try JSONEncoder().encode(territory)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(territory)
         let dict = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
         try await territoryRef(seasonId: seasonId, h3Index: territory.h3Index).setValue(dict)
     }
@@ -116,8 +119,7 @@ final class RealtimeDBService {
             for child in snapshot.children {
                 guard let childSnapshot = child as? DataSnapshot,
                       let dict = childSnapshot.value as? [String: Any],
-                      let data = try? JSONSerialization.data(withJSONObject: dict),
-                      let territory = try? JSONDecoder().decode(Territory.self, from: data) else {
+                      let territory = self.decodeTerritory(from: dict) else {
                     continue
                 }
                 territories.append(territory)
@@ -153,12 +155,81 @@ final class RealtimeDBService {
         for child in snapshot.children {
             guard let childSnapshot = child as? DataSnapshot,
                   let dict = childSnapshot.value as? [String: Any],
-                  let data = try? JSONSerialization.data(withJSONObject: dict),
-                  let territory = try? JSONDecoder().decode(Territory.self, from: data) else {
+                  let territory = decodeTerritory(from: dict) else {
                 continue
             }
             territories.append(territory)
         }
         return territories
+    }
+
+    // MARK: - Territory Decode
+
+    private func decodeTerritory(from dict: [String: Any]) -> Territory? {
+        guard let h3Index = dict["h3Index"] as? String,
+              let ownerId = dict["ownerId"] as? String,
+              let ownerColor = dict["ownerColor"] as? String,
+              let defenseLevel = numberAsDouble(dict["defenseLevel"]),
+              let lastRunDate = parseDate(dict["lastRunDate"]) else {
+            return nil
+        }
+
+        let totalDistance = numberAsDouble(dict["totalDistance"]) ?? 0
+
+        return Territory(
+            h3Index: h3Index,
+            ownerId: ownerId,
+            ownerColor: ownerColor,
+            defenseLevel: defenseLevel,
+            lastRunDate: lastRunDate,
+            totalDistance: totalDistance
+        )
+    }
+
+    private func parseDate(_ value: Any?) -> Date? {
+        if let date = value as? Date {
+            return date
+        }
+
+        if let seconds = value as? Double {
+            // Backward compatibility:
+            // - >= 1_000_000_000 -> unix epoch seconds
+            // - smaller positive values are likely Apple reference-date seconds
+            if seconds >= 1_000_000_000 {
+                return Date(timeIntervalSince1970: seconds)
+            }
+            if seconds > 0 {
+                return Date(timeIntervalSinceReferenceDate: seconds)
+            }
+        }
+
+        if let intSeconds = value as? Int {
+            return parseDate(Double(intSeconds))
+        }
+
+        if let text = value as? String {
+            if let date = iso8601.date(from: text) {
+                return date
+            }
+
+            let fallback = ISO8601DateFormatter()
+            fallback.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            return fallback.date(from: text)
+        }
+
+        return nil
+    }
+
+    private func numberAsDouble(_ value: Any?) -> Double? {
+        if let d = value as? Double {
+            return d
+        }
+        if let i = value as? Int {
+            return Double(i)
+        }
+        if let n = value as? NSNumber {
+            return n.doubleValue
+        }
+        return nil
     }
 }

@@ -38,7 +38,7 @@ struct RunHistoryDetailView: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     StatCardView(
                         icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
-                        value: run.distance.formattedDistance,
+                        value: run.distance.formattedDistanceFromMeters,
                         label: "run.distance".localized,
                         iconColor: .green
                     )
@@ -134,7 +134,7 @@ struct RunHistoryDetailView: View {
             id: "1", userId: "u1", mode: .boost,
             startDate: Date().addingTimeInterval(-1800),
             endDate: Date(),
-            distance: 5.24, avgSpeed: 10.5, trail: 850,
+            distance: 5240, avgSpeed: 10.5, trail: 850,
             territoriesCaptured: 12, uniqueZonesVisited: 10, totalZonesVisited: 14
         ))
     }

@@ -2,10 +2,15 @@ import Foundation
 
 extension String {
     var localized: String {
-        NSLocalizedString(self, comment: "")
+        LocalizationManager.shared.localizedString(forKey: self)
     }
 
     func localized(with arguments: CVarArg...) -> String {
-        String(format: self.localized, arguments: arguments)
+        let format = LocalizationManager.shared.localizedString(forKey: self)
+        return String(
+            format: format,
+            locale: LocalizationManager.shared.locale,
+            arguments: arguments
+        )
     }
 }

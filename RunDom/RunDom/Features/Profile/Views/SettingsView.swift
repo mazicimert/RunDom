@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = SettingsViewModel()
 
@@ -24,6 +25,19 @@ struct SettingsView: View {
                             .font(.subheadline)
                         }
                     }
+                }
+
+                Section("settings.language".localized) {
+                    Picker(
+                        "settings.language".localized,
+                        selection: $localizationManager.selectedLanguageCode
+                    ) {
+                        Text("settings.language.turkish".localized)
+                            .tag(AppLanguage.turkish.rawValue)
+                        Text("settings.language.english".localized)
+                            .tag(AppLanguage.english.rawValue)
+                    }
+                    .pickerStyle(.segmented)
                 }
 
                 // Account
@@ -98,4 +112,5 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .environmentObject(AppState())
+        .environmentObject(LocalizationManager.shared)
 }

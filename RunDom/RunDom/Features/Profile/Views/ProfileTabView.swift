@@ -38,6 +38,11 @@ struct ProfileTabView: View {
                 await viewModel.loadProfile(userId: userId)
             }
         }
+        .onChange(of: appState.currentUser) { _, newUser in
+            if let newUser {
+                viewModel.user = newUser
+            }
+        }
         .overlay {
             if viewModel.isLoading && viewModel.user == nil {
                 LoadingView()
@@ -93,7 +98,7 @@ struct ProfileTabView: View {
             )
             StatCardView(
                 icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
-                value: (user?.totalDistance ?? 0).formattedDistance,
+                value: (user?.totalDistance ?? 0).formattedDistanceFromMeters,
                 label: "profile.totalDistance".localized,
                 iconColor: .green
             )

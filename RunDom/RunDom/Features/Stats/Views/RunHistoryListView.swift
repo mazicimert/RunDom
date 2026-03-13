@@ -5,6 +5,7 @@ struct RunHistoryListView: View {
     let hasMore: Bool
     var onLoadMore: (() -> Void)? = nil
     var onSelectRun: ((RunSession) -> Void)? = nil
+    var onDeleteRun: ((RunSession) -> Void)? = nil
 
     var body: some View {
         if runs.isEmpty {
@@ -16,7 +17,12 @@ struct RunHistoryListView: View {
         } else {
             LazyVStack(spacing: 0) {
                 ForEach(runs) { run in
-                    RunHistoryRow(run: run)
+                    RunHistoryRow(
+                        run: run,
+                        onDelete: onDeleteRun.map { delete in
+                            { delete(run) }
+                        }
+                    )
                         .contentShape(Rectangle())
                         .onTapGesture {
                             Haptics.selection()
@@ -45,6 +51,7 @@ struct RunHistoryListView: View {
 
 private struct RunHistoryRow: View {
     let run: RunSession
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -65,7 +72,7 @@ private struct RunHistoryRow: View {
                     .font(.subheadline.bold())
 
                 HStack(spacing: 8) {
-                    Label(run.distance.formattedDistance, systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
+                    Label(run.distance.formattedDistanceFromMeters, systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
                     Label(run.duration.formattedDuration, systemImage: "clock")
                 }
                 .font(.caption)
@@ -83,6 +90,34 @@ private struct RunHistoryRow: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
+            .frame(minWidth: 52, alignment: .trailing)
+
+            if let onDelete {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "trash")
+                            .font(.caption.bold())
+                        Text("common.delete".localized)
+                            .font(.caption2.bold())
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(Color.red.opacity(0.14))
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.red.opacity(0.35), lineWidth: 0.75)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("common.delete".localized)
+            }
 
             Image(systemName: "chevron.right")
                 .font(.caption)
@@ -96,8 +131,8 @@ private struct RunHistoryRow: View {
 #Preview {
     RunHistoryListView(
         runs: [
-            RunSession(id: "1", userId: "u1", mode: .normal, startDate: Date(), endDate: Date().addingTimeInterval(1800), distance: 5.2, avgSpeed: 10.4, trail: 650, territoriesCaptured: 8),
-            RunSession(id: "2", userId: "u1", mode: .boost, startDate: Date().addingTimeInterval(-86400), endDate: Date().addingTimeInterval(-84600), distance: 3.1, avgSpeed: 12.0, trail: 890, territoriesCaptured: 5),
+            RunSession(id: "1", userId: "u1", mode: .normal, startDate: Date(), endDate: Date().addingTimeInterval(1800), distance: 5200, avgSpeed: 10.4, trail: 650, territoriesCaptured: 8),
+            RunSession(id: "2", userId: "u1", mode: .boost, startDate: Date().addingTimeInterval(-86400), endDate: Date().addingTimeInterval(-84600), distance: 3100, avgSpeed: 12.0, trail: 890, territoriesCaptured: 5),
         ],
         hasMore: false
     )
