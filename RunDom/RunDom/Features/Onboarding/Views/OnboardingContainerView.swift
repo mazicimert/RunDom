@@ -21,9 +21,13 @@ struct OnboardingContainerView: View {
             TabView(selection: $viewModel.currentPage) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.offset) { index, page in
                     OnboardingPageView(
-                        icon: page.icon,
-                        title: page.title,
-                        subtitle: page.subtitle
+                        mediaAssetName: page.mediaAssetName,
+                        mediaStyle: page.mediaStyle,
+                        title: page.titleKey.localized,
+                        subtitle: page.subtitleKey.localized,
+                        supportingText: viewModel.supportingText(for: index),
+                        accentColor: page.accentColor,
+                        isActive: viewModel.currentPage == index
                     )
                     .tag(index)
                 }
@@ -31,15 +35,14 @@ struct OnboardingContainerView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
 
             // Bottom section
-            VStack(spacing: 20) {
+            VStack(spacing: 18) {
                 // Page indicator
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     ForEach(0..<viewModel.totalPages, id: \.self) { index in
-                        Circle()
-                            .fill(index == viewModel.currentPage ? Color.accentColor : Color.secondary.opacity(0.3))
-                            .frame(width: index == viewModel.currentPage ? 10 : 8,
-                                   height: index == viewModel.currentPage ? 10 : 8)
-                            .animation(.easeInOut(duration: AppConstants.Animation.quick), value: viewModel.currentPage)
+                        Capsule(style: .continuous)
+                            .fill(index == viewModel.currentPage ? Color.accentColor : Color.secondary.opacity(0.28))
+                            .frame(width: index == viewModel.currentPage ? 22 : 8, height: 8)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.currentPage)
                     }
                 }
 
@@ -47,15 +50,40 @@ struct OnboardingContainerView: View {
                 Button {
                     viewModel.nextPage()
                 } label: {
-                    Text(viewModel.currentPage == viewModel.totalPages - 1
-                         ? "onboarding.getStarted".localized
-                         : "common.next".localized)
+                    Text(buttonTitle)
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding(.horizontal, AppConstants.UI.screenPadding)
             }
             .padding(.bottom, 40)
         }
+        .background(
+            LinearGradient(
+                colors: [
+                    Color.black,
+                    Color.black.opacity(0.96),
+                    Color.accentColor.opacity(0.08)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        )
+        .onAppear {
+            viewModel.trackPageViewed(viewModel.currentPage)
+        }
+        .onChange(of: viewModel.currentPage) { _, newValue in
+            viewModel.trackPageViewed(newValue)
+        }
+    }
+
+    private var buttonTitle: String {
+        guard viewModel.currentPage == viewModel.totalPages - 1 else {
+            return "common.next".localized
+        }
+
+        return viewModel.pages[viewModel.currentPage].primaryCTAKey?.localized
+            ?? "onboarding.getStarted".localized
     }
 }
 

@@ -28,11 +28,18 @@
 
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Şehrini Fethet";
-"onboarding.slide1.subtitle" = "Gerçek dünya bölgelerinde koş ve onları kendi toprakların yap.";
-"onboarding.slide2.title" = "İz Puanı Kazan";
-"onboarding.slide2.subtitle" = "Ne kadar hızlı ve uzun koşarsan, o kadar çok İz kazanırsın.";
-"onboarding.slide3.title" = "Yarış ve Domine Et";
-"onboarding.slide3.subtitle" = "Sıralamalarda yüksel, rozetler topla ve bölgelerini savun.";
+"onboarding.slide1.subtitle" = "Haritada gerçek bölgeleri gör, koşarak alanları kendi renginle kapla.";
+"onboarding.slide1.support" = "Harita ekranı canlı sahiplik durumunu anlık gösterir.";
+"onboarding.slide2.title" = "Koşuyu Başlat, Bölgeyi Al";
+"onboarding.slide2.subtitle" = "Koşuya başladığında rota ve geçtiğin hücreler otomatik kaydedilir.";
+"onboarding.slide2.support" = "Yeni bölgelere girdikçe daha fazla avantaj kazanırsın.";
+"onboarding.slide3.title" = "İz ve Sıralama";
+"onboarding.slide3.subtitle" = "Koşularından İz puanı topla, haftalık sıralamada yukarı çık.";
+"onboarding.slide3.support" = "Mahallede öne çıkmak için düzenli koşu ritmi kur.";
+"onboarding.slide4.title" = "Hemen Başla";
+"onboarding.slide4.subtitle" = "İzinleri tamamla ve ilk koşunu birkaç dokunuşla başlat.";
+"onboarding.slide4.support" = "İlk hedefin: yakınındaki ilk bölgeyi fethetmek.";
+"onboarding.placeholder" = "Ekran önizlemesi yakında";
 "onboarding.getStarted" = "Başla";
 
 // MARK: - Permissions

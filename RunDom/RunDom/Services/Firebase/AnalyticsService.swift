@@ -3,6 +3,30 @@ import FirebaseAnalytics
 
 enum AnalyticsService {
 
+    // MARK: - Onboarding Events
+
+    static func logOnboardingViewed(pageIndex: Int) {
+        Analytics.logEvent("onboarding_viewed", parameters: [
+            "page_index": pageIndex
+        ])
+    }
+
+    static func logOnboardingNext(pageIndex: Int) {
+        Analytics.logEvent("onboarding_next", parameters: [
+            "page_index": pageIndex
+        ])
+    }
+
+    static func logOnboardingSkipped(pageIndex: Int) {
+        Analytics.logEvent("onboarding_skipped", parameters: [
+            "page_index": pageIndex
+        ])
+    }
+
+    static func logOnboardingCompleted() {
+        Analytics.logEvent("onboarding_completed", parameters: nil)
+    }
+
     // MARK: - Run Events
 
     static func logRunStarted(mode: RunMode) {

@@ -28,11 +28,18 @@
 
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Conquer Your City";
-"onboarding.slide1.subtitle" = "Run through real-world territories and claim them as your own.";
-"onboarding.slide2.title" = "Earn Trail Points";
-"onboarding.slide2.subtitle" = "The faster and farther you run, the more Trail you earn.";
-"onboarding.slide3.title" = "Compete & Dominate";
-"onboarding.slide3.subtitle" = "Climb leaderboards, collect badges, and defend your zones.";
+"onboarding.slide1.subtitle" = "See real zones on the map and paint them with your color by running.";
+"onboarding.slide1.support" = "Map ownership updates live as territories change hands.";
+"onboarding.slide2.title" = "Start Running, Capture Zones";
+"onboarding.slide2.subtitle" = "When you start a run, your route and visited cells are tracked automatically.";
+"onboarding.slide2.support" = "Entering new zones gives you stronger progression momentum.";
+"onboarding.slide3.title" = "Trail & Rankings";
+"onboarding.slide3.subtitle" = "Collect Trail points from runs and climb the weekly leaderboard.";
+"onboarding.slide3.support" = "Build a steady running rhythm to lead your neighborhood.";
+"onboarding.slide4.title" = "Start Now";
+"onboarding.slide4.subtitle" = "Complete permissions and launch your first run in a few taps.";
+"onboarding.slide4.support" = "First objective: capture the closest zone around you.";
+"onboarding.placeholder" = "Screen preview coming soon";
 "onboarding.getStarted" = "Get Started";
 
 // MARK: - Permissions

@@ -3,6 +3,11 @@ import CoreLocation
 import SwiftUI
 import UserNotifications
 
+enum OnboardingMediaStyle: String, Codable {
+    case screenshotCard
+    case iconAccent
+}
+
 @MainActor
 final class OnboardingViewModel: ObservableObject {
 
@@ -19,37 +24,58 @@ final class OnboardingViewModel: ObservableObject {
     @Published var currentStep: Step = .splash
     @Published var currentPage: Int = 0
 
-    let totalPages = 3
-
     // MARK: - Dependencies
 
     var locationManager: LocationManager?
     private var cancellables = Set<AnyCancellable>()
+    private var viewedPageIndexes = Set<Int>()
 
     // MARK: - Page Data
 
     struct PageData {
-        let icon: String
-        let title: String
-        let subtitle: String
+        let titleKey: String
+        let subtitleKey: String
+        let mediaAssetName: String
+        let mediaStyle: OnboardingMediaStyle
+        let accentColor: Color
+        let primaryCTAKey: String?
     }
+
+    var totalPages: Int { pages.count }
 
     var pages: [PageData] {
         [
             PageData(
-                icon: "map.fill",
-                title: "onboarding.slide1.title".localized,
-                subtitle: "onboarding.slide1.subtitle".localized
+                titleKey: "onboarding.slide1.title",
+                subtitleKey: "onboarding.slide1.subtitle",
+                mediaAssetName: "onboarding_map_mock",
+                mediaStyle: .screenshotCard,
+                accentColor: .blue,
+                primaryCTAKey: nil
             ),
             PageData(
-                icon: "flame.fill",
-                title: "onboarding.slide2.title".localized,
-                subtitle: "onboarding.slide2.subtitle".localized
+                titleKey: "onboarding.slide2.title",
+                subtitleKey: "onboarding.slide2.subtitle",
+                mediaAssetName: "onboarding_run_mock",
+                mediaStyle: .screenshotCard,
+                accentColor: .green,
+                primaryCTAKey: nil
             ),
             PageData(
-                icon: "trophy.fill",
-                title: "onboarding.slide3.title".localized,
-                subtitle: "onboarding.slide3.subtitle".localized
+                titleKey: "onboarding.slide3.title",
+                subtitleKey: "onboarding.slide3.subtitle",
+                mediaAssetName: "onboarding_stats_mock",
+                mediaStyle: .screenshotCard,
+                accentColor: .orange,
+                primaryCTAKey: nil
+            ),
+            PageData(
+                titleKey: "onboarding.slide4.title",
+                subtitleKey: "onboarding.slide4.subtitle",
+                mediaAssetName: "onboarding_start_mock",
+                mediaStyle: .screenshotCard,
+                accentColor: .mint,
+                primaryCTAKey: "onboarding.getStarted"
             ),
         ]
     }
@@ -65,17 +91,31 @@ final class OnboardingViewModel: ObservableObject {
     // MARK: - Pages
 
     func nextPage() {
+        AnalyticsService.logOnboardingNext(pageIndex: currentPage + 1)
+
         if currentPage < totalPages - 1 {
             withAnimation(.easeInOut(duration: AppConstants.Animation.standard)) {
                 currentPage += 1
             }
         } else {
+            AnalyticsService.logOnboardingCompleted()
             advanceToPermissions()
         }
     }
 
     func skipPages() {
+        AnalyticsService.logOnboardingSkipped(pageIndex: currentPage + 1)
         advanceToPermissions()
+    }
+
+    func trackPageViewed(_ pageIndex: Int) {
+        guard pageIndex >= 0 && pageIndex < totalPages else { return }
+        guard viewedPageIndexes.insert(pageIndex).inserted else { return }
+        AnalyticsService.logOnboardingViewed(pageIndex: pageIndex + 1)
+    }
+
+    func supportingText(for pageIndex: Int) -> String {
+        "onboarding.slide\(pageIndex + 1).support".localized
     }
 
     // MARK: - Permissions
