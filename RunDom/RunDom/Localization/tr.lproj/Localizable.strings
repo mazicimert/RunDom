@@ -1,4 +1,4 @@
-/* Localizable.strings (Turkish) — RunDom */
+/* Localizable.strings (Turkish) — Runpire */
 
 // MARK: - Common
 "common.ok" = "Tamam";
@@ -22,9 +22,9 @@
 "tab.leaderboard" = "Sıralama";
 "tab.stats" = "İstatistik";
 
-// MARK: - Trail Unit
-"trail.unit" = "İz";
-"trail.points" = "%@ İz";
+// MARK: - Points Unit
+"trail.unit" = "Puan";
+"trail.points" = "%@ Puan";
 
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Şehrini Fethet";
@@ -33,8 +33,8 @@
 "onboarding.slide2.title" = "Koşuyu Başlat, Bölgeyi Al";
 "onboarding.slide2.subtitle" = "Koşuya başladığında rota ve geçtiğin hücreler otomatik kaydedilir.";
 "onboarding.slide2.support" = "Yeni bölgelere girdikçe daha fazla avantaj kazanırsın.";
-"onboarding.slide3.title" = "İz ve Sıralama";
-"onboarding.slide3.subtitle" = "Koşularından İz puanı topla, haftalık sıralamada yukarı çık.";
+"onboarding.slide3.title" = "Puan ve Sıralama";
+"onboarding.slide3.subtitle" = "Koşularından puan topla, haftalık sıralamada yukarı çık.";
 "onboarding.slide3.support" = "Mahallede öne çıkmak için düzenli koşu ritmi kur.";
 "onboarding.slide4.title" = "Hemen Başla";
 "onboarding.slide4.subtitle" = "İzinleri tamamla ve ilk koşunu birkaç dokunuşla başlat.";
@@ -44,7 +44,7 @@
 
 // MARK: - Permissions
 "permission.location.title" = "Konum Erişimi";
-"permission.location.subtitle" = "RunDom, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
+"permission.location.subtitle" = "Runpire, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
 "permission.location.button" = "Konum Erişimine İzin Ver";
 "permission.notification.title" = "Oyunda Kal";
 "permission.notification.subtitle" = "Bölgelerin saldırı altındayken veya dropzone'lar belirdiğinde bildirim al.";
@@ -93,16 +93,16 @@
 "run.duration" = "Süre";
 "run.pace" = "Tempo";
 "run.avgSpeed" = "Ort. Hız";
-"run.trailEarned" = "Kazanılan İz";
+"run.trailEarned" = "Kazanılan Puan";
 "run.territoriesCaptured" = "Fethedilen Bölge";
 "run.summary" = "Koşu Özeti";
 "run.boostActive" = "Boost Aktif";
 "run.boostCancelled" = "Boost İptal";
 "run.selectMode" = "Mod Seç";
 "run.normalMode" = "Normal Mod";
-"run.normalMode.desc" = "Kendi hızında koş. İz puanları garantili.";
+"run.normalMode.desc" = "Kendi hızında koş. Puanlar garantili.";
 "run.boostMode" = "Boost Modu";
-"run.boostMode.desc" = "%@ üzerinde kal, %@ İz puanı kazan!";
+"run.boostMode.desc" = "%@ üzerinde kal, %@ puan kazan!";
 "run.streak" = "%@ günlük seri";
 "run.streakMultiplier" = "Seri bonusu: %@";
 "run.streakAtRisk" = "Risk Altında!";
@@ -130,6 +130,7 @@
 "run.capped" = "Koşu başı limit aşıldı (5.000)";
 "run.dailyCapped" = "Günlük limit aşıldı (15.000)";
 "run.territories" = "Bölgeler";
+"run.territoryConquered" = "Bölge Fethedildi!";
 "run.startPoint" = "Başlangıç";
 "run.endPoint" = "Bitiş";
 "run.delete.confirmTitle" = "Koşuyu silmek istiyor musun?";
@@ -148,7 +149,7 @@
 "map.lastActive" = "Son Aktivite";
 
 // MARK: - Profile
-"profile.totalTrail" = "Toplam İz";
+"profile.totalTrail" = "Toplam Puan";
 "profile.totalRuns" = "Koşu";
 "profile.totalDistance" = "Mesafe";
 "profile.streak" = "Seri";
@@ -179,9 +180,9 @@
 "stats.noRuns.subtitle" = "Koşu geçmişin burada görünecek.";
 "stats.noData" = "Veri yok";
 "stats.totalDistance" = "Toplam Mesafe";
-"stats.totalTrail" = "Toplam İz";
+"stats.totalTrail" = "Toplam Puan";
 "stats.weekOverWeek" = "geçen haftaya göre";
-"stats.trailChart" = "İz Puanları";
+"stats.trailChart" = "Puanlar";
 "stats.distanceChart" = "Mesafe (km)";
 "stats.date" = "Tarih";
 "stats.uniqueZones" = "Benzersiz Bölge";
@@ -197,7 +198,7 @@
 "dropzone.hint" = "Dropzone %@ içinde beliriyor";
 "dropzone.claimed" = "Alındı";
 "dropzone.reward" = "3 gün boyunca x2 çarpan";
-"dropzone.rewardDesc" = "Bu dropzone'u al ve 3 gün boyunca çift İz puanı kazan.";
+"dropzone.rewardDesc" = "Bu dropzone'u al ve 3 gün boyunca çift puan kazan.";
 "dropzone.spotsLeft" = "Kalan Yer";
 "dropzone.expiresIn" = "Bitiş Süresi";
 "dropzone.claim" = "Dropzone'u Al";
@@ -257,6 +258,6 @@
 "accessibility.badge.locked" = "Kilitli rozet";
 "accessibility.badge.unlocked" = "Açılmış rozet";
 "accessibility.leaderboard.rank" = "%d. sıra";
-"accessibility.stat.trail" = "%@ İz puanı";
+"accessibility.stat.trail" = "%@ puan";
 "accessibility.stat.distance" = "%@ mesafe";
 "accessibility.stat.runs" = "%d koşu";

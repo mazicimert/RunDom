@@ -89,8 +89,10 @@ struct SettingsView: View {
             .alert("settings.deleteAccount".localized, isPresented: $viewModel.showDeleteAccountAlert) {
                 Button("common.delete".localized, role: .destructive) {
                     Task {
-                        await viewModel.deleteAccount()
-                        dismiss()
+                        let success = await viewModel.deleteAccount()
+                        if success {
+                            dismiss()
+                        }
                     }
                 }
                 Button("common.cancel".localized, role: .cancel) {}

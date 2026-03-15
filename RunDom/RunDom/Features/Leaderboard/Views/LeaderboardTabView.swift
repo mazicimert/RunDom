@@ -2,7 +2,11 @@ import SwiftUI
 
 struct LeaderboardTabView: View {
     @EnvironmentObject private var appState: AppState
-    @StateObject private var viewModel = LeaderboardViewModel()
+    @StateObject private var viewModel: LeaderboardViewModel
+
+    init(locationManager: LocationManager) {
+        _viewModel = StateObject(wrappedValue: LeaderboardViewModel(locationManager: locationManager))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,20 +46,14 @@ struct LeaderboardTabView: View {
         }
         .navigationTitle("tab.leaderboard".localized)
         .task {
-            await viewModel.loadLeaderboard(
-                currentUserNeighborhood: appState.currentUser?.neighborhood
-            )
+            await viewModel.loadLeaderboard(currentUser: appState.currentUser)
         }
         .refreshable {
-            await viewModel.loadLeaderboard(
-                currentUserNeighborhood: appState.currentUser?.neighborhood
-            )
+            await viewModel.loadLeaderboard(currentUser: appState.currentUser)
         }
         .onChange(of: viewModel.scope) { _, _ in
             Task {
-                await viewModel.loadLeaderboard(
-                    currentUserNeighborhood: appState.currentUser?.neighborhood
-                )
+                await viewModel.loadLeaderboard(currentUser: appState.currentUser)
             }
         }
     }
@@ -63,7 +61,7 @@ struct LeaderboardTabView: View {
 
 #Preview {
     NavigationStack {
-        LeaderboardTabView()
+        LeaderboardTabView(locationManager: LocationManager())
             .environmentObject(AppState())
     }
 }

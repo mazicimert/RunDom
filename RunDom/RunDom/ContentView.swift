@@ -5,11 +5,17 @@ struct ContentView: View {
     @EnvironmentObject private var router: AppRouter
 
     @StateObject private var onboardingVM = OnboardingViewModel()
+    @State private var showLaunchSplash = true
 
     var body: some View {
         Group {
-            if appState.isLoading {
-                SplashView(onFinish: {})
+            if showLaunchSplash || appState.isLoading {
+                SplashView {
+                    showLaunchSplash = false
+                    if onboardingVM.currentStep == .splash {
+                        onboardingVM.finishSplash()
+                    }
+                }
             } else if !appState.isOnboardingComplete {
                 onboardingFlow
             } else if !appState.isAuthenticated {

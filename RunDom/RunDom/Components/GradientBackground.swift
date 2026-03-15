@@ -29,7 +29,7 @@ extension View {
 }
 
 #Preview {
-    Text("RunDom")
+    Text("Runpire")
         .font(.largeTitle.bold())
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .gradientBackground()

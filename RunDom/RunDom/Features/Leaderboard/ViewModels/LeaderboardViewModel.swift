@@ -12,12 +12,20 @@ final class LeaderboardViewModel: ObservableObject {
 
     // MARK: - Services
 
+    private let locationManager: LocationManager
     private let firestoreService: FirestoreService
+    private let geocodingService: GeocodingService
 
     // MARK: - Init
 
-    init(firestoreService: FirestoreService = FirestoreService()) {
+    init(
+        locationManager: LocationManager,
+        firestoreService: FirestoreService = FirestoreService(),
+        geocodingService: GeocodingService = .shared
+    ) {
+        self.locationManager = locationManager
         self.firestoreService = firestoreService
+        self.geocodingService = geocodingService
     }
 
     // MARK: - Computed
@@ -36,7 +44,7 @@ final class LeaderboardViewModel: ObservableObject {
 
     // MARK: - Data Loading
 
-    func loadLeaderboard(currentUserNeighborhood: String? = nil) async {
+    func loadLeaderboard(currentUser: User? = nil) async {
         isLoading = true
         errorMessage = nil
 
@@ -49,10 +57,12 @@ final class LeaderboardViewModel: ObservableObject {
                 seasonId = ""
             }
 
+            let neighborhood = scope == .neighborhood ? await resolveNeighborhood(for: currentUser) : nil
+
             entries = try await firestoreService.getLeaderboard(
                 scope: scope,
                 seasonId: seasonId,
-                neighborhood: scope == .neighborhood ? currentUserNeighborhood : nil
+                neighborhood: neighborhood
             )
         } catch {
             AppLogger.firebase.error("Failed to load leaderboard: \(error.localizedDescription)")
@@ -62,8 +72,34 @@ final class LeaderboardViewModel: ObservableObject {
         isLoading = false
     }
 
-    func switchScope(to newScope: LeaderboardScope, neighborhood: String? = nil) async {
+    func switchScope(to newScope: LeaderboardScope, currentUser: User? = nil) async {
         scope = newScope
-        await loadLeaderboard(currentUserNeighborhood: neighborhood)
+        await loadLeaderboard(currentUser: currentUser)
+    }
+
+    private func resolveNeighborhood(for currentUser: User?) async -> String? {
+        if let currentNeighborhood = currentUser?.neighborhood?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+           !currentNeighborhood.isEmpty {
+            return currentNeighborhood
+        }
+
+        guard let coordinate = locationManager.currentLocation?.coordinate ?? locationManager.lastKnownCoordinate,
+            let geocoded = await geocodingService.neighborhoodName(for: coordinate)?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !geocoded.isEmpty
+        else {
+            return nil
+        }
+
+        if let userId = currentUser?.id {
+            do {
+                try await firestoreService.updateUserNeighborhood(userId: userId, neighborhood: geocoded)
+            } catch {
+                AppLogger.firebase.warning("Failed to persist user neighborhood: \(error.localizedDescription)")
+            }
+        }
+
+        return geocoded
     }
 }

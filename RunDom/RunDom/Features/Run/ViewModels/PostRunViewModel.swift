@@ -9,6 +9,8 @@ final class PostRunViewModel: ObservableObject {
     @Published var isSaving = false
     @Published var isSaved = false
     @Published var errorMessage: String?
+    @Published var didExtendStreak = false
+    @Published var newStreakDays: Int?
 
     // MARK: - Properties
 
@@ -20,6 +22,7 @@ final class PostRunViewModel: ObservableObject {
     private let firestoreService: FirestoreService
     private let streakService: StreakService
     private let antiCheatService: AntiCheatService
+    private let geocodingService: GeocodingService
 
     // MARK: - Init
 
@@ -28,18 +31,25 @@ final class PostRunViewModel: ObservableObject {
         trailCalculator: TrailCalculator = TrailCalculator(),
         firestoreService: FirestoreService = FirestoreService(),
         streakService: StreakService = StreakService(),
-        antiCheatService: AntiCheatService = AntiCheatService()
+        antiCheatService: AntiCheatService = AntiCheatService(),
+        geocodingService: GeocodingService = .shared
     ) {
         self.session = session
         self.trailCalculator = trailCalculator
         self.firestoreService = firestoreService
         self.streakService = streakService
         self.antiCheatService = antiCheatService
+        self.geocodingService = geocodingService
     }
 
     // MARK: - Calculate & Save
 
     func processRun(user: User) async {
+        didExtendStreak = false
+        newStreakDays = nil
+
+        let latestUser = (try? await firestoreService.getUser(id: user.id)) ?? user
+
         // 1. Anti-cheat validation
         let validation = antiCheatService.validateRoute(
             points: session.route,
@@ -57,13 +67,15 @@ final class PostRunViewModel: ObservableObject {
 
         let result = trailCalculator.calculate(
             session: session,
-            streakDays: user.streakDays,
-            hasDropzoneBoost: user.hasActiveDropzoneBoost,
+            streakDays: latestUser.streakDays,
+            hasDropzoneBoost: latestUser.hasActiveDropzoneBoost,
             todayTrail: todayTrail
         )
 
         trailResult = result
         session.trail = result.totalTrail
+
+        let detectedNeighborhood = await detectedNeighborhoodFromRun()
 
         // 3. Save to Firebase
         isSaving = true
@@ -72,15 +84,18 @@ final class PostRunViewModel: ObservableObject {
             try await firestoreService.incrementUserTrail(
                 userId: user.id,
                 trail: result.totalTrail,
-                distance: session.distance
+                distance: session.distance,
+                neighborhood: detectedNeighborhood
             )
 
             // 4. Update streak
             let newStreakDays = streakService.updateStreak(
-                currentStreakDays: user.streakDays,
-                lastRunDate: user.lastRunDate
+                currentStreakDays: latestUser.streakDays,
+                lastRunDate: latestUser.lastRunDate
             )
             try await streakService.saveStreakUpdate(userId: user.id, newStreakDays: newStreakDays)
+            self.newStreakDays = newStreakDays
+            didExtendStreak = newStreakDays > latestUser.streakDays
 
             isSaved = true
             AppLogger.run.info("Run saved: \(self.session.id), trail=\(result.totalTrail)")
@@ -90,6 +105,15 @@ final class PostRunViewModel: ObservableObject {
         }
 
         isSaving = false
+    }
+
+    private func detectedNeighborhoodFromRun() async -> String? {
+        guard let coordinate = session.route.last?.coordinate ?? session.route.first?.coordinate else {
+            return nil
+        }
+
+        return await geocodingService.neighborhoodName(for: coordinate)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Computed
@@ -123,5 +147,10 @@ final class PostRunViewModel: ObservableObject {
         case .boost:
             return session.isBoostActive ? "run.boostMode".localized : "run.boostCancelled".localized
         }
+    }
+
+    var streakExtendedText: String? {
+        guard didExtendStreak, let days = newStreakDays else { return nil }
+        return "run.streak".localized(with: "\(days)")
     }
 }

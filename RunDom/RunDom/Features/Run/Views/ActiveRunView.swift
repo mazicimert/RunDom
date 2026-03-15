@@ -4,6 +4,10 @@ import MapKit
 struct ActiveRunView: View {
     @StateObject var viewModel: ActiveRunViewModel
     let onFinish: (RunSession) -> Void
+    @State private var showCountdown = true
+    @State private var hasStartedRun = false
+    @State private var showTerritoryConquestAnimation = false
+    @State private var pendingTerritoryConquestAnimations = 0
 
     var body: some View {
         ZStack {
@@ -100,15 +104,63 @@ struct ActiveRunView: View {
                 )
                 .transition(.opacity)
             }
+
+            if showCountdown {
+                Color.black.opacity(0.35)
+                    .ignoresSafeArea()
+
+                LottieView(
+                    animationName: "run_countdown",
+                    loopMode: .playOnce,
+                    onCompletion: {
+                        guard !hasStartedRun else { return }
+                        hasStartedRun = true
+                        showCountdown = false
+                        viewModel.startRun()
+                    }
+                )
+                    .frame(width: 260, height: 260)
+            }
+
+            if showTerritoryConquestAnimation {
+                Color.black.opacity(0.22)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+
+                VStack(spacing: 12) {
+                    LottieView(
+                        animationName: "Unlocked",
+                        loopMode: .playOnce,
+                        contentMode: .scaleAspectFit,
+                        animationSpeed: 1.0,
+                        onCompletion: { finishTerritoryConquestAnimation() }
+                    )
+                    .frame(width: 220, height: 220)
+
+                    Text("run.territoryConquered".localized)
+                        .font(.headline.bold())
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.2))
+                        .clipShape(Capsule())
+                }
+                .allowsHitTesting(false)
+                .transition(.opacity)
+            }
         }
         .onAppear {
-            viewModel.startRun()
+            guard !hasStartedRun else { return }
+            showCountdown = true
         }
         .onChange(of: viewModel.gpsSignalLost) { _, isLost in
             if isLost { Haptics.notification(.warning) }
         }
         .onChange(of: viewModel.territoriesCaptured) { oldValue, newValue in
             if newValue > oldValue { Haptics.notification(.success) }
+        }
+        .onChange(of: viewModel.territoryConquestAnimationTrigger) { oldValue, newValue in
+            guard newValue > oldValue else { return }
+            enqueueTerritoryConquestAnimation(count: newValue - oldValue)
         }
         .statusBarHidden(viewModel.runState == .running)
     }
@@ -127,6 +179,33 @@ struct ActiveRunView: View {
         .padding(.vertical, 8)
         .background(Color.red.opacity(0.9))
         .clipShape(Capsule())
+    }
+
+    private func enqueueTerritoryConquestAnimation(count: Int) {
+        guard count > 0 else { return }
+
+        if showTerritoryConquestAnimation {
+            pendingTerritoryConquestAnimations += count
+            return
+        }
+
+        showTerritoryConquestAnimation = true
+        if count > 1 {
+            pendingTerritoryConquestAnimations += (count - 1)
+        }
+    }
+
+    private func finishTerritoryConquestAnimation() {
+        if pendingTerritoryConquestAnimations > 0 {
+            pendingTerritoryConquestAnimations -= 1
+            showTerritoryConquestAnimation = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                showTerritoryConquestAnimation = true
+            }
+            return
+        }
+
+        showTerritoryConquestAnimation = false
     }
 }
 

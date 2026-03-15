@@ -21,7 +21,7 @@ struct MainTabView: View {
 
                 // Leaderboard Tab
                 NavigationStack {
-                    LeaderboardTabView()
+                    LeaderboardTabView(locationManager: appState.locationManager)
                 }
                 .tabItem {
                     Label("tab.leaderboard".localized, systemImage: "trophy.fill")

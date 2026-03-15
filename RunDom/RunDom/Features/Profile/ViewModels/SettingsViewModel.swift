@@ -15,11 +15,22 @@ final class SettingsViewModel: ObservableObject {
     // MARK: - Services
 
     private let authService: AuthService
+    private let firestoreService: FirestoreService
+    private let realtimeDBService: RealtimeDBService
+    private let offlineStorageService: OfflineStorageService
 
     // MARK: - Init
 
-    init(authService: AuthService? = nil) {
+    init(
+        authService: AuthService? = nil,
+        firestoreService: FirestoreService = FirestoreService(),
+        realtimeDBService: RealtimeDBService = RealtimeDBService(),
+        offlineStorageService: OfflineStorageService = .shared
+    ) {
         self.authService = authService ?? AuthService()
+        self.firestoreService = firestoreService
+        self.realtimeDBService = realtimeDBService
+        self.offlineStorageService = offlineStorageService
     }
 
     // MARK: - App Info
@@ -44,14 +55,25 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Account
 
-    func deleteAccount() async {
+    func deleteAccount() async -> Bool {
+        guard let userId = authService.currentUser?.uid else {
+            errorMessage = "error.generic".localized
+            return false
+        }
+
         isDeleting = true
+        defer { isDeleting = false }
+
         do {
+            _ = try await realtimeDBService.deleteTerritoriesOwned(by: userId)
+            try await firestoreService.deleteUserAccountData(userId: userId)
+            try? offlineStorageService.clearAll()
             try await authService.deleteAccount()
+            return true
         } catch {
             AppLogger.auth.error("Failed to delete account: \(error.localizedDescription)")
             errorMessage = "error.generic".localized
+            return false
         }
-        isDeleting = false
     }
 }

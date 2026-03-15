@@ -1,4 +1,4 @@
-/* Localizable.strings (English) — RunDom */
+/* Localizable.strings (English) — Runpire */
 
 // MARK: - Common
 "common.ok" = "OK";
@@ -22,9 +22,9 @@
 "tab.leaderboard" = "Leaderboard";
 "tab.stats" = "Stats";
 
-// MARK: - Trail Unit
-"trail.unit" = "Trail";
-"trail.points" = "%@ Trail";
+// MARK: - Points Unit
+"trail.unit" = "Points";
+"trail.points" = "%@ points";
 
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Conquer Your City";
@@ -33,8 +33,8 @@
 "onboarding.slide2.title" = "Start Running, Capture Zones";
 "onboarding.slide2.subtitle" = "When you start a run, your route and visited cells are tracked automatically.";
 "onboarding.slide2.support" = "Entering new zones gives you stronger progression momentum.";
-"onboarding.slide3.title" = "Trail & Rankings";
-"onboarding.slide3.subtitle" = "Collect Trail points from runs and climb the weekly leaderboard.";
+"onboarding.slide3.title" = "Points & Rankings";
+"onboarding.slide3.subtitle" = "Collect points from runs and climb the weekly leaderboard.";
 "onboarding.slide3.support" = "Build a steady running rhythm to lead your neighborhood.";
 "onboarding.slide4.title" = "Start Now";
 "onboarding.slide4.subtitle" = "Complete permissions and launch your first run in a few taps.";
@@ -44,7 +44,7 @@
 
 // MARK: - Permissions
 "permission.location.title" = "Enable Location";
-"permission.location.subtitle" = "RunDom needs your location to track runs and conquer territories in real time.";
+"permission.location.subtitle" = "Runpire needs your location to track runs and conquer territories in real time.";
 "permission.location.button" = "Allow Location Access";
 "permission.notification.title" = "Stay in the Game";
 "permission.notification.subtitle" = "Get notified when your territories are under attack or dropzones appear.";
@@ -93,16 +93,16 @@
 "run.duration" = "Duration";
 "run.pace" = "Pace";
 "run.avgSpeed" = "Avg Speed";
-"run.trailEarned" = "Trail Earned";
+"run.trailEarned" = "Points Earned";
 "run.territoriesCaptured" = "Territories Captured";
 "run.summary" = "Run Summary";
 "run.boostActive" = "Boost Active";
 "run.boostCancelled" = "Boost Cancelled";
 "run.selectMode" = "Select Mode";
 "run.normalMode" = "Normal Mode";
-"run.normalMode.desc" = "Run at your own pace. Trail points guaranteed.";
+"run.normalMode.desc" = "Run at your own pace. Points guaranteed.";
 "run.boostMode" = "Boost Mode";
-"run.boostMode.desc" = "Keep above %@ for %@ Trail points!";
+"run.boostMode.desc" = "Keep above %@ for %@ points!";
 "run.streak" = "%@ day streak";
 "run.streakMultiplier" = "Streak bonus: %@";
 "run.streakAtRisk" = "At Risk!";
@@ -130,6 +130,7 @@
 "run.capped" = "Per-run cap reached (5,000)";
 "run.dailyCapped" = "Daily cap reached (15,000)";
 "run.territories" = "Territories";
+"run.territoryConquered" = "Territory Conquered!";
 "run.startPoint" = "Start";
 "run.endPoint" = "Finish";
 "run.delete.confirmTitle" = "Delete this run?";
@@ -148,7 +149,7 @@
 "map.lastActive" = "Last Active";
 
 // MARK: - Profile
-"profile.totalTrail" = "Total Trail";
+"profile.totalTrail" = "Total Points";
 "profile.totalRuns" = "Runs";
 "profile.totalDistance" = "Distance";
 "profile.streak" = "Streak";
@@ -179,9 +180,9 @@
 "stats.noRuns.subtitle" = "Your run history will appear here.";
 "stats.noData" = "No data";
 "stats.totalDistance" = "Total Distance";
-"stats.totalTrail" = "Total Trail";
+"stats.totalTrail" = "Total Points";
 "stats.weekOverWeek" = "vs last week";
-"stats.trailChart" = "Trail Points";
+"stats.trailChart" = "Points";
 "stats.distanceChart" = "Distance (km)";
 "stats.date" = "Date";
 "stats.uniqueZones" = "Unique Zones";
@@ -197,7 +198,7 @@
 "dropzone.hint" = "Dropzone appearing in %@";
 "dropzone.claimed" = "Claimed";
 "dropzone.reward" = "x2 multiplier for 3 days";
-"dropzone.rewardDesc" = "Claim this dropzone to earn double Trail points for 3 days.";
+"dropzone.rewardDesc" = "Claim this dropzone to earn double points for 3 days.";
 "dropzone.spotsLeft" = "Spots Left";
 "dropzone.expiresIn" = "Expires In";
 "dropzone.claim" = "Claim Dropzone";
@@ -257,6 +258,6 @@
 "accessibility.badge.locked" = "Locked badge";
 "accessibility.badge.unlocked" = "Unlocked badge";
 "accessibility.leaderboard.rank" = "Rank %d";
-"accessibility.stat.trail" = "%@ Trail points";
+"accessibility.stat.trail" = "%@ points";
 "accessibility.stat.distance" = "%@ distance";
 "accessibility.stat.runs" = "%d runs";

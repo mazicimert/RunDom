@@ -4,6 +4,8 @@ import MapKit
 struct PostRunSummaryView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var viewModel: PostRunViewModel
+    @State private var showConfetti = false
+    @State private var showStreakFire = false
     let onDismiss: () -> Void
 
     init(session: RunSession, onDismiss: @escaping () -> Void) {
@@ -65,10 +67,59 @@ struct PostRunSummaryView: View {
                 }
             }
             .onChange(of: viewModel.isSaved) { _, saved in
-                if saved { Haptics.notification(.success) }
+                if saved {
+                    Task { await appState.loadCurrentUser() }
+                    Haptics.notification(.success)
+                    if viewModel.didExtendStreak {
+                        showStreakFire = true
+                    } else {
+                        showConfetti = true
+                    }
+                }
             }
             .onChange(of: viewModel.errorMessage) { _, message in
                 if message != nil { Haptics.notification(.error) }
+            }
+        }
+        .overlay {
+            ZStack {
+                if showConfetti {
+                    LottieView(
+                        animationName: "confetti",
+                        loopMode: .playOnce,
+                        contentMode: .scaleAspectFill,
+                        onCompletion: {
+                            showConfetti = false
+                        }
+                    )
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                }
+
+                if showStreakFire {
+                    VStack(spacing: 8) {
+                        LottieView(
+                            animationName: "Streak_fire",
+                            loopMode: .playOnce,
+                            animationSpeed: 0.95,
+                            onCompletion: {
+                                showStreakFire = false
+                            }
+                        )
+                        .frame(width: 220, height: 220)
+
+                        if let streakText = viewModel.streakExtendedText {
+                            Text(streakText)
+                                .font(.headline.bold())
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(Color.orange.opacity(0.2))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.top, 32)
+                    .allowsHitTesting(false)
+                }
             }
         }
     }

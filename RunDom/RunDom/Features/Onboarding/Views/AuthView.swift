@@ -22,7 +22,7 @@ struct AuthView: View {
                     .font(.system(size: 64, weight: .bold))
                     .foregroundStyle(Color.accentColor)
 
-                Text("RunDom")
+                Text("Runpire")
                     .font(.system(size: 36, weight: .black, design: .rounded))
             }
             .scaleEffect(isAnimating ? 1.0 : 0.8)

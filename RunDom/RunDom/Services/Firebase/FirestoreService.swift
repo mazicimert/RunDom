@@ -31,6 +31,92 @@ final class FirestoreService {
         try usersCollection.document(user.id).setData(from: user, merge: true)
     }
 
+    func deleteUserAccountData(userId: String) async throws {
+        try await deleteDocuments(in: runsCollection, whereField: "userId", equals: userId)
+        try await deleteDocuments(in: leaderboardCollection, whereField: "userId", equals: userId)
+        try await deleteDocuments(in: leaderboardCollection, whereField: "id", equals: userId)
+        try? await leaderboardCollection.document(userId).delete()
+        try await deleteDocuments(in: weeklyReportsCollection, whereField: "userId", equals: userId)
+        try await deleteDocuments(in: badgesCollection, whereField: "userId", equals: userId)
+        try await deleteAllDocuments(in: usersCollection.document(userId).collection("badges"))
+        try await removeUserFromDropzoneClaims(userId: userId)
+        try await usersCollection.document(userId).delete()
+    }
+
+    private func deleteDocuments(
+        in collection: CollectionReference,
+        whereField field: String,
+        equals value: Any,
+        batchSize: Int = 400
+    ) async throws {
+        while true {
+            let snapshot = try await collection
+                .whereField(field, isEqualTo: value)
+                .limit(to: batchSize)
+                .getDocuments()
+
+            guard !snapshot.documents.isEmpty else { return }
+
+            let batch = db.batch()
+            for document in snapshot.documents {
+                batch.deleteDocument(document.reference)
+            }
+            try await batch.commit()
+
+            if snapshot.documents.count < batchSize {
+                return
+            }
+        }
+    }
+
+    private func deleteAllDocuments(in collection: CollectionReference, batchSize: Int = 400) async throws {
+        while true {
+            let snapshot = try await collection.limit(to: batchSize).getDocuments()
+            guard !snapshot.documents.isEmpty else { return }
+
+            let batch = db.batch()
+            for document in snapshot.documents {
+                batch.deleteDocument(document.reference)
+            }
+            try await batch.commit()
+
+            if snapshot.documents.count < batchSize {
+                return
+            }
+        }
+    }
+
+    private func removeUserFromDropzoneClaims(userId: String, batchSize: Int = 200) async throws {
+        while true {
+            let snapshot = try await dropzonesCollection
+                .whereField("claimedBy", arrayContains: userId)
+                .limit(to: batchSize)
+                .getDocuments()
+
+            guard !snapshot.documents.isEmpty else { return }
+
+            let batch = db.batch()
+            for document in snapshot.documents {
+                batch.updateData([
+                    "claimedBy": FieldValue.arrayRemove([userId])
+                ], forDocument: document.reference)
+            }
+            try await batch.commit()
+
+            if snapshot.documents.count < batchSize {
+                return
+            }
+        }
+    }
+
+    func updateUserNeighborhood(userId: String, neighborhood: String) async throws {
+        let normalized = neighborhood.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return }
+        try await usersCollection.document(userId).updateData([
+            "neighborhood": normalized
+        ])
+    }
+
     func userExists(id: String) async throws -> Bool {
         let snapshot = try await usersCollection.document(id).getDocument()
         return snapshot.exists
@@ -159,7 +245,8 @@ final class FirestoreService {
         // Fallback: some environments do not write to `leaderboard` yet.
         // In that case derive rankings from users' current season trail values.
         if !entries.isEmpty {
-            return assignRanks(entries)
+            let filteredEntries = await filterEntriesWithExistingUsers(entries)
+            return assignRanks(filteredEntries)
         }
 
         let fallbackLimit = scope == .neighborhood ? max(limit * 4, 200) : limit
@@ -201,6 +288,55 @@ final class FirestoreService {
         }
 
         return derivedEntries
+    }
+
+    private func filterEntriesWithExistingUsers(_ entries: [LeaderboardEntry]) async -> [LeaderboardEntry] {
+        let uniqueUserIds = Array(Set(entries.map(\.userId).filter { !$0.isEmpty }))
+        guard !uniqueUserIds.isEmpty else { return entries }
+
+        var existingUserIds = Set<String>()
+        let chunkSize = 10
+        var index = 0
+
+        while index < uniqueUserIds.count {
+            let end = min(index + chunkSize, uniqueUserIds.count)
+            let chunk = Array(uniqueUserIds[index..<end])
+
+            do {
+                let snapshot = try await usersCollection
+                    .whereField(FieldPath.documentID(), in: chunk)
+                    .getDocuments()
+                for document in snapshot.documents {
+                    existingUserIds.insert(document.documentID)
+                }
+            } catch {
+                AppLogger.firebase.warning("Failed to validate leaderboard users: \(error.localizedDescription)")
+                return entries
+            }
+
+            index = end
+        }
+
+        let staleEntries = entries.filter { !existingUserIds.contains($0.userId) }
+        if !staleEntries.isEmpty {
+            await removeStaleLeaderboardEntries(staleEntries)
+        }
+
+        return entries.filter { existingUserIds.contains($0.userId) }
+    }
+
+    private func removeStaleLeaderboardEntries(_ staleEntries: [LeaderboardEntry]) async {
+        let batch = db.batch()
+        for entry in staleEntries {
+            batch.deleteDocument(leaderboardCollection.document(entry.id))
+        }
+
+        do {
+            try await batch.commit()
+            AppLogger.firebase.info("Removed \(staleEntries.count) stale leaderboard entries")
+        } catch {
+            AppLogger.firebase.warning("Failed to remove stale leaderboard entries: \(error.localizedDescription)")
+        }
     }
 
     func updateLeaderboardEntry(_ entry: LeaderboardEntry) async throws {
@@ -296,13 +432,20 @@ final class FirestoreService {
 
     // MARK: - Batch Updates
 
-    func incrementUserTrail(userId: String, trail: Double, distance: Double) async throws {
-        try await usersCollection.document(userId).updateData([
+    func incrementUserTrail(userId: String, trail: Double, distance: Double, neighborhood: String? = nil) async throws {
+        var updates: [String: Any] = [
             "totalTrail": FieldValue.increment(trail),
             "totalDistance": FieldValue.increment(distance),
             "totalRuns": FieldValue.increment(Int64(1)),
             "currentSeasonTrail": FieldValue.increment(trail),
             "lastRunDate": Date()
-        ])
+        ]
+
+        if let neighborhood = neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !neighborhood.isEmpty {
+            updates["neighborhood"] = neighborhood
+        }
+
+        try await usersCollection.document(userId).updateData(updates)
     }
 }

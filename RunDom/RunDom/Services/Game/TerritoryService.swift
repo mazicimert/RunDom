@@ -87,13 +87,28 @@ final class TerritoryService {
         userColor: String,
         distance: Double,
         seasonId: String
-    ) async throws -> Bool {
-        try await realtimeDB.captureTerritory(
+    ) async throws -> CaptureResult {
+        let existingTerritory = try await realtimeDB.getTerritory(
+            seasonId: seasonId,
+            h3Index: h3Index
+        )
+
+        let isNewTerritory = existingTerritory == nil
+        let previousOwnerId = existingTerritory?.ownerId
+
+        let captured = try await realtimeDB.captureTerritory(
             seasonId: seasonId,
             h3Index: h3Index,
             userId: userId,
             userColor: userColor,
             distance: distance
+        )
+
+        return CaptureResult(
+            h3Index: h3Index,
+            captured: captured,
+            isNewTerritory: isNewTerritory,
+            previousOwnerId: previousOwnerId
         )
     }
 

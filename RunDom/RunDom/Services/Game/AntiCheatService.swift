@@ -132,9 +132,10 @@ final class AntiCheatService {
         let avgSpeed = points.reduce(0.0) { $0 + $1.speedKmh } / max(Double(points.count), 1)
         allFlags.append(contentsOf: validateSpeed(avgSpeed))
 
-        // GPS consistency check between consecutive points
-        for i in 1..<points.count {
-            let gpsFlags = validateGPSConsistency(previous: points[i - 1], current: points[i])
+        // GPS consistency check between consecutive points.
+        // Using zip avoids invalid ranges for empty/single-point runs.
+        for (previous, current) in zip(points, points.dropFirst()) {
+            let gpsFlags = validateGPSConsistency(previous: previous, current: current)
             allFlags.append(contentsOf: gpsFlags)
         }
 

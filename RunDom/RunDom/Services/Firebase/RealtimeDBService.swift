@@ -163,6 +163,37 @@ final class RealtimeDBService {
         return territories
     }
 
+    func deleteTerritoriesOwned(by userId: String) async throws -> Int {
+        let snapshot = try await db.child("territories").getData()
+        guard snapshot.exists() else { return 0 }
+
+        var refsToDelete: [DatabaseReference] = []
+
+        for seasonChild in snapshot.children {
+            guard let seasonSnapshot = seasonChild as? DataSnapshot else { continue }
+
+            for territoryChild in seasonSnapshot.children {
+                guard let territorySnapshot = territoryChild as? DataSnapshot,
+                      let dict = territorySnapshot.value as? [String: Any],
+                      let ownerId = dict["ownerId"] as? String,
+                      ownerId == userId else {
+                    continue
+                }
+                refsToDelete.append(territorySnapshot.ref)
+            }
+        }
+
+        for ref in refsToDelete {
+            try await ref.setValue(NSNull())
+        }
+
+        if !refsToDelete.isEmpty {
+            AppLogger.firebase.info("Deleted \(refsToDelete.count) territories for user \(userId)")
+        }
+
+        return refsToDelete.count
+    }
+
     // MARK: - Territory Decode
 
     private func decodeTerritory(from dict: [String: Any]) -> Territory? {

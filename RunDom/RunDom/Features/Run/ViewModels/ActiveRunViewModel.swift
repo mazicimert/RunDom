@@ -25,6 +25,7 @@ final class ActiveRunViewModel: ObservableObject {
     @Published var visitedZones: [String] = []
     @Published var uniqueZones: Set<String> = []
     @Published var territoriesCaptured: Int = 0
+    @Published var territoryConquestAnimationTrigger: Int = 0
     @Published var isBoostActive: Bool = true
     @Published var gpsSignalLost = false
     @Published var currentH3Index: String?
@@ -205,8 +206,16 @@ final class ActiveRunViewModel: ObservableObject {
                     distance: distance,
                     seasonId: seasonId
                 )
-                if captured {
+                if captured.captured {
                     territoriesCaptured += 1
+                }
+
+                let conqueredFromOpponent = captured.captured
+                    && (captured.previousOwnerId?.isEmpty == false)
+                    && captured.previousOwnerId != userId
+
+                if conqueredFromOpponent {
+                    territoryConquestAnimationTrigger += 1
                 }
             } catch {
                 AppLogger.run.error("Territory capture failed: \(error.localizedDescription)")
@@ -313,4 +322,3 @@ final class ActiveRunViewModel: ObservableObject {
         timer?.invalidate()
     }
 }
-
