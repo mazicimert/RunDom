@@ -14,13 +14,16 @@ final class ProfileViewModel: ObservableObject {
 
     private let firestoreService: FirestoreService
     private let storageService: StorageService
+    private let badgeService: BadgeService
 
     // MARK: - Init
 
     init(firestoreService: FirestoreService = FirestoreService(),
-         storageService: StorageService = StorageService()) {
+         storageService: StorageService = StorageService(),
+         badgeService: BadgeService = BadgeService()) {
         self.firestoreService = firestoreService
         self.storageService = storageService
+        self.badgeService = badgeService
     }
 
     // MARK: - Computed
@@ -45,12 +48,14 @@ final class ProfileViewModel: ObservableObject {
         errorMessage = nil
 
         do {
+            try await badgeService.syncAndEvaluateBadges(userId: userId)
+
             async let userTask = firestoreService.getUser(id: userId)
             async let badgesTask = firestoreService.getBadges(userId: userId)
 
             let (fetchedUser, fetchedBadges) = try await (userTask, badgesTask)
             user = fetchedUser
-            badges = fetchedBadges
+            badges = sortBadges(fetchedBadges)
         } catch {
             AppLogger.firebase.error("Failed to load profile: \(error.localizedDescription)")
             errorMessage = "error.generic".localized
@@ -64,6 +69,34 @@ final class ProfileViewModel: ObservableObject {
             user = try await firestoreService.getUser(id: userId)
         } catch {
             AppLogger.firebase.error("Failed to refresh user: \(error.localizedDescription)")
+        }
+    }
+
+    private func sortBadges(_ badges: [Badge]) -> [Badge] {
+        let displayOrder: [String] = [
+            "boost_5",
+            "distance_10k",
+            "distance_5k",
+            "dropzone_5",
+            "first_dropzone",
+            "first_run",
+            "first_territory",
+            "streak_30",
+            "streak_7",
+            "territory_100",
+            "territory_25",
+            "total_distance_100k"
+        ]
+        let indexById = Dictionary(uniqueKeysWithValues: displayOrder.enumerated().map { ($1, $0) })
+
+        return badges.sorted { lhs, rhs in
+            let lhsIndex = indexById[lhs.id] ?? Int.max
+            let rhsIndex = indexById[rhs.id] ?? Int.max
+
+            if lhsIndex == rhsIndex {
+                return lhs.localizedName < rhs.localizedName
+            }
+            return lhsIndex < rhsIndex
         }
     }
 }

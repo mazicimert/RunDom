@@ -53,13 +53,15 @@ private struct BadgeCell: View {
             }
 
             Text(badge.isSecret && !badge.isUnlocked ? "badge.secret".localized : badge.localizedName)
-                .font(.caption2)
+                .font(.caption2.weight(.medium))
                 .foregroundStyle(badge.isUnlocked ? .primary : .secondary)
                 .lineLimit(2)
+                .minimumScaleFactor(0.8)
                 .multilineTextAlignment(.center)
 
             if !badge.isUnlocked && !badge.isSecret {
                 ProgressView(value: badge.progressPercentage)
+                    .progressViewStyle(.linear)
                     .tint(.accentColor)
                     .frame(width: 50)
             }

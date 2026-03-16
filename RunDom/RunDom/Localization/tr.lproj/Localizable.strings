@@ -206,11 +206,37 @@
 // MARK: - Badges
 "badge.locked" = "Kilitli";
 "badge.secret" = "Gizli Rozet";
+"badge.completed" = "Tamamlandı";
+"badge.remaining" = "Kalan";
 "badge.category.performance" = "Performans";
 "badge.category.territory" = "Bölge";
 "badge.category.dropzone" = "Dropzone";
 "badge.category.exploration" = "Keşif";
 "badge.category.streak" = "Seri";
+"badge.first_run.name" = "İlk Adım";
+"badge.first_run.description" = "İlk koşunu tamamla.";
+"badge.distance_5k.name" = "5K Koşucusu";
+"badge.distance_5k.description" = "Tek bir koşuda 5 km tamamla.";
+"badge.distance_10k.name" = "10K Koşucusu";
+"badge.distance_10k.description" = "Tek bir koşuda 10 km tamamla.";
+"badge.total_distance_100k.name" = "Yüzlük Kulübü";
+"badge.total_distance_100k.description" = "Toplamda 100 km koşu mesafesine ulaş.";
+"badge.boost_5.name" = "Boost Pilotu";
+"badge.boost_5.description" = "Boost modunda 5 koşu bitir.";
+"badge.first_territory.name" = "İlk Fetih";
+"badge.first_territory.description" = "İlk bölgeni fethet.";
+"badge.territory_25.name" = "Mahalle Hakimi";
+"badge.territory_25.description" = "Toplam 25 bölge fethet.";
+"badge.territory_100.name" = "Şehir Fatihi";
+"badge.territory_100.description" = "Toplam 100 bölge fethet.";
+"badge.first_dropzone.name" = "Dropzone Acemisi";
+"badge.first_dropzone.description" = "İlk dropzone'unu al.";
+"badge.dropzone_5.name" = "Dropzone Avcısı";
+"badge.dropzone_5.description" = "5 dropzone al.";
+"badge.streak_7.name" = "Sıcak Hafta";
+"badge.streak_7.description" = "7 günlük koşu serisine ulaş.";
+"badge.streak_30.name" = "Durmak Yok";
+"badge.streak_30.description" = "30 günlük koşu serisine ulaş.";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Bölgen ele geçirildi!";

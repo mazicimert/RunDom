@@ -52,7 +52,7 @@ final class AppRouter: ObservableObject {
         case postRunSummary(runId: String)
         case territoryDetail(territoryId: String)
         case dropzoneDetail(dropzoneId: String)
-        case badgeDetail(badgeId: String)
+        case badgeDetail(badge: Badge)
         case editProfile
         case settings
 
@@ -62,7 +62,7 @@ final class AppRouter: ObservableObject {
             case .postRunSummary(let id): return "postRunSummary-\(id)"
             case .territoryDetail(let id): return "territoryDetail-\(id)"
             case .dropzoneDetail(let id): return "dropzoneDetail-\(id)"
-            case .badgeDetail(let id): return "badgeDetail-\(id)"
+            case .badgeDetail(let badge): return "badgeDetail-\(badge.id)"
             case .editProfile: return "editProfile"
             case .settings: return "settings"
             }

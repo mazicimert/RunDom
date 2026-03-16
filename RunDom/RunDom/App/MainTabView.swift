@@ -116,15 +116,10 @@ struct MainTabView: View {
             Text("map.myTerritory".localized)
         case .dropzoneDetail:
             Text("dropzone.active".localized)
-        case .badgeDetail(let badgeId):
-            BadgeDetailView(badge: Badge(
-                id: badgeId,
-                nameKey: badgeId,
-                descriptionKey: badgeId,
-                iconName: "rosette",
-                category: .performance,
-                isSecret: false
-            ))
+        case .badgeDetail(let badge):
+            BadgeDetailView(badge: badge)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         case .editProfile:
             EditProfileView()
                 .environmentObject(appState)

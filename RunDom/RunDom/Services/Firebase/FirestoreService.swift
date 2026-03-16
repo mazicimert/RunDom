@@ -144,6 +144,13 @@ final class FirestoreService {
         return (runs, snapshot.documents.last)
     }
 
+    func getAllRuns(userId: String) async throws -> [RunSession] {
+        let snapshot = try await runsCollection
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: RunSession.self) }
+    }
+
     func getTodayTrail(userId: String) async throws -> Double {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -218,6 +225,13 @@ final class FirestoreService {
             .collection("badges")
             .document(badgeId)
             .updateData(["progress": progress])
+    }
+
+    func upsertBadge(_ badge: Badge, userId: String) async throws {
+        try usersCollection.document(userId)
+            .collection("badges")
+            .document(badge.id)
+            .setData(from: badge, merge: true)
     }
 
     // MARK: - Leaderboard
@@ -428,6 +442,13 @@ final class FirestoreService {
             return nil
         }
         AppLogger.firebase.info("Dropzone claimed: \(dropzoneId) by \(userId)")
+    }
+
+    func getClaimedDropzoneCount(userId: String) async throws -> Int {
+        let snapshot = try await dropzonesCollection
+            .whereField("claimedBy", arrayContains: userId)
+            .getDocuments()
+        return snapshot.documents.count
     }
 
     // MARK: - Batch Updates

@@ -17,6 +17,7 @@ final class AppState: ObservableObject {
     let authService: AuthService
     let firestoreService: FirestoreService
     let locationManager: LocationManager
+    let badgeService: BadgeService
 
     // MARK: - Private
 
@@ -28,6 +29,7 @@ final class AppState: ObservableObject {
         self.authService = AuthService()
         self.firestoreService = FirestoreService()
         self.locationManager = LocationManager()
+        self.badgeService = BadgeService()
         self.isOnboardingComplete = UserDefaults.standard.bool(
             forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete
         )
@@ -79,6 +81,14 @@ final class AppState: ObservableObject {
                 try await firestoreService.createUser(newUser)
                 currentUser = newUser
                 requiresProfileCompletion = needsCompletion
+            }
+
+            Task {
+                do {
+                    try await badgeService.syncAndEvaluateBadges(userId: firebaseUser.uid)
+                } catch {
+                    AppLogger.game.error("Badge sync failed: \(error.localizedDescription)")
+                }
             }
         } catch {
             AppLogger.firebase.error("Failed to load user: \(error.localizedDescription)")

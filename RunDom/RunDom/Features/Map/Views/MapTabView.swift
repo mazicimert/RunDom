@@ -2,9 +2,11 @@ import MapKit
 import SwiftUI
 
 struct MapTabView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel: MapViewModel
+    private let badgeService = BadgeService()
 
     init(locationManager: LocationManager) {
         _viewModel = StateObject(wrappedValue: MapViewModel(locationManager: locationManager))
@@ -94,11 +96,12 @@ struct MapTabView: View {
             Text("\(viewModel.userTerritoryCount)")
                 .font(.subheadline.bold().monospacedDigit())
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(mapControlForegroundColor)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 0.5))
+        .background(mapControlBackgroundColor, in: Capsule())
+        .overlay(Capsule().stroke(mapControlBorderColor, lineWidth: 1))
+        .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
         .accessibilityLabel(
             "accessibility.map.territoryCount".localized(with: viewModel.userTerritoryCount)
         )
@@ -114,12 +117,33 @@ struct MapTabView: View {
         } label: {
             Image(systemName: "location.fill")
                 .font(.body.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(mapControlForegroundColor)
                 .frame(width: 44, height: 44)
-                .background(.ultraThinMaterial, in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 0.5))
+                .background(mapControlBackgroundColor, in: Circle())
+                .overlay(Circle().stroke(mapControlBorderColor, lineWidth: 1))
+                .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
         }
         .accessibilityLabel("accessibility.map.centerOnUser".localized)
+    }
+
+    // MARK: - Map Controls Style
+
+    private var mapControlBackgroundColor: Color {
+        colorScheme == .light
+            ? Color(uiColor: .systemBackground).opacity(0.96)
+            : Color(uiColor: .secondarySystemBackground).opacity(0.88)
+    }
+
+    private var mapControlForegroundColor: Color {
+        Color(uiColor: .label)
+    }
+
+    private var mapControlBorderColor: Color {
+        colorScheme == .light ? .black.opacity(0.12) : .white.opacity(0.2)
+    }
+
+    private var mapControlShadowColor: Color {
+        colorScheme == .light ? .black.opacity(0.18) : .black.opacity(0.34)
     }
 
     // MARK: - Actions
@@ -129,6 +153,13 @@ struct MapTabView: View {
         Task {
             do {
                 try await FirestoreService().claimDropzone(dropzoneId: dropzone.id, userId: userId)
+                Task {
+                    do {
+                        try await badgeService.syncAndEvaluateBadges(userId: userId)
+                    } catch {
+                        AppLogger.game.warning("Badge sync failed after dropzone claim: \(error.localizedDescription)")
+                    }
+                }
                 AppLogger.game.info("Dropzone claimed: \(dropzone.id)")
             } catch {
                 viewModel.errorMessage = "error.generic".localized

@@ -23,6 +23,7 @@ final class PostRunViewModel: ObservableObject {
     private let streakService: StreakService
     private let antiCheatService: AntiCheatService
     private let geocodingService: GeocodingService
+    private let badgeService: BadgeService
 
     // MARK: - Init
 
@@ -32,7 +33,8 @@ final class PostRunViewModel: ObservableObject {
         firestoreService: FirestoreService = FirestoreService(),
         streakService: StreakService = StreakService(),
         antiCheatService: AntiCheatService = AntiCheatService(),
-        geocodingService: GeocodingService = .shared
+        geocodingService: GeocodingService = .shared,
+        badgeService: BadgeService = BadgeService()
     ) {
         self.session = session
         self.trailCalculator = trailCalculator
@@ -40,6 +42,7 @@ final class PostRunViewModel: ObservableObject {
         self.streakService = streakService
         self.antiCheatService = antiCheatService
         self.geocodingService = geocodingService
+        self.badgeService = badgeService
     }
 
     // MARK: - Calculate & Save
@@ -96,6 +99,14 @@ final class PostRunViewModel: ObservableObject {
             try await streakService.saveStreakUpdate(userId: user.id, newStreakDays: newStreakDays)
             self.newStreakDays = newStreakDays
             didExtendStreak = newStreakDays > latestUser.streakDays
+
+            Task {
+                do {
+                    try await badgeService.syncAndEvaluateBadges(userId: user.id)
+                } catch {
+                    AppLogger.game.warning("Badge sync failed after run: \(error.localizedDescription)")
+                }
+            }
 
             isSaved = true
             AppLogger.run.info("Run saved: \(self.session.id), trail=\(result.totalTrail)")

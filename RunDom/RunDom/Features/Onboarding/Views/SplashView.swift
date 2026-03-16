@@ -20,13 +20,25 @@ struct SplashView: View {
             ZStack {
                 LinearGradient(
                     colors: [
-                        Color.black,
-                        Color.black.opacity(0.95),
-                        Color.accentColor.opacity(0.12)
+                        Color(red: 0.01, green: 0.08, blue: 0.22),
+                        Color(red: 0.03, green: 0.18, blue: 0.43),
+                        Color(red: 0.06, green: 0.30, blue: 0.62)
                     ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
+                .overlay {
+                    RadialGradient(
+                        colors: [
+                            Color(red: 0.28, green: 0.66, blue: 1.00).opacity(0.30),
+                            Color(red: 0.14, green: 0.46, blue: 0.86).opacity(0.14),
+                            .clear
+                        ],
+                        center: .bottom,
+                        startRadius: 36,
+                        endRadius: proxy.size.height * 0.62
+                    )
+                }
                 .ignoresSafeArea()
 
                 Text("Runpire")

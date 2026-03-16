@@ -3,61 +3,80 @@ import SwiftUI
 struct BadgeDetailView: View {
     let badge: Badge
     @Environment(\.dismiss) private var dismiss
+    private var isHiddenSecret: Bool { badge.isSecret && !badge.isUnlocked }
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // Badge Icon
-                ZStack {
-                    Circle()
-                        .fill(badge.isUnlocked ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.1))
-                        .frame(width: 100, height: 100)
+            ScrollView {
+                VStack(spacing: 20) {
+                    ZStack {
+                        Circle()
+                            .fill(badge.isUnlocked ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.1))
+                            .frame(width: 108, height: 108)
 
-                    Image(systemName: badge.iconName)
-                        .font(.system(size: 44))
-                        .foregroundStyle(badge.isUnlocked ? Color.accentColor : Color.secondary)
-                }
-                .padding(.top, 20)
-
-                // Badge Name
-                Text(badge.localizedName)
-                    .font(.title2.bold())
-
-                // Badge Description
-                Text(badge.localizedDescription)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppConstants.UI.screenPadding)
-
-                // Category
-                Text("badge.category.\(badge.category.rawValue)".localized)
-                    .font(.caption)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.accentColor.opacity(0.1))
-                    .clipShape(Capsule())
-
-                // Progress or Unlock Date
-                if badge.isUnlocked {
-                    if let date = badge.unlockedAt {
-                        Label(date.formatted(style: .medium), systemImage: "checkmark.circle.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.green)
+                        Image(systemName: isHiddenSecret ? "questionmark" : badge.iconName)
+                            .font(.system(size: 44, weight: .semibold))
+                            .foregroundStyle(badge.isUnlocked ? Color.accentColor : Color.secondary)
                     }
-                } else {
-                    VStack(spacing: 8) {
-                        ProgressView(value: badge.progressPercentage)
-                            .tint(.accentColor)
-                            .frame(width: 200)
+                    .padding(.top, 12)
 
-                        Text("\(Int(badge.progress)) / \(Int(badge.targetValue))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    Text(isHiddenSecret ? "badge.secret".localized : badge.localizedName)
+                        .font(.title2.bold())
+                        .multilineTextAlignment(.center)
+
+                    Text(isHiddenSecret ? "badge.locked".localized : badge.localizedDescription)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    Text("badge.category.\(badge.category.rawValue)".localized)
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.accentColor.opacity(0.1))
+                        .clipShape(Capsule())
+
+                    if badge.isUnlocked {
+                        VStack(spacing: 8) {
+                            Label("badge.completed".localized, systemImage: "checkmark.circle.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.green)
+
+                            if let date = badge.unlockedAt {
+                                Text(date.formatted(style: .medium))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.secondary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    } else {
+                        VStack(spacing: 10) {
+                            ProgressView(value: badge.progressPercentage)
+                                .tint(.accentColor)
+                                .progressViewStyle(.linear)
+
+                            HStack {
+                                Text(badge.progressText)
+                                    .font(.caption.weight(.medium))
+
+                                Spacer()
+
+                                Text("\("badge.remaining".localized): \(badge.remainingText)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(14)
+                        .background(Color.secondary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                 }
-
-                Spacer()
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, AppConstants.UI.screenPadding)
+                .padding(.bottom, 24)
             }
             .navigationTitle("profile.badges".localized)
             .navigationBarTitleDisplayMode(.inline)

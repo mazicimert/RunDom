@@ -147,7 +147,7 @@ struct ProfileTabView: View {
             }
 
             BadgeGridView(badges: viewModel.badges) { badge in
-                router.presentedSheet = .badgeDetail(badgeId: badge.id)
+                router.presentedSheet = .badgeDetail(badge: badge)
             }
         }
         .screenPadding()

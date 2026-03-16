@@ -206,11 +206,37 @@
 // MARK: - Badges
 "badge.locked" = "Locked";
 "badge.secret" = "Secret Badge";
+"badge.completed" = "Completed";
+"badge.remaining" = "Remaining";
 "badge.category.performance" = "Performance";
 "badge.category.territory" = "Territory";
 "badge.category.dropzone" = "Dropzone";
 "badge.category.exploration" = "Exploration";
 "badge.category.streak" = "Streak";
+"badge.first_run.name" = "First Steps";
+"badge.first_run.description" = "Complete your first run.";
+"badge.distance_5k.name" = "5K Runner";
+"badge.distance_5k.description" = "Complete a single run of 5 km.";
+"badge.distance_10k.name" = "10K Runner";
+"badge.distance_10k.description" = "Complete a single run of 10 km.";
+"badge.total_distance_100k.name" = "Centurion";
+"badge.total_distance_100k.description" = "Reach 100 km total running distance.";
+"badge.boost_5.name" = "Boost Pilot";
+"badge.boost_5.description" = "Finish 5 runs in Boost mode.";
+"badge.first_territory.name" = "First Capture";
+"badge.first_territory.description" = "Capture your first territory.";
+"badge.territory_25.name" = "District Controller";
+"badge.territory_25.description" = "Capture 25 territories in total.";
+"badge.territory_100.name" = "City Conqueror";
+"badge.territory_100.description" = "Capture 100 territories in total.";
+"badge.first_dropzone.name" = "Dropzone Initiate";
+"badge.first_dropzone.description" = "Claim your first dropzone.";
+"badge.dropzone_5.name" = "Dropzone Hunter";
+"badge.dropzone_5.description" = "Claim 5 dropzones.";
+"badge.streak_7.name" = "Hot Week";
+"badge.streak_7.description" = "Reach a 7-day running streak.";
+"badge.streak_30.name" = "Unstoppable";
+"badge.streak_30.description" = "Reach a 30-day running streak.";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Your territory was captured!";
