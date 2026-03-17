@@ -7,11 +7,11 @@ struct SplashView: View {
     private let animationName = "Running_character"
     private let fallbackDuration: TimeInterval = 2.2
     private let characterSizeRatio: CGFloat = 0.36
-    private let horizontalPadding: CGFloat = 24
+    private let offscreenTravelPadding: CGFloat = 24
+    private let movementDurationRatio: CGFloat = 0.90
 
     @State private var movementProgress: CGFloat = 0
     @State private var movementDidComplete = false
-    @State private var lottieDidComplete = false
     @State private var hasStarted = false
     @State private var didFinish = false
 
@@ -51,17 +51,13 @@ struct SplashView: View {
 
                 let characterSize = min(proxy.size.width * characterSizeRatio, 180)
                 let yPosition = proxy.size.height * 0.55
-                let startX = horizontalPadding + (characterSize / 2)
-                let endX = proxy.size.width - horizontalPadding - (characterSize / 2)
+                let startX = -(characterSize / 2) - offscreenTravelPadding
+                let endX = proxy.size.width + (characterSize / 2) + offscreenTravelPadding
 
                 LottieView(
                     animationName: animationName,
                     loopMode: .playOnce,
-                    contentMode: .scaleAspectFit,
-                    onCompletion: {
-                        lottieDidComplete = true
-                        completeIfNeeded()
-                    }
+                    contentMode: .scaleAspectFit
                 )
                 .frame(width: characterSize, height: characterSize)
                 .position(
@@ -79,22 +75,15 @@ struct SplashView: View {
         guard !hasStarted else { return }
         hasStarted = true
         let duration = resolveDuration()
+        let movementDuration = max(0.65, duration * movementDurationRatio)
 
-        withAnimation(.linear(duration: duration)) {
+        withAnimation(.linear(duration: movementDuration)) {
             movementProgress = 1
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + movementDuration) {
             movementDidComplete = true
             completeIfNeeded()
-        }
-
-        // Safety net for missing/corrupted animation files.
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.4) {
-            if !lottieDidComplete {
-                lottieDidComplete = true
-                completeIfNeeded()
-            }
         }
     }
 
@@ -104,7 +93,7 @@ struct SplashView: View {
     }
 
     private func completeIfNeeded() {
-        guard movementDidComplete, lottieDidComplete, !didFinish else { return }
+        guard movementDidComplete, !didFinish else { return }
         didFinish = true
         onFinish()
     }
