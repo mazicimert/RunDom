@@ -11,6 +11,7 @@ final class PostRunViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var didExtendStreak = false
     @Published var newStreakDays: Int?
+    @Published var dailyChallengeReward: DailyChallengeReward?
 
     // MARK: - Properties
 
@@ -24,6 +25,7 @@ final class PostRunViewModel: ObservableObject {
     private let antiCheatService: AntiCheatService
     private let geocodingService: GeocodingService
     private let badgeService: BadgeService
+    private let dailyChallengeService: DailyChallengeService
 
     // MARK: - Init
 
@@ -34,7 +36,8 @@ final class PostRunViewModel: ObservableObject {
         streakService: StreakService = StreakService(),
         antiCheatService: AntiCheatService = AntiCheatService(),
         geocodingService: GeocodingService = .shared,
-        badgeService: BadgeService = BadgeService()
+        badgeService: BadgeService = BadgeService(),
+        dailyChallengeService: DailyChallengeService = DailyChallengeService()
     ) {
         self.session = session
         self.trailCalculator = trailCalculator
@@ -43,6 +46,7 @@ final class PostRunViewModel: ObservableObject {
         self.antiCheatService = antiCheatService
         self.geocodingService = geocodingService
         self.badgeService = badgeService
+        self.dailyChallengeService = dailyChallengeService
     }
 
     // MARK: - Calculate & Save
@@ -50,6 +54,7 @@ final class PostRunViewModel: ObservableObject {
     func processRun(user: User) async {
         didExtendStreak = false
         newStreakDays = nil
+        dailyChallengeReward = nil
 
         let latestUser = (try? await firestoreService.getUser(id: user.id)) ?? user
 
@@ -99,6 +104,12 @@ final class PostRunViewModel: ObservableObject {
             try await streakService.saveStreakUpdate(userId: user.id, newStreakDays: newStreakDays)
             self.newStreakDays = newStreakDays
             didExtendStreak = newStreakDays > latestUser.streakDays
+
+            let dailyChallengeResult = try await dailyChallengeService.updateAfterRun(
+                userId: user.id,
+                run: session
+            )
+            dailyChallengeReward = dailyChallengeResult.reward
 
             Task {
                 do {

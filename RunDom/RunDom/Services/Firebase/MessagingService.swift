@@ -8,6 +8,8 @@ final class MessagingService {
         case allUsers = "all_users"
         case seasonReset = "season_reset"
         case dropzoneAlerts = "dropzone_alerts"
+        case dailyChallengesEn = "daily_challenges_en"
+        case dailyChallengesTr = "daily_challenges_tr"
     }
 
     // MARK: - FCM Token
@@ -44,5 +46,17 @@ final class MessagingService {
         subscribe(to: .allUsers)
         subscribe(to: .seasonReset)
         subscribe(to: .dropzoneAlerts)
+        subscribeToDailyChallenges()
+    }
+
+    func subscribeToDailyChallenges() {
+        let preferredLang = Locale.preferredLanguages.first ?? "en"
+        if preferredLang.hasPrefix("tr") {
+            subscribe(to: .dailyChallengesTr)
+            unsubscribe(from: .dailyChallengesEn)
+        } else {
+            subscribe(to: .dailyChallengesEn)
+            unsubscribe(from: .dailyChallengesTr)
+        }
     }
 }

@@ -47,7 +47,7 @@
 "permission.location.subtitle" = "Runpire, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
 "permission.location.button" = "Konum Erişimine İzin Ver";
 "permission.notification.title" = "Oyunda Kal";
-"permission.notification.subtitle" = "Bölgelerin saldırı altındayken veya dropzone'lar belirdiğinde bildirim al.";
+"permission.notification.subtitle" = "Bölgelerin saldırı altındayken bildirim al.";
 "permission.notification.button" = "Bildirimleri Aç";
 
 // MARK: - Auth
@@ -136,6 +136,27 @@
 "run.delete.confirmTitle" = "Koşuyu silmek istiyor musun?";
 "run.delete.confirmMessage" = "Bu koşu kalıcı olarak silinir.";
 "run.delete.failed" = "Koşu silinemedi.";
+
+// MARK: - Daily Challenge
+"challenge.loading" = "Günlük görevler yükleniyor...";
+"challenge.sectionTitle" = "Günlük Görev";
+"challenge.sectionSubtitle" = "Bugün iki görevden birini seç ve bonus puanı kap.";
+"challenge.difficulty.safe" = "Safe";
+"challenge.difficulty.difficult" = "Difficult";
+"challenge.select" = "Bu Görevi Seç";
+"challenge.selected" = "Seçildi";
+"challenge.locked" = "Bugün diğer görevi seçtin";
+"challenge.completed" = "Tamamlandı";
+"challenge.duration.title" = "Bugün toplam %d dk tamamla";
+"challenge.distance.title" = "Bugün toplam %@ tamamla";
+"challenge.duration.value" = "%d dk";
+"challenge.distance.value" = "%@ km";
+"challenge.progress.value" = "%@ / %@";
+"challenge.reward.value" = "+%@ trail";
+"challenge.reward.granted" = "Günlük görev bonusu: +%@ trail";
+"challenge.prompt.title" = "Bugünün görevleri hazır";
+"challenge.prompt.body" = "Safe ve difficult görevlerden birini seçip bugün bonus trail kazanabilirsin.";
+"challenge.prompt.action" = "Görevleri Gör";
 
 // MARK: - Map
 "map.myTerritory" = "Benim Bölgem";
@@ -250,6 +271,8 @@
 "notification.streakWarning" = "Serini korumak için bugün koş!";
 "notification.streakWarning.title" = "Seri Risk Altında";
 "notification.streakWarning.body" = "%d günlük serin var. Korumak için bugün koş!";
+"notification.dailyChallenge.title" = "Yeni Görevler Seni Bekliyor!";
+"notification.dailyChallenge.body" = "Bugünkü görevler hazır. Yolunu seç ve bonus İz kazan!";
 
 // MARK: - Errors
 "error.locationDenied" = "Konum erişimi gerekli. Lütfen Ayarlar'dan etkinleştirin.";
@@ -268,6 +291,7 @@
 "settings.account" = "Hesap";
 "settings.deleteAccount" = "Hesabı Sil";
 "settings.deleteAccountConfirm" = "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.";
+"settings.deleteAccountRecentLogin" = "Güvenlik nedeniyle hesabı silmeden önce yeniden giriş yapman gerekiyor.";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
 

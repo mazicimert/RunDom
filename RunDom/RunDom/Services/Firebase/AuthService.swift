@@ -94,6 +94,19 @@ final class AuthService: ObservableObject {
 
     // MARK: - Delete Account
 
+    func requiresRecentSignInForAccountDeletion(maxAge: TimeInterval = 5 * 60) async throws -> Bool {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.noUser
+        }
+
+        let tokenResult = try await user.getIDTokenResult(forcingRefresh: true)
+        guard let authTime = authTimestamp(from: tokenResult.claims["auth_time"]) else {
+            return true
+        }
+
+        return Date().timeIntervalSince(authTime) > maxAge
+    }
+
     func deleteAccount() async throws {
         guard let user = Auth.auth().currentUser else {
             throw AuthError.noUser
@@ -119,6 +132,23 @@ final class AuthService: ObservableObject {
         let inputData = Data(input.utf8)
         let hashedData = SHA256.hash(data: inputData)
         return hashedData.compactMap { String(format: "%02x", $0) }.joined()
+    }
+
+    private func authTimestamp(from claim: Any?) -> Date? {
+        if let seconds = claim as? TimeInterval {
+            return Date(timeIntervalSince1970: seconds)
+        }
+
+        if let intSeconds = claim as? Int {
+            return Date(timeIntervalSince1970: TimeInterval(intSeconds))
+        }
+
+        if let stringSeconds = claim as? String,
+           let seconds = TimeInterval(stringSeconds) {
+            return Date(timeIntervalSince1970: seconds)
+        }
+
+        return nil
     }
 }
 

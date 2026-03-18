@@ -88,4 +88,17 @@ final class AppRouter: ObservableObject {
     func resetNavigation() {
         navigationPath = NavigationPath()
     }
+
+    // MARK: - Notification Deep-link
+
+    func handleNotificationDestination(_ destination: NotificationDestination) {
+        switch destination {
+        case .map, .territory, .dropzone:
+            selectedTab = .map
+        case .run, .dailyChallenge:
+            selectedTab = .run
+        case .profile:
+            selectedTab = .profile
+        }
+    }
 }

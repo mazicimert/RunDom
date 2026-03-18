@@ -1,11 +1,16 @@
 import SwiftUI
+import UserNotifications
 
 struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var activeRunSession: RunSession?
     @State private var completedRunSession: RunSession?
+    @State private var showDailyChallengePrompt = false
+
+    private let dailyChallengeService = DailyChallengeService()
 
     var body: some View {
         ZStack {
@@ -89,6 +94,28 @@ struct MainTabView: View {
             }
             .environmentObject(appState)
         }
+        .sheet(isPresented: $showDailyChallengePrompt) {
+            DailyChallengePromptSheet {
+                showDailyChallengePrompt = false
+            } onOpenChallenges: {
+                router.selectedTab = .run
+                showDailyChallengePrompt = false
+            }
+            .presentationDetents([.height(220)])
+            .presentationDragIndicator(.visible)
+        }
+        .task(id: appState.currentUser?.id) {
+            await presentDailyChallengePromptIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) { notification in
+            guard let destination = notification.userInfo?["destination"] as? NotificationDestination else { return }
+            router.handleNotificationDestination(destination)
+        }
+        .onChange(of: scenePhase) {
+            if scenePhase == .active {
+                UNUserNotificationCenter.current().setBadgeCount(0)
+            }
+        }
     }
 
     // MARK: - Run Actions
@@ -101,6 +128,14 @@ struct MainTabView: View {
             startDate: Date()
         )
         router.isRunActive = true
+    }
+
+    private func presentDailyChallengePromptIfNeeded() async {
+        guard appState.currentUser != nil else { return }
+        guard dailyChallengeService.shouldShowDailyPrompt() else { return }
+        guard await dailyChallengeService.hasAvailableChallenges() else { return }
+        dailyChallengeService.markDailyPromptShown()
+        showDailyChallengePrompt = true
     }
 
     // MARK: - Sheet Content
@@ -124,7 +159,7 @@ struct MainTabView: View {
             EditProfileView()
                 .environmentObject(appState)
         case .settings:
-            SettingsView()
+            SettingsView(authService: appState.authService)
                 .environmentObject(appState)
         }
     }
@@ -136,4 +171,34 @@ struct MainTabView: View {
     MainTabView()
         .environmentObject(AppState())
         .environmentObject(AppRouter())
+}
+
+private struct DailyChallengePromptSheet: View {
+    let onDismiss: () -> Void
+    let onOpenChallenges: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("challenge.prompt.title".localized)
+                .font(.title3.bold())
+
+            Text("challenge.prompt.body".localized)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 12) {
+                Button("common.cancel".localized) {
+                    onDismiss()
+                }
+                .buttonStyle(SecondaryButtonStyle())
+
+                Button("challenge.prompt.action".localized) {
+                    onOpenChallenges()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(24)
+    }
 }

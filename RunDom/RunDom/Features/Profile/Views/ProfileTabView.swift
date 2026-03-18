@@ -33,7 +33,7 @@ struct ProfileTabView: View {
                 await viewModel.loadProfile(userId: userId)
             }
         }
-        .task {
+        .task(id: appState.currentUser?.id) {
             if let userId = appState.currentUser?.id {
                 await viewModel.loadProfile(userId: userId)
             }
@@ -41,6 +41,9 @@ struct ProfileTabView: View {
         .onChange(of: appState.currentUser) { _, newUser in
             if let newUser {
                 viewModel.user = newUser
+            } else {
+                viewModel.user = nil
+                viewModel.badges = []
             }
         }
         .overlay {
@@ -146,8 +149,17 @@ struct ProfileTabView: View {
                 }
             }
 
-            BadgeGridView(badges: viewModel.badges) { badge in
-                router.presentedSheet = .badgeDetail(badge: badge)
+            if viewModel.isLoading && viewModel.badges.isEmpty {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                }
+                .padding(.vertical, 24)
+            } else {
+                BadgeGridView(badges: viewModel.badges) { badge in
+                    router.presentedSheet = .badgeDetail(badge: badge)
+                }
             }
         }
         .screenPadding()

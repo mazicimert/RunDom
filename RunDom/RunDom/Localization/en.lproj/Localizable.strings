@@ -47,7 +47,7 @@
 "permission.location.subtitle" = "Runpire needs your location to track runs and conquer territories in real time.";
 "permission.location.button" = "Allow Location Access";
 "permission.notification.title" = "Stay in the Game";
-"permission.notification.subtitle" = "Get notified when your territories are under attack or dropzones appear.";
+"permission.notification.subtitle" = "Get notified when your territories are under attack.";
 "permission.notification.button" = "Enable Notifications";
 
 // MARK: - Auth
@@ -136,6 +136,27 @@
 "run.delete.confirmTitle" = "Delete this run?";
 "run.delete.confirmMessage" = "This run will be permanently deleted.";
 "run.delete.failed" = "Failed to delete run.";
+
+// MARK: - Daily Challenge
+"challenge.loading" = "Loading daily challenges...";
+"challenge.sectionTitle" = "Daily Challenge";
+"challenge.sectionSubtitle" = "Choose one of today's two goals and earn bonus trail.";
+"challenge.difficulty.safe" = "Safe";
+"challenge.difficulty.difficult" = "Difficult";
+"challenge.select" = "Choose This Goal";
+"challenge.selected" = "Selected";
+"challenge.locked" = "You selected the other goal today";
+"challenge.completed" = "Completed";
+"challenge.duration.title" = "Complete %d min in total today";
+"challenge.distance.title" = "Complete %@ in total today";
+"challenge.duration.value" = "%d min";
+"challenge.distance.value" = "%@ km";
+"challenge.progress.value" = "%@ / %@";
+"challenge.reward.value" = "+%@ trail";
+"challenge.reward.granted" = "Daily challenge bonus: +%@ trail";
+"challenge.prompt.title" = "Today's challenges are ready";
+"challenge.prompt.body" = "Pick either the safe or difficult goal and earn bonus trail today.";
+"challenge.prompt.action" = "View Challenges";
 
 // MARK: - Map
 "map.myTerritory" = "My Territory";
@@ -250,6 +271,8 @@
 "notification.streakWarning" = "Run today to keep your streak!";
 "notification.streakWarning.title" = "Streak at Risk";
 "notification.streakWarning.body" = "You have a %d-day streak. Run today to keep it!";
+"notification.dailyChallenge.title" = "New Challenges Await!";
+"notification.dailyChallenge.body" = "Today's challenges are ready. Pick your path and earn bonus Trail!";
 
 // MARK: - Errors
 "error.locationDenied" = "Location access is required. Please enable it in Settings.";
@@ -268,6 +291,7 @@
 "settings.account" = "Account";
 "settings.deleteAccount" = "Delete Account";
 "settings.deleteAccountConfirm" = "This action cannot be undone. All your data will be permanently deleted.";
+"settings.deleteAccountRecentLogin" = "For security, you need to sign in again before deleting your account.";
 "settings.about" = "About";
 "settings.version" = "Version";
 

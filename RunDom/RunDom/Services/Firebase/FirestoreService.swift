@@ -13,6 +13,7 @@ final class FirestoreService {
     private var seasonsCollection: CollectionReference { db.collection("seasons") }
     private var weeklyReportsCollection: CollectionReference { db.collection("weeklyReports") }
     private var dropzonesCollection: CollectionReference { db.collection("dropzones") }
+    private var challengeTemplatesCollection: CollectionReference { db.collection("challengeTemplates") }
 
     // MARK: - User
 
@@ -109,6 +110,24 @@ final class FirestoreService {
         }
     }
 
+    func updateFCMToken(userId: String, token: String) async throws {
+        try await usersCollection.document(userId).updateData([
+            "fcmToken": token
+        ])
+    }
+
+    func clearFCMToken(userId: String) async throws {
+        try await usersCollection.document(userId).updateData([
+            "fcmToken": FieldValue.delete()
+        ])
+    }
+
+    func updateLanguageCode(userId: String, languageCode: String) async throws {
+        try await usersCollection.document(userId).updateData([
+            "languageCode": languageCode
+        ])
+    }
+
     func updateUserNeighborhood(userId: String, neighborhood: String) async throws {
         let normalized = neighborhood.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return }
@@ -147,6 +166,15 @@ final class FirestoreService {
     func getAllRuns(userId: String) async throws -> [RunSession] {
         let snapshot = try await runsCollection
             .whereField("userId", isEqualTo: userId)
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: RunSession.self) }
+    }
+
+    func getRuns(userId: String, from startDate: Date, to endDate: Date) async throws -> [RunSession] {
+        let snapshot = try await runsCollection
+            .whereField("userId", isEqualTo: userId)
+            .whereField("startDate", isGreaterThanOrEqualTo: startDate)
+            .whereField("startDate", isLessThan: endDate)
             .getDocuments()
         return try snapshot.documents.compactMap { try $0.data(as: RunSession.self) }
     }
@@ -413,6 +441,32 @@ final class FirestoreService {
         return try snapshot.documents.compactMap { try $0.data(as: WeeklyReport.self) }
     }
 
+    // MARK: - Daily Challenges
+
+    func getActiveDailyChallengeTemplates() async throws -> [DailyChallengeTemplate] {
+        let snapshot = try await challengeTemplatesCollection
+            .whereField("isActive", isEqualTo: true)
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: DailyChallengeTemplate.self) }
+    }
+
+    func getDailyChallengeProgress(userId: String, dateKey: String) async throws -> UserDailyChallengeProgress? {
+        let snapshot = try await usersCollection.document(userId)
+            .collection("dailyChallengeProgress")
+            .document(dateKey)
+            .getDocument()
+
+        guard snapshot.exists else { return nil }
+        return try snapshot.data(as: UserDailyChallengeProgress.self)
+    }
+
+    func upsertDailyChallengeProgress(_ progress: UserDailyChallengeProgress, userId: String) async throws {
+        try usersCollection.document(userId)
+            .collection("dailyChallengeProgress")
+            .document(progress.dateKey)
+            .setData(from: progress, merge: true)
+    }
+
     // MARK: - Dropzones
 
     func getActiveDropzones() async throws -> [Dropzone] {
@@ -468,5 +522,12 @@ final class FirestoreService {
         }
 
         try await usersCollection.document(userId).updateData(updates)
+    }
+
+    func grantDailyChallengeReward(userId: String, bonusTrail: Double) async throws {
+        try await usersCollection.document(userId).updateData([
+            "totalTrail": FieldValue.increment(bonusTrail),
+            "currentSeasonTrail": FieldValue.increment(bonusTrail)
+        ])
     }
 }

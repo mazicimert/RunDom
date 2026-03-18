@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import FirebaseMessaging
 
 @MainActor
 final class AppState: ObservableObject {
@@ -35,6 +36,31 @@ final class AppState: ObservableObject {
         )
 
         observeAuthState()
+        observeFCMToken()
+    }
+
+    // MARK: - FCM Token Observation
+
+    private func observeFCMToken() {
+        NotificationCenter.default.publisher(for: .fcmTokenReceived)
+            .compactMap { $0.userInfo?["token"] as? String }
+            .sink { [weak self] token in
+                guard let self, let userId = self.currentUser?.id else { return }
+                Task {
+                    try? await self.firestoreService.updateFCMToken(userId: userId, token: token)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func persistFCMTokenAndLanguage(userId: String) async {
+        if let token = try? await Messaging.messaging().token() {
+            try? await firestoreService.updateFCMToken(userId: userId, token: token)
+        }
+
+        let preferredLang = Locale.preferredLanguages.first ?? "en"
+        let langCode = preferredLang.hasPrefix("tr") ? "tr" : "en"
+        try? await firestoreService.updateLanguageCode(userId: userId, languageCode: langCode)
     }
 
     // MARK: - Auth Observation
@@ -90,6 +116,8 @@ final class AppState: ObservableObject {
                     AppLogger.game.error("Badge sync failed: \(error.localizedDescription)")
                 }
             }
+
+            Task { await persistFCMTokenAndLanguage(userId: firebaseUser.uid) }
         } catch {
             AppLogger.firebase.error("Failed to load user: \(error.localizedDescription)")
         }
@@ -107,6 +135,9 @@ final class AppState: ObservableObject {
     // MARK: - Sign Out
 
     func signOut() {
+        if let userId = currentUser?.id {
+            Task { try? await firestoreService.clearFCMToken(userId: userId) }
+        }
         do {
             try authService.signOut()
             currentUser = nil

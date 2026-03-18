@@ -4,9 +4,7 @@ import SwiftUI
 struct MapTabView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel: MapViewModel
-    private let badgeService = BadgeService()
 
     init(locationManager: LocationManager) {
         _viewModel = StateObject(wrappedValue: MapViewModel(locationManager: locationManager))
@@ -18,9 +16,9 @@ struct MapTabView: View {
             TerritoryMapView(
                 region: $viewModel.region,
                 territories: viewModel.shouldRenderOverlays ? viewModel.visibleTerritories : [],
-                dropzones: viewModel.dropzones,
+                dropzones: [],
                 onTerritoryTapped: { viewModel.selectTerritory($0) },
-                onDropzoneTapped: { viewModel.selectDropzone($0) }
+                onDropzoneTapped: nil
             )
             .ignoresSafeArea(edges: .top)
 
@@ -65,13 +63,6 @@ struct MapTabView: View {
             TerritoryDetailSheet(
                 territory: territory,
                 currentUserId: appState.currentUser?.id
-            )
-        }
-        .sheet(item: $viewModel.selectedDropzone) { dropzone in
-            DropzoneDetailSheet(
-                dropzone: dropzone,
-                currentUserId: appState.currentUser?.id,
-                onClaim: { claimDropzone(dropzone) }
             )
         }
         .task {
@@ -144,28 +135,6 @@ struct MapTabView: View {
 
     private var mapControlShadowColor: Color {
         colorScheme == .light ? .black.opacity(0.18) : .black.opacity(0.34)
-    }
-
-    // MARK: - Actions
-
-    private func claimDropzone(_ dropzone: Dropzone) {
-        guard let userId = appState.currentUser?.id else { return }
-        Task {
-            do {
-                try await FirestoreService().claimDropzone(dropzoneId: dropzone.id, userId: userId)
-                Task {
-                    do {
-                        try await badgeService.syncAndEvaluateBadges(userId: userId)
-                    } catch {
-                        AppLogger.game.warning("Badge sync failed after dropzone claim: \(error.localizedDescription)")
-                    }
-                }
-                AppLogger.game.info("Dropzone claimed: \(dropzone.id)")
-            } catch {
-                viewModel.errorMessage = "error.generic".localized
-                AppLogger.firebase.error("Failed to claim dropzone: \(error.localizedDescription)")
-            }
-        }
     }
 }
 

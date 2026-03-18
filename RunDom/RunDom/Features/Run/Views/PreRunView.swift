@@ -11,42 +11,46 @@ struct PreRunView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        VStack(spacing: 16) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 24) {
+                    Text("run.selectMode".localized)
+                        .font(.title.bold())
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, AppConstants.UI.screenPadding)
 
-            // Title
-            Text("run.selectMode".localized)
-                .font(.title.bold())
+                    dailyChallengesSection
 
-            // Mode Cards
-            VStack(spacing: 16) {
-                modeCard(
-                    mode: .normal,
-                    icon: "figure.run",
-                    title: "run.normalMode".localized,
-                    description: "run.normalMode.desc".localized,
-                    color: .blue
-                )
+                    VStack(spacing: 16) {
+                        modeCard(
+                            mode: .normal,
+                            icon: "figure.run",
+                            title: "run.normalMode".localized,
+                            description: "run.normalMode.desc".localized,
+                            color: .blue
+                        )
 
-                modeCard(
-                    mode: .boost,
-                    icon: "bolt.fill",
-                    title: "run.boostMode".localized,
-                    description: "run.boostMode.desc".localized(with: viewModel.boostThresholdText, viewModel.boostMultiplierText),
-                    color: .orange
-                )
-            }
-            .padding(.horizontal, AppConstants.UI.screenPadding)
-
-            // Streak Info
-            if let streak = viewModel.streakInfo, streak.days > 0 {
-                streakBanner(streak: streak)
+                        modeCard(
+                            mode: .boost,
+                            icon: "bolt.fill",
+                            title: "run.boostMode".localized,
+                            description: "run.boostMode.desc".localized(with: viewModel.boostThresholdText, viewModel.boostMultiplierText),
+                            color: .orange
+                        )
+                    }
                     .padding(.horizontal, AppConstants.UI.screenPadding)
+
+                    if let streak = viewModel.streakInfo, streak.days > 0 {
+                        streakBanner(streak: streak)
+                            .padding(.horizontal, AppConstants.UI.screenPadding)
+                    }
+                }
+                .padding(.vertical, 24)
+            }
+            .refreshable {
+                await reloadScreen()
             }
 
-            Spacer()
-
-            // GPS Status
             if !viewModel.isLocationReady {
                 HStack(spacing: 8) {
                     ProgressView()
@@ -56,7 +60,6 @@ struct PreRunView: View {
                 }
             }
 
-            // Start Button
             Button {
                 guard viewModel.canStartRun() else { return }
                 Haptics.impact(.medium)
@@ -70,10 +73,8 @@ struct PreRunView: View {
             .buttonStyle(PrimaryButtonStyle())
             .disabled(!viewModel.isLocationReady)
             .padding(.horizontal, AppConstants.UI.screenPadding)
-            .padding(.bottom, 8)
             .accessibilityHint("accessibility.run.startHint".localized)
 
-            // Error
             if let error = viewModel.errorMessage {
                 Text(error)
                     .font(.caption)
@@ -82,9 +83,155 @@ struct PreRunView: View {
             }
         }
         .navigationTitle("tab.run".localized)
-        .onAppear {
-            viewModel.loadStreakInfo(user: appState.currentUser)
+        .task(id: appState.currentUser?.id) {
+            await reloadScreen()
         }
+        .onAppear {
+            Task {
+                await reloadScreen()
+            }
+        }
+    }
+
+    private func reloadScreen() async {
+        await viewModel.load(user: appState.currentUser)
+    }
+
+    // MARK: - Daily Challenges
+
+    @ViewBuilder
+    private var dailyChallengesSection: some View {
+        if viewModel.isLoadingChallenges {
+            HStack(spacing: 10) {
+                ProgressView()
+                Text("challenge.loading".localized)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, AppConstants.UI.screenPadding)
+        } else if let state = viewModel.dailyChallengeState {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("challenge.sectionTitle".localized)
+                        .font(.headline)
+
+                    Text("challenge.sectionSubtitle".localized)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                ForEach(state.challenges) { challenge in
+                    challengeCard(challenge: challenge, state: state)
+                }
+
+                if let reward = viewModel.dailyChallengeReward {
+                    Label(
+                        "challenge.reward.granted".localized(with: reward.bonusTrail.formattedTrail),
+                        systemImage: "sparkles"
+                    )
+                    .font(.footnote.bold())
+                    .foregroundStyle(.boostGreen)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.boostGreen.opacity(0.12), in: Capsule())
+                }
+            }
+            .padding(.horizontal, AppConstants.UI.screenPadding)
+        }
+    }
+
+    @ViewBuilder
+    private func challengeCard(challenge: DailyChallengeTemplate, state: DailyChallengeState) -> some View {
+        let isSelected = state.isSelected(challenge)
+        let isLocked = state.isLocked(challenge)
+        let progressValue = state.progressValue(for: challenge)
+        let progressFraction = challenge.progressFraction(for: progressValue)
+        let accentColor: Color = challenge.difficulty == .safe ? .boostGreen : .boostRed
+
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center) {
+                Text(challenge.difficulty.localizedLabel)
+                    .font(.caption.bold())
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(accentColor.opacity(0.14), in: Capsule())
+                    .foregroundStyle(accentColor)
+
+                Spacer()
+
+                Text(challenge.rewardText)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.primary)
+            }
+
+            Text(challenge.localizedTitle)
+                .font(.headline)
+
+            ProgressView(value: progressFraction)
+                .tint(accentColor)
+
+            HStack {
+                Text(isSelected ? challenge.progressText(for: progressValue) : challenge.targetText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                if isSelected, state.progress?.isCompleted == true {
+                    Text("challenge.completed".localized)
+                        .font(.caption.bold())
+                        .foregroundStyle(accentColor)
+                }
+            }
+
+            if isSelected {
+                statusChip(
+                    title: state.progress?.isCompleted == true
+                        ? "challenge.completed".localized
+                        : "challenge.selected".localized,
+                    color: accentColor
+                )
+            } else if isLocked {
+                statusChip(
+                    title: "challenge.locked".localized,
+                    color: .secondary
+                )
+            } else {
+                Button {
+                    guard let userId = appState.currentUser?.id else { return }
+                    Task {
+                        let result = await viewModel.selectDailyChallenge(
+                            challengeId: challenge.id,
+                            userId: userId
+                        )
+                        if result?.didGrantReward == true {
+                            await appState.loadCurrentUser()
+                        }
+                    }
+                } label: {
+                    Text("challenge.select".localized)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(viewModel.isSelectingChallenge)
+            }
+        }
+        .cardStyle()
+        .overlay(
+            RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
+                .stroke(isSelected ? accentColor : .clear, lineWidth: 2)
+        )
+        .opacity(isLocked ? 0.68 : 1.0)
+    }
+
+    private func statusChip(title: String, color: Color) -> some View {
+        Text(title)
+            .font(.caption.bold())
+            .foregroundStyle(color)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(color.opacity(0.12), in: Capsule())
     }
 
     // MARK: - Mode Card

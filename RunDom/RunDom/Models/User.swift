@@ -15,6 +15,8 @@ struct User: Codable, Identifiable, Equatable {
     var neighborhood: String?
     var dropzoneMultiplierExpiry: Date?
     var lastRunDate: Date?
+    var fcmToken: String?
+    var languageCode: String?
     var createdAt: Date = Date()
 
     var hasActiveDropzoneBoost: Bool {

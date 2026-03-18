@@ -10,19 +10,29 @@ final class PreRunViewModel: ObservableObject {
     @Published var isLocationReady = false
     @Published var isStarting = false
     @Published var streakInfo: StreakService.StreakInfo?
+    @Published var dailyChallengeState: DailyChallengeState?
+    @Published var isLoadingChallenges = false
+    @Published var isSelectingChallenge = false
+    @Published var dailyChallengeReward: DailyChallengeReward?
     @Published var errorMessage: String?
 
     // MARK: - Services
 
     private let streakService: StreakService
+    private let dailyChallengeService: DailyChallengeService
     private let locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
-    init(locationManager: LocationManager, streakService: StreakService = StreakService()) {
+    init(
+        locationManager: LocationManager,
+        streakService: StreakService = StreakService(),
+        dailyChallengeService: DailyChallengeService = DailyChallengeService()
+    ) {
         self.locationManager = locationManager
         self.streakService = streakService
+        self.dailyChallengeService = dailyChallengeService
         observeLocation()
     }
 
@@ -41,12 +51,49 @@ final class PreRunViewModel: ObservableObject {
 
     // MARK: - Load Streak
 
-    func loadStreakInfo(user: User?) {
+    func load(user: User?) async {
         guard let user else { return }
+        dailyChallengeReward = nil
         streakInfo = streakService.streakInfo(
             streakDays: user.streakDays,
             lastRunDate: user.lastRunDate
         )
+        await loadDailyChallenges(userId: user.id)
+    }
+
+    func loadDailyChallenges(userId: String) async {
+        isLoadingChallenges = true
+        defer { isLoadingChallenges = false }
+
+        do {
+            dailyChallengeState = try await dailyChallengeService.loadDailyState(userId: userId)
+        } catch {
+            AppLogger.firebase.error("Failed to load daily challenges: \(error.localizedDescription)")
+        }
+    }
+
+    @discardableResult
+    func selectDailyChallenge(
+        challengeId: String,
+        userId: String
+    ) async -> DailyChallengeService.SelectionResult? {
+        guard !isSelectingChallenge else { return nil }
+        isSelectingChallenge = true
+        defer { isSelectingChallenge = false }
+
+        do {
+            let result = try await dailyChallengeService.selectChallenge(
+                userId: userId,
+                challengeId: challengeId
+            )
+            dailyChallengeState = result.state
+            dailyChallengeReward = result.reward
+            return result
+        } catch {
+            errorMessage = "error.generic".localized
+            AppLogger.firebase.error("Failed to select daily challenge: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     // MARK: - Mode Selection

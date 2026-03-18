@@ -12,6 +12,7 @@ final class NotificationService {
         case dropzoneActive = "dropzone_active"
         case defenseDropping = "defense_dropping"
         case streakWarning = "streak_warning"
+        case dailyChallenge = "daily_challenge"
 
         var categoryIdentifier: String { rawValue }
     }
@@ -178,6 +179,8 @@ final class NotificationService {
             return .map
         case .streakWarning:
             return .run
+        case .dailyChallenge:
+            return .dailyChallenge
         }
     }
 
@@ -232,4 +235,5 @@ enum NotificationDestination {
     case dropzone(id: String)
     case run
     case profile
+    case dailyChallenge
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Calculates Trail (İz) points earned from a run session.
+/// Calculates Trail points earned from a run session.
 ///
 /// Formula: Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 /// - Base: distance(km) × 100

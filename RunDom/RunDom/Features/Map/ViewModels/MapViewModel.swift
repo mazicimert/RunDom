@@ -44,7 +44,6 @@ final class MapViewModel: ObservableObject {
     func onAppear(currentUser: User?) async {
         isLoading = true
         await loadCurrentSeason()
-        await loadDropzones()
         observeTerritories()
         if let userId = currentUser?.id {
             updateUserTerritoryCount(userId: userId)
@@ -132,16 +131,6 @@ final class MapViewModel: ObservableObject {
         if let observerId = territoryObserverId, let seasonId = currentSeasonId {
             realtimeDB.removeObserver(id: observerId, seasonId: seasonId)
             territoryObserverId = nil
-        }
-    }
-
-    // MARK: - Dropzones
-
-    private func loadDropzones() async {
-        do {
-            dropzones = try await firestoreService.getActiveDropzones()
-        } catch {
-            AppLogger.firebase.error("Failed to load dropzones: \(error.localizedDescription)")
         }
     }
 

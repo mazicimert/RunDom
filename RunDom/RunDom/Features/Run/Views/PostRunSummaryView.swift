@@ -23,6 +23,10 @@ struct PostRunSummaryView: View {
                     // Trail Points
                     trailSection
 
+                    if let reward = viewModel.dailyChallengeReward {
+                        dailyChallengeRewardSection(reward: reward)
+                    }
+
                     // Stats Grid
                     statsGrid
 
@@ -192,6 +196,35 @@ struct PostRunSummaryView: View {
                 label: "run.territories".localized
             )
         }
+        .padding(.horizontal, AppConstants.UI.screenPadding)
+    }
+
+    @ViewBuilder
+    private func dailyChallengeRewardSection(reward: DailyChallengeReward) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: "flag.checkered.2.crossed")
+                .font(.title2)
+                .foregroundStyle(.boostGreen)
+                .frame(width: 42, height: 42)
+                .background(Color.boostGreen.opacity(0.14), in: Circle())
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("challenge.completed".localized)
+                    .font(.headline)
+
+                Text(reward.challengeTitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text("challenge.reward.value".localized(with: reward.bonusTrail.formattedTrail))
+                .font(.headline.bold())
+                .foregroundStyle(.boostGreen)
+        }
+        .padding(AppConstants.UI.cardPadding)
+        .cardStyle()
         .padding(.horizontal, AppConstants.UI.screenPadding)
     }
 

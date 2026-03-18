@@ -4,7 +4,11 @@ struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var viewModel: SettingsViewModel
+
+    init(authService: AuthService) {
+        _viewModel = StateObject(wrappedValue: SettingsViewModel(authService: authService))
+    }
 
     var body: some View {
         NavigationStack {
@@ -99,6 +103,23 @@ struct SettingsView: View {
             } message: {
                 Text("settings.deleteAccountConfirm".localized)
             }
+            .alert(
+                "common.error".localized,
+                isPresented: Binding(
+                    get: { viewModel.errorMessage != nil },
+                    set: { isPresented in
+                        if !isPresented {
+                            viewModel.dismissError()
+                        }
+                    }
+                )
+            ) {
+                Button("common.ok".localized, role: .cancel) {
+                    viewModel.dismissError()
+                }
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
             .overlay {
                 if viewModel.isDeleting {
                     Color.black.opacity(0.3)
@@ -112,7 +133,7 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(authService: AuthService())
         .environmentObject(AppState())
         .environmentObject(LocalizationManager.shared)
 }

@@ -49,13 +49,37 @@ RunDom is a gamified running app where users conquer real-world territories on a
 ```
 RunDom/
 ├── RunDom.xcodeproj/
-└── RunDom/                          # App source
-    ├── Assets.xcassets/
-    ├── GoogleService-Info.plist     # Firebase config (already added)
-    ├── Info.plist                   # Permissions configured
-    ├── RunDom.entitlements          # Sign in with Apple, APNs, Background Location
-    ├── RunDomApp.swift              # @main entry point
-    └── ContentView.swift            # Default template (needs replacement)
+└── RunDom/
+    ├── Assets.xcassets/           # App icon, color sets (light/dark)
+    ├── GoogleService-Info.plist   # Firebase config
+    ├── Info.plist                 # Permissions configured
+    ├── RunDom.entitlements        # Sign in with Apple, APNs, Background Location
+    ├── RunDomApp.swift            # @main entry, AppDelegate adaptor, environment injection
+    ├── ContentView.swift          # Onboarding state machine → MainTabView
+    ├── App/                       # AppDelegate, AppState, AppRouter, MainTabView
+    ├── Models/                    # Codable/Identifiable data structs
+    ├── Components/                # Reusable UI (Lottie, buttons, cards, image cache)
+    ├── Extensions/                # String+Localization, Color+Theme, Date, Double, H3, MKPolygon
+    ├── Utilities/                 # Constants, Logger, Haptics
+    ├── Localization/              # en.lproj + tr.lproj Localizable.strings
+    ├── Resources/Lottie/          # Animation JSON files
+    ├── Services/
+    │   ├── Firebase/              # Auth, Firestore, RealtimeDB, Storage, RemoteConfig, Analytics, Crashlytics, Messaging
+    │   ├── Game/                  # TrailCalculator, Territory, Streak, Season, AntiCheat, Dropzone, Badge, DailyChallenge
+    │   ├── H3/                    # H3GridService
+    │   ├── Location/              # LocationManager
+    │   ├── Motion/                # MotionManager
+    │   ├── Localization/          # LocalizationManager (runtime language switcher)
+    │   ├── Geocoding/             # GeocodingService (CLGeocoder + cache)
+    │   ├── Notification/          # NotificationService (FCM + local + deep linking)
+    │   └── Offline/               # OfflineStorageService (CoreData), SyncService (NWPathMonitor)
+    └── Features/
+        ├── Onboarding/            # Splash, slides, permissions, auth, profile completion
+        ├── Map/                   # Territory overlays, dropzone annotations, detail sheets
+        ├── Run/                   # PreRun, ActiveRun, PostRun (views + view models)
+        ├── Profile/               # Avatar, badges, settings, edit profile
+        ├── Leaderboard/           # Global/neighborhood rankings
+        └── Stats/                 # Run history, charts, weekly reports
 ```
 
 **Bundle ID:** `com.mertmazici.RunDom`
@@ -85,6 +109,7 @@ RunDom/
 ### Localization
 - Supported languages: Turkish (`tr`), English (`en`)
 - Device language = Turkish → app in Turkish; all others → English
+- Runtime language switching via `LocalizationManager` (ObservableObject)
 - All strings via `Localizable.strings` — never hardcode user-facing text
 - Custom unit name: "İz" (tr) / "Trail" (en)
 - Avatar messages, notifications, badge names, weekly reports — all localized
@@ -142,8 +167,18 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - First 3 users to reach it get reward: x2 multiplier for 3 days
 - Special animation on map
 
+### Daily Challenge System
+- Daily rotating challenges with difficulty tiers (easy/medium/hard)
+- Challenge types: distance, speed, territory, duration, zone variety
+- Template-based with localized descriptions
+- Trail point rewards based on difficulty
+- Prompted before runs, progress tracked per run
+- FCM topics per language (`daily_challenges_en`, `daily_challenges_tr`)
+
 ### Badge System
-- 15+ badges across categories: Performance, Territory, Dropzone, Exploration, Streak
+- 12 badges across categories: Performance, Territory, Dropzone, Exploration, Streak
+- Rule-based auto-evaluation via `BadgeService` after each run
+- Badge catalog seeded on first login
 - Some badges are hidden/secret
 
 ### User Color
@@ -170,10 +205,12 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 
 ## Onboarding Flow
 
-1. Splash Screen (logo + animation)
-2. 3 onboarding slides (full-screen, bold typography, animations)
-3. Permission screens (location Always On with explanation, notifications)
-4. Sign Up / Sign In (Apple required, Google optional)
+1. Splash Screen (logo + Lottie animation)
+2. 3 onboarding slides (full-screen, bold typography)
+3. Location permission screen (Always On with explanation)
+4. Notification permission screen
+5. Sign Up / Sign In (Apple required, Google optional)
+6. Complete Profile (if display name missing from Apple Sign In)
 - Only shown on first launch (UserDefaults flag)
 
 ## Avatar System
@@ -187,17 +224,19 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - State Machine: `Main Animation`
 - Boolean inputs: `Talking Animation`, `Sad Animation`, `Happy Animation`
 
-## Notifications (Push via FCM)
+## Notifications (Push via FCM + Local)
 
 - "Your territory was captured"
 - "Dropzone is active"
 - "Defense level dropping"
-- "Streak about to break"
+- "Streak about to break" (local, calendar trigger at 20:00)
+- "Daily challenge available"
+- Deep-link destinations: map, territory detail, dropzone detail, profile badges, stats, run history
 
 ## Error Handling
 
 - **GPS signal loss:** Run continues, warning shown. Gaps >60s excluded from calculations
-- **Offline mode:** Run data stored in CoreData, auto-synced when online. Territory captures processed after sync
+- **Offline mode:** Run data stored in CoreData (programmatic model), auto-synced when online via `SyncService` (NWPathMonitor). Territory captures queued separately. Retry up to 5 times per item
 
 ## Anti-Cheat & Fairness
 
@@ -228,21 +267,22 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 | API | Purpose |
 |-----|---------|
 | Gemini API (Google) | AI caricature avatar generation (future) |
-| Google Maps Geocoding API | Coordinates → neighborhood names for map display |
+| CLGeocoder (Apple) | Coordinates → neighborhood names (cached in memory) |
 
 ## Important Notes
 
-- `FirebaseApp.configure()` must be called in `@main` app init (not yet done)
-- H3 hexagonal grid preferred over square grid (equal neighbor distances, no corner bias)
-- Territory sync must use transactions to prevent race conditions when two users capture simultaneously
+- `FirebaseApp.configure()` is called in `AppDelegate` via `@UIApplicationDelegateAdaptor`
+- H3 grid uses custom pseudo-H3 coordinate quantization (not Uber's C library)
+- Territory sync uses Realtime Database transactions to prevent race conditions
 - Remote Config for all tunable game parameters (speed thresholds, multipliers, zone sizes)
 - All game parameters should be server-configurable without app updates
-- Every user model must include `isPremium: Bool = true`
-  (everyone gets true for now, StoreKit deferred)
+- Every user model includes `isPremium: Bool = true` (everyone gets true for now, StoreKit deferred)
+- Offline mode uses programmatic CoreData model (no `.xcdatamodeld` file)
+- Lottie animations bundled: `Running_character.json`, `Streak_fire.json`, `Unlocked.json`, `confetti.json`, `run_countdown.json`
 
 ## Development Roadmap
 
-17-step implementation plan ordered by dependency chain. Each step is a prerequisite for the next.
+17-step implementation plan ordered by dependency chain. Steps 1–16 are complete. Step 17 (polish) is in progress.
 
 ### Step 1: Foundation ✅
 > Shared infrastructure everything depends on
@@ -257,9 +297,10 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Extensions/View+Modifiers.swift` — Common view modifiers
 - `Localization/en.lproj/Localizable.strings` — Initial strings
 - `Localization/tr.lproj/Localizable.strings` — Initial strings
-- `Assets.xcassets/Colors/` — Fill color values (light/dark)
+- `Assets.xcassets/Colors/` — 7 color sets (BoostGreen, BoostRed, BoostYellow, CardBackground, SurfacePrimary, TerritoryBlue, TerritoryRed)
+- `Services/Localization/LocalizationManager.swift` — Runtime language switcher (added beyond roadmap)
 
-### Step 2: Data Models
+### Step 2: Data Models ✅
 > Codable structs used by all features and services
 
 - `Models/User.swift` — id, displayName, email, color, isPremium, streakDays, totalTrail
@@ -271,8 +312,9 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Models/Season.swift` — id, startDate, endDate, weekNumber
 - `Models/LeaderboardEntry.swift` — userId, displayName, trail, rank, neighborhood
 - `Models/WeeklyReport.swift` — totalDistance, totalTrail, weekOverWeekChange, territories
+- `Models/DailyChallenge.swift` — templates, user progress, state, rewards (added beyond roadmap)
 
-### Step 3: Firebase Integration & Auth
+### Step 3: Firebase Integration & Auth ✅
 > Backend connection and user authentication
 
 - `App/AppDelegate.swift` — `FirebaseApp.configure()`, FCM delegate
@@ -286,7 +328,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Services/Firebase/CrashlyticsService.swift` — Non-fatal error logging
 - `Services/Firebase/MessagingService.swift` — FCM token, topic subscriptions
 
-### Step 4: App Shell & Navigation
+### Step 4: App Shell & Navigation ✅
 > Tab bar, routing, global state
 
 - `App/AppState.swift` — ObservableObject: isAuthenticated, isOnboardingComplete, currentUser
@@ -294,7 +336,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `App/MainTabView.swift` — Bottom Tab Bar: Map | Run (center) | Profile | Leaderboard | Stats
 - `ContentView.swift` — Onboarding/Auth check → MainTabView or OnboardingFlow
 
-### Step 5: Shared UI Components
+### Step 5: Shared UI Components ✅
 > Reusable components before features
 
 - `Components/LottieView.swift` — SwiftUI wrapper for Lottie
@@ -302,11 +344,12 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Components/LoadingView.swift` — Loading spinner
 - `Components/EmptyStateView.swift` — Icon + title + subtitle + CTA
 - `Components/ErrorBannerView.swift` — Dismissable error banner
-- `Components/PrimaryButtonStyle.swift` — Bold button style
+- `Components/PrimaryButtonStyle.swift` — Bold button style + `SecondaryButtonStyle`
 - `Components/StatCardView.swift` — Icon + value + label card
 - `Components/GradientBackground.swift` — Gradient modifier
+- `Components/CachedImageView.swift` — Two-tier (memory + disk) image cache (added beyond roadmap)
 
-### Step 6: Onboarding & Auth Flow
+### Step 6: Onboarding & Auth Flow ✅
 > First-time user experience
 
 - `Features/Onboarding/Views/SplashView.swift` — Logo + Lottie animation
@@ -314,23 +357,24 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Onboarding/Views/OnboardingContainerView.swift` — 3-slide TabView pager
 - `Features/Onboarding/Views/PermissionRequestView.swift` — Location + notification permissions
 - `Features/Onboarding/Views/AuthView.swift` — Apple Sign In + Google Sign In
+- `Features/Onboarding/Views/CompleteProfileView.swift` — Post-auth display name completion (added beyond roadmap)
 - `Features/Onboarding/ViewModels/OnboardingViewModel.swift` — Page state, UserDefaults flag
 - `Features/Onboarding/ViewModels/AuthViewModel.swift` — Sign-in flow, Firebase Auth
 
-### Step 7: Location & Motion Services
+### Step 7: Location & Motion Services ✅
 > Required infrastructure for Run feature
 
 - `Services/Location/LocationManager.swift` — CLLocationManager, background tracking, Combine publisher
 - `Services/Motion/MotionManager.swift` — CMMotionManager, accelerometer data
 - `Extensions/CLLocationCoordinate2D+H3.swift` — Coordinate → H3 index helpers
 
-### Step 8: H3 Grid System
+### Step 8: H3 Grid System ✅
 > Foundation for territory rendering on map
 
 - `Services/H3/H3GridService.swift` — H3 index calculation, hex boundary polygon, neighbors
 - `Extensions/MKPolygon+H3.swift` — Create MKPolygon from H3 hex boundary
 
-### Step 9: Map Screen (Map Tab)
+### Step 9: Map Screen (Map Tab) ✅
 > Display territories on map
 
 - `Features/Map/Views/MapTabView.swift` — MapKit + territory overlays
@@ -341,7 +385,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Map/ViewModels/MapViewModel.swift` — Region fetch, territory loading
 - `Features/Map/ViewModels/TerritoryDetailViewModel.swift` — Single territory detail
 
-### Step 10: Game Services (Game Logic)
+### Step 10: Game Services (Game Logic) ✅
 > Point calculation, streak, anti-cheat, territory
 
 - `Services/Game/TrailCalculator.swift` — Full trail formula
@@ -350,8 +394,10 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Services/Game/SeasonService.swift` — Weekly reset, active season info
 - `Services/Game/AntiCheatService.swift` — GPS anomaly, farming detection, speed threshold
 - `Services/Game/DropzoneService.swift` — Proximity check, claim logic, reward
+- `Services/Game/BadgeService.swift` — 12-badge catalog, auto-evaluation, seeding (added beyond roadmap)
+- `Services/Game/DailyChallengeService.swift` — Daily rotation, selection, progress tracking (added beyond roadmap)
 
-### Step 11: Run Feature ⭐ CORE
+### Step 11: Run Feature ⭐ CORE ✅
 > The heart of the app — active run tracking
 
 - `Features/Run/Views/PreRunView.swift` — Normal/Boost mode selection
@@ -364,7 +410,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Run/ViewModels/ActiveRunViewModel.swift` — Timer, distance, speed, GPS stream, territory capture
 - `Features/Run/ViewModels/PostRunViewModel.swift` — Trail calculation, save to Firebase
 
-### Step 12: Profile Screen
+### Step 12: Profile Screen ✅
 > User info, avatar, badges
 
 - `Features/Profile/Views/ProfileTabView.swift` — Avatar, name, total trail, streak, badges
@@ -377,7 +423,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Profile/ViewModels/BadgeViewModel.swift` — Badge unlock, progress
 - `Features/Profile/ViewModels/SettingsViewModel.swift` — Sign out, notification toggle
 
-### Step 13: Leaderboard Screen
+### Step 13: Leaderboard Screen ✅
 > Rankings and competition
 
 - `Features/Leaderboard/Views/LeaderboardTabView.swift` — Global / Neighborhood segment
@@ -385,7 +431,7 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Leaderboard/Views/LeaderboardRowView.swift` — Single row: rank, avatar, name, trail
 - `Features/Leaderboard/ViewModels/LeaderboardViewModel.swift` — Fetch rankings, season filter
 
-### Step 14: Stats Screen
+### Step 14: Stats Screen ✅
 > Run history, charts, weekly report
 
 - `Features/Stats/Views/StatsTabView.swift` — Weekly/monthly toggle, charts
@@ -397,29 +443,28 @@ Trail = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - `Features/Stats/ViewModels/RunHistoryViewModel.swift` — Paginated run history
 - `Features/Stats/ViewModels/WeeklyReportViewModel.swift` — Report generation, sharing
 
-### Step 15: Notifications
+### Step 15: Notifications ✅
 > Push notification system
 
 - `Services/Notification/NotificationService.swift` — FCM + local notification
 - `Services/Geocoding/GeocodingService.swift` — Coordinate → neighborhood name
 
-### Step 16: Offline Mode & Sync
+### Step 16: Offline Mode & Sync ✅
 > Offline support
 
-- `CoreData/RunDom.xcdatamodeld` — CoreData model
-- `Services/Offline/OfflineStorageService.swift` — CoreData save/load
-- `Services/Offline/SyncService.swift` — Online detection, queue processing
+- `Services/Offline/OfflineStorageService.swift` — Programmatic CoreData model, save/load (no .xcdatamodeld file)
+- `Services/Offline/SyncService.swift` — NWPathMonitor, auto-sync on reconnect, retry up to 5 times
 
-### Step 17: Polish & Release Prep
+### Step 17: Polish & Release Prep ⏳
 > Final touches
 
-- Empty state designs for all screens
-- Lottie animations (splash, run start/complete, territory captured)
-- Haptic feedback
-- Accessibility checks
-- App icon design
-- Complete all localization strings
-- Info.plist permission descriptions
+- ~~Empty state designs for all screens~~ ✅
+- ~~Lottie animations (splash, run start/complete, territory captured)~~ ✅
+- ~~Haptic feedback~~ ✅
+- Accessibility audit (VoiceOver, Dynamic Type)
+- ~~App icon design~~ ✅
+- ~~Complete all localization strings~~ ✅
+- ~~Info.plist permission descriptions~~ ✅
 - Performance and memory optimizations
 
 ### Dependency Table

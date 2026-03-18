@@ -70,6 +70,7 @@ enum AppConstants {
         static let lastKnownLatitude = "lastKnownLatitude"
         static let lastKnownLongitude = "lastKnownLongitude"
         static let appLanguageCode = "appLanguageCode"
+        static let lastDailyChallengePromptDateKey = "lastDailyChallengePromptDateKey"
     }
 
     // MARK: - Animation Durations

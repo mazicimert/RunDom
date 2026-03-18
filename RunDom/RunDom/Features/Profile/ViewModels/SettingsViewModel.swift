@@ -1,5 +1,6 @@
 import SwiftUI
 import UserNotifications
+import FirebaseAuth
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
@@ -22,12 +23,12 @@ final class SettingsViewModel: ObservableObject {
     // MARK: - Init
 
     init(
-        authService: AuthService? = nil,
+        authService: AuthService,
         firestoreService: FirestoreService = FirestoreService(),
         realtimeDBService: RealtimeDBService = RealtimeDBService(),
         offlineStorageService: OfflineStorageService = .shared
     ) {
-        self.authService = authService ?? AuthService()
+        self.authService = authService
         self.firestoreService = firestoreService
         self.realtimeDBService = realtimeDBService
         self.offlineStorageService = offlineStorageService
@@ -65,6 +66,11 @@ final class SettingsViewModel: ObservableObject {
         defer { isDeleting = false }
 
         do {
+            if try await authService.requiresRecentSignInForAccountDeletion() {
+                errorMessage = "settings.deleteAccountRecentLogin".localized
+                return false
+            }
+
             _ = try await realtimeDBService.deleteTerritoriesOwned(by: userId)
             try await firestoreService.deleteUserAccountData(userId: userId)
             try? offlineStorageService.clearAll()
@@ -72,8 +78,17 @@ final class SettingsViewModel: ObservableObject {
             return true
         } catch {
             AppLogger.auth.error("Failed to delete account: \(error.localizedDescription)")
-            errorMessage = "error.generic".localized
+            if let authErrorCode = AuthErrorCode(rawValue: (error as NSError).code),
+               authErrorCode == .requiresRecentLogin {
+                errorMessage = "settings.deleteAccountRecentLogin".localized
+            } else {
+                errorMessage = "error.generic".localized
+            }
             return false
         }
+    }
+
+    func dismissError() {
+        errorMessage = nil
     }
 }
