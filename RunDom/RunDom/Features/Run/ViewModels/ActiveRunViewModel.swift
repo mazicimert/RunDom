@@ -35,6 +35,7 @@ final class ActiveRunViewModel: ObservableObject {
     let mode: RunMode
     let userId: String
     let userColor: String
+    let userDisplayName: String?
 
     // MARK: - Services
 
@@ -42,6 +43,7 @@ final class ActiveRunViewModel: ObservableObject {
     private let motionManager: MotionManager
     private let h3Service: H3GridService
     private let territoryService: TerritoryService
+    private let territoryLossService: TerritoryLossService
     private let antiCheatService: AntiCheatService
     private let seasonService: SeasonService
 
@@ -65,20 +67,24 @@ final class ActiveRunViewModel: ObservableObject {
         mode: RunMode,
         userId: String,
         userColor: String,
+        userDisplayName: String? = nil,
         locationManager: LocationManager,
         motionManager: MotionManager = MotionManager(),
         h3Service: H3GridService = .shared,
         territoryService: TerritoryService = TerritoryService(),
+        territoryLossService: TerritoryLossService = TerritoryLossService(),
         antiCheatService: AntiCheatService = AntiCheatService(),
         seasonService: SeasonService = SeasonService()
     ) {
         self.mode = mode
         self.userId = userId
         self.userColor = userColor
+        self.userDisplayName = userDisplayName
         self.locationManager = locationManager
         self.motionManager = motionManager
         self.h3Service = h3Service
         self.territoryService = territoryService
+        self.territoryLossService = territoryLossService
         self.antiCheatService = antiCheatService
         self.seasonService = seasonService
         self.startDate = Date()
@@ -216,6 +222,16 @@ final class ActiveRunViewModel: ObservableObject {
 
                 if conqueredFromOpponent {
                     territoryConquestAnimationTrigger += 1
+
+                    if let previousOwnerId = captured.previousOwnerId {
+                        try? await territoryLossService.recordLossEvent(
+                            losingUserId: previousOwnerId,
+                            seasonId: seasonId,
+                            h3Index: h3Index,
+                            capturedByUserId: userId,
+                            capturerDisplayName: userDisplayName
+                        )
+                    }
                 }
             } catch {
                 AppLogger.run.error("Territory capture failed: \(error.localizedDescription)")

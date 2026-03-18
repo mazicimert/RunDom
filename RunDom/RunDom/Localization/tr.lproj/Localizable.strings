@@ -157,6 +157,15 @@
 "challenge.prompt.title" = "Bugünün görevleri hazır";
 "challenge.prompt.body" = "Safe ve difficult görevlerden birini seçip bugün bonus trail kazanabilirsin.";
 "challenge.prompt.action" = "Görevleri Gör";
+"territoryLoss.prompt.title" = "Bölgelerin Ele Geçirildi";
+"territoryLoss.prompt.body.single" = "Bölgelerinden biri ele geçirildi. Haritada tam yerini inceleyebilirsin.";
+"territoryLoss.prompt.body.multiple" = "%d bölgen ele geçirildi. Haritada sırayla inceleyebilirsin.";
+"territoryLoss.prompt.dismiss" = "Şimdilik Kapat";
+"territoryLoss.prompt.showOnMap" = "Haritada Göster";
+"territoryLoss.prompt.next" = "Sonraki Bölge";
+"territoryLoss.prompt.locationLoading" = "Konum yükleniyor...";
+"territoryLoss.prompt.locationFallback" = "Konum bilgisi bulunamadı";
+"territoryLoss.prompt.capturedBy" = "%@ tarafından ele geçirildi";
 
 // MARK: - Map
 "map.myTerritory" = "Benim Bölgem";

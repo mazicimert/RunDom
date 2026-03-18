@@ -157,6 +157,15 @@
 "challenge.prompt.title" = "Today's challenges are ready";
 "challenge.prompt.body" = "Pick either the safe or difficult goal and earn bonus trail today.";
 "challenge.prompt.action" = "View Challenges";
+"territoryLoss.prompt.title" = "Your Territories Were Captured";
+"territoryLoss.prompt.body.single" = "One of your territories was captured. You can inspect its exact spot on the map.";
+"territoryLoss.prompt.body.multiple" = "%d of your territories were captured. You can review them one by one on the map.";
+"territoryLoss.prompt.dismiss" = "Close for Now";
+"territoryLoss.prompt.showOnMap" = "Show on Map";
+"territoryLoss.prompt.next" = "Next Territory";
+"territoryLoss.prompt.locationLoading" = "Loading location...";
+"territoryLoss.prompt.locationFallback" = "Location unavailable";
+"territoryLoss.prompt.capturedBy" = "Captured by %@";
 
 // MARK: - Map
 "map.myTerritory" = "My Territory";

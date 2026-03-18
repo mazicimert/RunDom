@@ -1,9 +1,11 @@
+import Combine
 import MapKit
 import SwiftUI
 
 struct MapTabView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel: MapViewModel
 
     init(locationManager: LocationManager) {
@@ -75,6 +77,10 @@ struct MapTabView: View {
             if let userId = appState.currentUser?.id {
                 viewModel.updateUserTerritoryCount(userId: userId)
             }
+        }
+        .onReceive(router.$mapFocusRequest.compactMap { $0 }) { request in
+            viewModel.focusTerritoryLoss(h3Index: request.h3Index)
+            router.clearMapFocusRequest()
         }
     }
 

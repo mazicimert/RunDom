@@ -3,10 +3,16 @@ import SwiftUI
 @MainActor
 final class AppRouter: ObservableObject {
 
+    struct MapFocusRequest: Identifiable, Equatable {
+        let id = UUID()
+        let h3Index: String
+    }
+
     // MARK: - Navigation
 
     @Published var selectedTab: Tab = .map
     @Published var navigationPath = NavigationPath()
+    @Published var mapFocusRequest: MapFocusRequest?
 
     // MARK: - Sheets
 
@@ -89,11 +95,20 @@ final class AppRouter: ObservableObject {
         navigationPath = NavigationPath()
     }
 
+    func focusMap(onTerritoryLoss h3Index: String) {
+        selectedTab = .map
+        mapFocusRequest = MapFocusRequest(h3Index: h3Index)
+    }
+
+    func clearMapFocusRequest() {
+        mapFocusRequest = nil
+    }
+
     // MARK: - Notification Deep-link
 
     func handleNotificationDestination(_ destination: NotificationDestination) {
         switch destination {
-        case .map, .territory, .dropzone:
+        case .map, .territory, .dropzone, .territoryLossInbox:
             selectedTab = .map
         case .run, .dailyChallenge:
             selectedTab = .run

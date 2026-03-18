@@ -87,6 +87,20 @@ final class MapViewModel: ObservableObject {
         }
     }
 
+    func focusTerritoryLoss(h3Index: String) {
+        guard let coordinate = h3Service.coordinate(fromIndex: h3Index) else { return }
+
+        selectedTerritory = nil
+        selectedDropzone = nil
+
+        withAnimation(.easeInOut(duration: AppConstants.Animation.standard)) {
+            region = MKCoordinateRegion(
+                center: coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
+            )
+        }
+    }
+
     // MARK: - Season
 
     private func loadCurrentSeason() async {

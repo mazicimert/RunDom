@@ -8,6 +8,8 @@ struct MainTabView: View {
 
     @State private var activeRunSession: RunSession?
     @State private var completedRunSession: RunSession?
+    @StateObject private var territoryLossPromptViewModel = TerritoryLossPromptViewModel()
+    @State private var showTerritoryLossPrompt = false
     @State private var showDailyChallengePrompt = false
 
     private let dailyChallengeService = DailyChallengeService()
@@ -71,6 +73,7 @@ struct MainTabView: View {
                         mode: activeRunSession?.mode ?? .normal,
                         userId: userId,
                         userColor: userColor,
+                        userDisplayName: appState.currentUser?.displayName,
                         locationManager: appState.locationManager
                     ),
                     onFinish: { session in
@@ -94,7 +97,31 @@ struct MainTabView: View {
             }
             .environmentObject(appState)
         }
-        .sheet(isPresented: $showDailyChallengePrompt) {
+        .sheet(isPresented: $showTerritoryLossPrompt, onDismiss: {
+            Task { await dismissTerritoryLossPromptIfNeeded() }
+        }) {
+            TerritoryLossPromptSheet(
+                viewModel: territoryLossPromptViewModel,
+                onDismiss: {
+                    showTerritoryLossPrompt = false
+                },
+                onShowOnMap: {
+                    guard let event = territoryLossPromptViewModel.selectedEvent else { return }
+                    router.focusMap(onTerritoryLoss: event.h3Index)
+                },
+                onNext: {
+                    territoryLossPromptViewModel.moveToNextEvent()
+                    if let event = territoryLossPromptViewModel.selectedEvent {
+                        router.focusMap(onTerritoryLoss: event.h3Index)
+                    }
+                }
+            )
+            .presentationDetents([.height(340)])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showDailyChallengePrompt, onDismiss: {
+            Task { await refreshPromptQueue() }
+        }) {
             DailyChallengePromptSheet {
                 showDailyChallengePrompt = false
             } onOpenChallenges: {
@@ -105,15 +132,31 @@ struct MainTabView: View {
             .presentationDragIndicator(.visible)
         }
         .task(id: appState.currentUser?.id) {
-            await presentDailyChallengePromptIfNeeded()
+            await refreshPromptQueue(initialLossEventId: consumePendingNotificationLossEventId())
         }
         .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) { notification in
             guard let destination = notification.userInfo?["destination"] as? NotificationDestination else { return }
-            router.handleNotificationDestination(destination)
+            Task { await handleNotificationDestination(destination) }
         }
         .onChange(of: scenePhase) {
             if scenePhase == .active {
                 UNUserNotificationCenter.current().setBadgeCount(0)
+                Task { await refreshPromptQueue(initialLossEventId: consumePendingNotificationLossEventId()) }
+            }
+        }
+        .onChange(of: router.isRunActive) {
+            if !router.isRunActive {
+                Task { await refreshPromptQueue() }
+            }
+        }
+        .onChange(of: router.presentedSheet?.id) {
+            if router.presentedSheet == nil {
+                Task { await refreshPromptQueue() }
+            }
+        }
+        .onChange(of: completedRunSession) {
+            if completedRunSession == nil {
+                Task { await refreshPromptQueue() }
             }
         }
     }
@@ -130,7 +173,62 @@ struct MainTabView: View {
         router.isRunActive = true
     }
 
+    private var canPresentOverlayPrompts: Bool {
+        !router.isRunActive
+            && router.presentedSheet == nil
+            && completedRunSession == nil
+            && !showDailyChallengePrompt
+    }
+
+    private func consumePendingNotificationLossEventId() -> String? {
+        guard let destination = NotificationService.shared.consumePendingDestination() else { return nil }
+        router.handleNotificationDestination(destination)
+
+        if case .territoryLossInbox(let initialLossEventId) = destination {
+            return initialLossEventId
+        }
+
+        return nil
+    }
+
+    private func handleNotificationDestination(_ destination: NotificationDestination) async {
+        _ = NotificationService.shared.consumePendingDestination()
+        router.handleNotificationDestination(destination)
+
+        switch destination {
+        case .territoryLossInbox(let initialLossEventId):
+            showDailyChallengePrompt = false
+            await refreshPromptQueue(initialLossEventId: initialLossEventId)
+        default:
+            await refreshPromptQueue()
+        }
+    }
+
+    private func refreshPromptQueue(initialLossEventId: String? = nil) async {
+        guard let userId = appState.currentUser?.id else { return }
+        guard canPresentOverlayPrompts || showTerritoryLossPrompt else { return }
+
+        if await territoryLossPromptViewModel.loadUnreadEvents(
+            userId: userId,
+            initialLossEventId: initialLossEventId
+        ) {
+            showTerritoryLossPrompt = true
+            return
+        }
+
+        showTerritoryLossPrompt = false
+        await presentDailyChallengePromptIfNeeded()
+    }
+
+    private func dismissTerritoryLossPromptIfNeeded() async {
+        guard territoryLossPromptViewModel.hasEvents else { return }
+        await territoryLossPromptViewModel.markBatchSeenAndClear()
+        await refreshPromptQueue()
+    }
+
     private func presentDailyChallengePromptIfNeeded() async {
+        guard canPresentOverlayPrompts else { return }
+        guard !showTerritoryLossPrompt else { return }
         guard appState.currentUser != nil else { return }
         guard dailyChallengeService.shouldShowDailyPrompt() else { return }
         guard await dailyChallengeService.hasAvailableChallenges() else { return }

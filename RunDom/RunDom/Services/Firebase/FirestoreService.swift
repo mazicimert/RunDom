@@ -15,6 +15,10 @@ final class FirestoreService {
     private var dropzonesCollection: CollectionReference { db.collection("dropzones") }
     private var challengeTemplatesCollection: CollectionReference { db.collection("challengeTemplates") }
 
+    private func territoryLossEventsCollection(userId: String) -> CollectionReference {
+        usersCollection.document(userId).collection("territoryLossEvents")
+    }
+
     // MARK: - User
 
     func createUser(_ user: User) async throws {
@@ -40,6 +44,7 @@ final class FirestoreService {
         try await deleteDocuments(in: weeklyReportsCollection, whereField: "userId", equals: userId)
         try await deleteDocuments(in: badgesCollection, whereField: "userId", equals: userId)
         try await deleteAllDocuments(in: usersCollection.document(userId).collection("badges"))
+        try await deleteAllDocuments(in: territoryLossEventsCollection(userId: userId))
         try await removeUserFromDropzoneClaims(userId: userId)
         try await usersCollection.document(userId).delete()
     }
@@ -134,6 +139,43 @@ final class FirestoreService {
         try await usersCollection.document(userId).updateData([
             "neighborhood": normalized
         ])
+    }
+
+    func saveTerritoryLossEvent(_ event: TerritoryLossEvent, userId: String) async throws {
+        try territoryLossEventsCollection(userId: userId)
+            .document(event.id)
+            .setData(from: event, merge: true)
+    }
+
+    func getUnreadTerritoryLossEvents(userId: String, seasonId: String) async throws -> [TerritoryLossEvent] {
+        let snapshot = try await territoryLossEventsCollection(userId: userId)
+            .whereField("seasonId", isEqualTo: seasonId)
+            .getDocuments()
+
+        return try snapshot.documents
+            .compactMap { try $0.data(as: TerritoryLossEvent.self) }
+            .filter { !$0.isSeen }
+            .sorted { $0.capturedAt > $1.capturedAt }
+    }
+
+    func markTerritoryLossEventsSeen(userId: String, eventIds: [String], seenAt: Date = Date()) async throws {
+        guard !eventIds.isEmpty else { return }
+
+        for chunkStart in stride(from: 0, to: eventIds.count, by: 400) {
+            let chunkEnd = min(chunkStart + 400, eventIds.count)
+            let chunk = eventIds[chunkStart..<chunkEnd]
+            let batch = db.batch()
+
+            for eventId in chunk {
+                let ref = territoryLossEventsCollection(userId: userId).document(eventId)
+                batch.updateData([
+                    "isSeen": true,
+                    "seenAt": seenAt
+                ], forDocument: ref)
+            }
+
+            try await batch.commit()
+        }
     }
 
     func userExists(id: String) async throws -> Bool {

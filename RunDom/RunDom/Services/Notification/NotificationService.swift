@@ -22,6 +22,7 @@ final class NotificationService {
     static let shared = NotificationService()
 
     private let center = UNUserNotificationCenter.current()
+    private var pendingDestination: NotificationDestination?
 
     private init() {}
 
@@ -48,15 +49,27 @@ final class NotificationService {
     // MARK: - Local Notification Scheduling
 
     /// Schedules a local notification for a territory capture event.
-    func sendTerritoryCaptured(territoryIndex: String, capturerName: String?) async {
+    func sendTerritoryCaptured(
+        territoryIndex: String,
+        seasonId: String? = nil,
+        lossEventId: String? = nil,
+        capturerName: String?
+    ) async {
         let content = UNMutableNotificationContent()
         content.title = "notification.territoryCaptured.title".localized
         content.body = "notification.territoryCaptured".localized
         content.sound = .default
-        content.userInfo = [
+        var userInfo: [String: Any] = [
             "type": NotificationType.territoryCaptured.rawValue,
             "h3Index": territoryIndex
         ]
+        if let seasonId {
+            userInfo["seasonId"] = seasonId
+        }
+        if let lossEventId {
+            userInfo["lossEventId"] = lossEventId
+        }
+        content.userInfo = userInfo
         content.categoryIdentifier = NotificationType.territoryCaptured.categoryIdentifier
 
         await schedule(content: content, identifier: "territory_\(territoryIndex)_\(Date().timeIntervalSince1970)")
@@ -163,10 +176,7 @@ final class NotificationService {
 
         switch type {
         case .territoryCaptured:
-            if let h3Index = userInfo["h3Index"] as? String {
-                return .territory(h3Index: h3Index)
-            }
-            return .map
+            return .territoryLossInbox(initialLossEventId: userInfo["lossEventId"] as? String)
         case .dropzoneActive:
             if let dropzoneId = userInfo["dropzoneId"] as? String {
                 return .dropzone(id: dropzoneId)
@@ -182,6 +192,15 @@ final class NotificationService {
         case .dailyChallenge:
             return .dailyChallenge
         }
+    }
+
+    func setPendingDestination(_ destination: NotificationDestination) {
+        pendingDestination = destination
+    }
+
+    func consumePendingDestination() -> NotificationDestination? {
+        defer { pendingDestination = nil }
+        return pendingDestination
     }
 
     // MARK: - Badge Management
@@ -236,4 +255,5 @@ enum NotificationDestination {
     case run
     case profile
     case dailyChallenge
+    case territoryLossInbox(initialLossEventId: String?)
 }

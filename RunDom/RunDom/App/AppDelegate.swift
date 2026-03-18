@@ -16,6 +16,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
 
+        if let userInfo = launchOptions?[.remoteNotification] as? [AnyHashable: Any],
+           let destination = NotificationService.shared.destination(for: userInfo) {
+            NotificationService.shared.setPendingDestination(destination)
+        }
+
         AppLogger.firebase.info("Firebase configured successfully")
         return true
     }
@@ -67,6 +72,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         AppLogger.notification.info("Notification tapped: \(userInfo)")
 
         guard let destination = NotificationService.shared.destination(for: userInfo) else { return }
+        NotificationService.shared.setPendingDestination(destination)
         NotificationCenter.default.post(
             name: .notificationTapped,
             object: nil,
