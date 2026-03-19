@@ -7,18 +7,52 @@ import SwiftUI
 @MainActor
 final class AuthViewModel: ObservableObject {
 
+    enum AuthField {
+        case firstName
+        case email
+        case password
+        case confirmPassword
+    }
+
     // MARK: - State
 
     @Published var isSigningIn = false
     @Published var errorMessage: String?
     @Published var showEmailAuth = false
     @Published var isSignUpMode = false
-    @Published var email = ""
-    @Published var password = ""
-    @Published var confirmPassword = ""
+    @Published var email = "" {
+        didSet {
+            emailError = nil
+            passwordResetSent = false
+            if errorMessage == "auth.email.invalidEmail".localized || errorMessage == "auth.email.userNotFound".localized {
+                errorMessage = nil
+            }
+        }
+    }
+    @Published var password = "" {
+        didSet {
+            passwordError = nil
+            if errorMessage == "auth.email.wrongPassword".localized || errorMessage == "auth.email.passwordTooShort".localized {
+                errorMessage = nil
+            }
+        }
+    }
+    @Published var confirmPassword = "" {
+        didSet {
+            confirmPasswordError = nil
+        }
+    }
     @Published var passwordResetSent = false
-    @Published var firstName = ""
+    @Published var firstName = "" {
+        didSet {
+            firstNameError = nil
+        }
+    }
     @Published var lastName = ""
+    @Published var firstNameError: String?
+    @Published var emailError: String?
+    @Published var passwordError: String?
+    @Published var confirmPasswordError: String?
 
     // MARK: - Dependencies
 
@@ -148,7 +182,7 @@ final class AuthViewModel: ObservableObject {
                     AppLogger.auth.info("Email Sign In completed")
                 }
             } catch {
-                errorMessage = emailErrorMessage(for: error)
+                applyEmailAuthError(error)
                 AppLogger.auth.error("Email auth failed: \(error.localizedDescription)")
             }
             isSigningIn = false
@@ -156,17 +190,25 @@ final class AuthViewModel: ObservableObject {
     }
 
     func sendPasswordReset() {
-        guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            errorMessage = "auth.email.enterEmail".localized
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedEmail.isEmpty else {
+            emailError = "auth.email.enterEmail".localized
+            return
+        }
+
+        guard isValidEmail(trimmedEmail) else {
+            emailError = "auth.email.invalidEmail".localized
             return
         }
 
         isSigningIn = true
         errorMessage = nil
+        passwordResetSent = false
 
         Task {
             do {
-                try await authService.sendPasswordReset(email: email.trimmingCharacters(in: .whitespacesAndNewlines))
+                try await authService.sendPasswordReset(email: trimmedEmail)
                 passwordResetSent = true
             } catch {
                 errorMessage = "error.generic".localized
@@ -178,46 +220,91 @@ final class AuthViewModel: ObservableObject {
 
     func toggleAuthMode() {
         isSignUpMode.toggle()
-        errorMessage = nil
-        password = ""
-        confirmPassword = ""
-        firstName = ""
-        lastName = ""
+        resetEmailAuthState(keepEmail: true)
+    }
+
+    func showEmailAuthForm() {
+        showEmailAuth = true
+        clearMessages()
+    }
+
+    func hideEmailAuthForm() {
+        showEmailAuth = false
+        clearMessages()
+    }
+
+    func error(for field: AuthField) -> String? {
+        switch field {
+        case .firstName:
+            return firstNameError
+        case .email:
+            return emailError
+        case .password:
+            return passwordError
+        case .confirmPassword:
+            return confirmPasswordError
+        }
     }
 
     private func validateEmailFields() -> Bool {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        resetFieldErrors()
 
         if isSignUpMode {
             guard !firstName.trimmingCharacters(in: .whitespaces).isEmpty else {
-                errorMessage = "auth.email.fillAllFields".localized
+                firstNameError = "auth.email.firstName.required".localized
                 return false
             }
         }
 
-        guard !trimmedEmail.isEmpty, !password.isEmpty else {
-            errorMessage = "auth.email.fillAllFields".localized
+        guard !trimmedEmail.isEmpty else {
+            emailError = "auth.email.enterEmail".localized
             return false
         }
 
-        guard trimmedEmail.contains("@") && trimmedEmail.contains(".") else {
-            errorMessage = "auth.email.invalidEmail".localized
+        guard !password.isEmpty else {
+            passwordError = "auth.email.fillAllFields".localized
+            return false
+        }
+
+        guard isValidEmail(trimmedEmail) else {
+            emailError = "auth.email.invalidEmail".localized
             return false
         }
 
         guard password.count >= 6 else {
-            errorMessage = "auth.email.passwordTooShort".localized
+            passwordError = "auth.email.passwordTooShort".localized
             return false
         }
 
         if isSignUpMode {
             guard password == confirmPassword else {
-                errorMessage = "auth.email.passwordMismatch".localized
+                confirmPasswordError = "auth.email.passwordMismatch".localized
                 return false
             }
         }
 
         return true
+    }
+
+    private func applyEmailAuthError(_ error: Error) {
+        let message = emailErrorMessage(for: error)
+        let nsError = error as NSError
+
+        switch nsError.code {
+        case 17008:
+            emailError = message
+        case 17009:
+            passwordError = message
+        case 17011:
+            emailError = message
+        case 17007:
+            emailError = message
+        case 17026:
+            passwordError = message
+        default:
+            errorMessage = message
+        }
     }
 
     private func emailErrorMessage(for error: Error) -> String {
@@ -235,6 +322,35 @@ final class AuthViewModel: ObservableObject {
             return "auth.email.passwordTooShort".localized
         default:
             return "error.generic".localized
+        }
+    }
+
+    private func isValidEmail(_ email: String) -> Bool {
+        email.contains("@") && email.contains(".")
+    }
+
+    private func resetFieldErrors() {
+        firstNameError = nil
+        emailError = nil
+        passwordError = nil
+        confirmPasswordError = nil
+    }
+
+    private func clearMessages() {
+        errorMessage = nil
+        passwordResetSent = false
+        resetFieldErrors()
+    }
+
+    private func resetEmailAuthState(keepEmail: Bool) {
+        clearMessages()
+        password = ""
+        confirmPassword = ""
+        firstName = ""
+        lastName = ""
+
+        if !keepEmail {
+            email = ""
         }
     }
 

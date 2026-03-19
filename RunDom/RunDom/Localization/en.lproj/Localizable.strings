@@ -54,6 +54,21 @@
 "auth.signInApple" = "Sign in with Apple";
 "auth.signInGoogle" = "Sign in with Google";
 "auth.signInEmail" = "Sign in with Email";
+"auth.hero.title" = "Continue your run";
+"auth.hero.subtitle" = "Sign in and get back to conquering your neighborhood.";
+"auth.hero.body" = "Use Apple or Google for a fast start, or continue with your email account.";
+"auth.divider" = "or";
+"auth.form.signin.title" = "Welcome back";
+"auth.form.signin.subtitle" = "Sign in securely to keep moving.";
+"auth.form.signin.body" = "Use your email address and password to continue.";
+"auth.form.signup.title" = "Create your account";
+"auth.form.signup.subtitle" = "Get ready for your first run in a couple of steps.";
+"auth.form.signup.body" = "Add your basics, create your account, and jump into the game.";
+"auth.field.email" = "Email";
+"auth.field.password" = "Password";
+"auth.field.confirmPassword" = "Confirm Password";
+"auth.password.show" = "Show";
+"auth.password.hide" = "Hide";
 "auth.signOut" = "Sign Out";
 "auth.signOutConfirm" = "Are you sure you want to sign out?";
 "auth.email.placeholder" = "Email";
@@ -70,10 +85,12 @@
 "auth.email.fillAllFields" = "Please fill in all fields.";
 "auth.email.invalidEmail" = "Please enter a valid email address.";
 "auth.email.passwordTooShort" = "Password must be at least 6 characters.";
+"auth.email.passwordHint" = "Use at least 6 characters.";
 "auth.email.passwordMismatch" = "Passwords do not match.";
 "auth.email.wrongPassword" = "Incorrect password. Please try again.";
 "auth.email.userNotFound" = "No account found with this email.";
 "auth.email.firstName" = "First Name";
+"auth.email.firstName.required" = "First name is required.";
 "auth.email.lastName" = "Last Name (Optional)";
 "auth.email.alreadyInUse" = "This email is already in use.";
 

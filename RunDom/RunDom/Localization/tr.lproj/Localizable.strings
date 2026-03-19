@@ -54,6 +54,21 @@
 "auth.signInApple" = "Apple ile Giriş Yap";
 "auth.signInGoogle" = "Google ile Giriş Yap";
 "auth.signInEmail" = "E-posta ile Giriş Yap";
+"auth.hero.title" = "Koşuna devam et";
+"auth.hero.subtitle" = "Mahalleni koşarak fethetmek için giriş yap ve oyuna dön.";
+"auth.hero.body" = "İstersen Apple ya da Google ile hızlıca devam et, istersen e-posta ile hesabına gir.";
+"auth.divider" = "veya";
+"auth.form.signin.title" = "Tekrar hoş geldin";
+"auth.form.signin.subtitle" = "Hesabına güvenle giriş yap.";
+"auth.form.signin.body" = "E-posta adresin ve şifrenle hızlıca devam et.";
+"auth.form.signup.title" = "Hesap oluştur";
+"auth.form.signup.subtitle" = "İlk koşun için hesabını birkaç adımda hazırla.";
+"auth.form.signup.body" = "Temel bilgilerini gir, hesabını oluştur ve oyuna başla.";
+"auth.field.email" = "E-posta";
+"auth.field.password" = "Şifre";
+"auth.field.confirmPassword" = "Şifre Tekrar";
+"auth.password.show" = "Göster";
+"auth.password.hide" = "Gizle";
 "auth.signOut" = "Çıkış Yap";
 "auth.signOutConfirm" = "Çıkış yapmak istediğinize emin misiniz?";
 "auth.email.placeholder" = "E-posta";
@@ -70,10 +85,12 @@
 "auth.email.fillAllFields" = "Lütfen tüm alanları doldur.";
 "auth.email.invalidEmail" = "Lütfen geçerli bir e-posta adresi gir.";
 "auth.email.passwordTooShort" = "Şifre en az 6 karakter olmalıdır.";
+"auth.email.passwordHint" = "En az 6 karakter kullan.";
 "auth.email.passwordMismatch" = "Şifreler eşleşmiyor.";
 "auth.email.wrongPassword" = "Şifre hatalı. Lütfen tekrar dene.";
 "auth.email.userNotFound" = "Bu e-posta ile kayıtlı hesap bulunamadı.";
 "auth.email.firstName" = "Ad";
+"auth.email.firstName.required" = "Ad alanı zorunludur.";
 "auth.email.lastName" = "Soyad (Opsiyonel)";
 "auth.email.alreadyInUse" = "Bu e-posta adresi zaten kullanımda.";
 
