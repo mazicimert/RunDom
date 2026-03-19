@@ -11,10 +11,7 @@ struct MainTabView: View {
     @StateObject private var territoryLossPromptViewModel = TerritoryLossPromptViewModel()
     @State private var showTerritoryLossPrompt = false
     @State private var showTerritoryLossMapBrowser = false
-    @State private var showDailyChallengePrompt = false
     @State private var skipTerritoryLossPromptDismissHandling = false
-
-    private let dailyChallengeService = DailyChallengeService()
 
     var body: some View {
         ZStack {
@@ -160,18 +157,6 @@ struct MainTabView: View {
             .presentationDetents([.height(340)])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showDailyChallengePrompt, onDismiss: {
-            Task { await refreshPromptQueue() }
-        }) {
-            DailyChallengePromptSheet {
-                showDailyChallengePrompt = false
-            } onOpenChallenges: {
-                router.selectedTab = .run
-                showDailyChallengePrompt = false
-            }
-            .presentationDetents([.height(220)])
-            .presentationDragIndicator(.visible)
-        }
         .task(id: appState.currentUser?.id) {
             await refreshPromptQueue(initialLossEventId: consumePendingNotificationLossEventId())
         }
@@ -219,7 +204,6 @@ struct MainTabView: View {
             && router.presentedSheet == nil
             && completedRunSession == nil
             && !showTerritoryLossMapBrowser
-            && !showDailyChallengePrompt
     }
 
     private var shouldShowTerritoryLossMapBrowser: Bool {
@@ -249,7 +233,6 @@ struct MainTabView: View {
 
         switch destination {
         case .territoryLossInbox(let initialLossEventId):
-            showDailyChallengePrompt = false
             await refreshPromptQueue(initialLossEventId: initialLossEventId)
         default:
             await refreshPromptQueue()
@@ -269,7 +252,6 @@ struct MainTabView: View {
         }
 
         showTerritoryLossPrompt = false
-        await presentDailyChallengePromptIfNeeded()
     }
 
     private func dismissTerritoryLossPromptIfNeeded() async {
@@ -291,16 +273,6 @@ struct MainTabView: View {
             territoryLossPromptViewModel.clear()
             await refreshPromptQueue()
         }
-    }
-
-    private func presentDailyChallengePromptIfNeeded() async {
-        guard canPresentOverlayPrompts else { return }
-        guard !showTerritoryLossPrompt else { return }
-        guard appState.currentUser != nil else { return }
-        guard dailyChallengeService.shouldShowDailyPrompt() else { return }
-        guard await dailyChallengeService.hasAvailableChallenges() else { return }
-        dailyChallengeService.markDailyPromptShown()
-        showDailyChallengePrompt = true
     }
 
     // MARK: - Sheet Content
@@ -336,34 +308,4 @@ struct MainTabView: View {
     MainTabView()
         .environmentObject(AppState())
         .environmentObject(AppRouter())
-}
-
-private struct DailyChallengePromptSheet: View {
-    let onDismiss: () -> Void
-    let onOpenChallenges: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("challenge.prompt.title".localized)
-                .font(.title3.bold())
-
-            Text("challenge.prompt.body".localized)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 12) {
-                Button("common.cancel".localized) {
-                    onDismiss()
-                }
-                .buttonStyle(SecondaryButtonStyle())
-
-                Button("challenge.prompt.action".localized) {
-                    onOpenChallenges()
-                }
-                .buttonStyle(PrimaryButtonStyle())
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
-    }
 }

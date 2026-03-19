@@ -17,6 +17,7 @@ final class AppState: ObservableObject {
 
     let authService: AuthService
     let firestoreService: FirestoreService
+    let messagingService: MessagingService
     let locationManager: LocationManager
     let badgeService: BadgeService
 
@@ -29,6 +30,7 @@ final class AppState: ObservableObject {
     init() {
         self.authService = AuthService()
         self.firestoreService = FirestoreService()
+        self.messagingService = MessagingService()
         self.locationManager = LocationManager()
         self.badgeService = BadgeService()
         self.isOnboardingComplete = UserDefaults.standard.bool(
@@ -48,6 +50,7 @@ final class AppState: ObservableObject {
                 guard let self, let userId = self.currentUser?.id else { return }
                 Task {
                     try? await self.firestoreService.updateFCMToken(userId: userId, token: token)
+                    self.messagingService.subscribeToDailyChallenges()
                 }
             }
             .store(in: &cancellables)
@@ -56,6 +59,7 @@ final class AppState: ObservableObject {
     private func persistFCMTokenAndLanguage(userId: String) async {
         if let token = try? await Messaging.messaging().token() {
             try? await firestoreService.updateFCMToken(userId: userId, token: token)
+            messagingService.subscribeToDailyChallenges()
         }
 
         let preferredLang = Locale.preferredLanguages.first ?? "en"

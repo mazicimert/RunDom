@@ -15,6 +15,7 @@ final class PreRunViewModel: ObservableObject {
     @Published var isSelectingChallenge = false
     @Published var dailyChallengeReward: DailyChallengeReward?
     @Published var errorMessage: String?
+    @Published var isChallengeSelectionPresented = false
 
     // MARK: - Services
 
@@ -59,6 +60,7 @@ final class PreRunViewModel: ObservableObject {
             lastRunDate: user.lastRunDate
         )
         await loadDailyChallenges(userId: user.id)
+        evaluateChallengeSelectionPresentation()
     }
 
     func loadDailyChallenges(userId: String) async {
@@ -67,6 +69,7 @@ final class PreRunViewModel: ObservableObject {
 
         do {
             dailyChallengeState = try await dailyChallengeService.loadDailyState(userId: userId)
+            errorMessage = nil
         } catch {
             AppLogger.firebase.error("Failed to load daily challenges: \(error.localizedDescription)")
         }
@@ -88,6 +91,8 @@ final class PreRunViewModel: ObservableObject {
             )
             dailyChallengeState = result.state
             dailyChallengeReward = result.reward
+            errorMessage = nil
+            isChallengeSelectionPresented = false
             return result
         } catch {
             errorMessage = "error.generic".localized
@@ -117,6 +122,40 @@ final class PreRunViewModel: ObservableObject {
             errorMessage = "run.waitingGPS".localized
             return false
         }
+        errorMessage = nil
         return true
+    }
+
+    var selectedChallenge: DailyChallengeTemplate? {
+        dailyChallengeState?.selectedChallenge
+    }
+
+    var hasSelectedChallenge: Bool {
+        selectedChallenge != nil
+    }
+
+    func presentChallengeSelection() {
+        guard dailyChallengeState != nil else { return }
+        isChallengeSelectionPresented = true
+    }
+
+    func dismissChallengeSelection() {
+        isChallengeSelectionPresented = false
+    }
+
+    private func evaluateChallengeSelectionPresentation() {
+        guard let state = dailyChallengeState else {
+            isChallengeSelectionPresented = false
+            return
+        }
+
+        guard state.selectedChallenge == nil else {
+            isChallengeSelectionPresented = false
+            return
+        }
+
+        guard dailyChallengeService.shouldShowDailyPrompt() else { return }
+        dailyChallengeService.markDailyPromptShown()
+        isChallengeSelectionPresented = true
     }
 }
