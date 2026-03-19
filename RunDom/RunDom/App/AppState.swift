@@ -92,17 +92,20 @@ final class AppState: ObservableObject {
         do {
             if let user = try await firestoreService.getUser(id: firebaseUser.uid) {
                 // Firestore is the source of truth for user profile data
-                currentUser = user
-                requiresProfileCompletion = Self.isDefaultDisplayName(user.displayName)
+                let syncedUser = try await firestoreService.syncUserSeasonState(user)
+                currentUser = syncedUser
+                requiresProfileCompletion = Self.isDefaultDisplayName(syncedUser.displayName)
             } else {
                 // First-time sign in — create user document
                 let displayName = firebaseUser.displayName ?? ""
                 let needsCompletion = displayName.isEmpty || Self.isDefaultDisplayName(displayName)
+                let seasonId = SeasonService().generateCurrentSeason().id
                 let newUser = User(
                     id: firebaseUser.uid,
                     displayName: displayName.isEmpty ? "runner.defaultName".localized : displayName,
                     email: firebaseUser.email ?? "",
-                    color: Self.randomUserColor()
+                    color: Self.randomUserColor(),
+                    currentSeasonId: seasonId
                 )
                 try await firestoreService.createUser(newUser)
                 currentUser = newUser

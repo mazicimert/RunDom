@@ -35,6 +35,10 @@ final class TerritoryLossPromptViewModel: ObservableObject {
         selectedIndex < events.count - 1
     }
 
+    var canGoPrevious: Bool {
+        selectedIndex > 0
+    }
+
     var counterText: String {
         guard hasEvents else { return "" }
         return "\(selectedIndex + 1)/\(events.count)"
@@ -109,9 +113,13 @@ final class TerritoryLossPromptViewModel: ObservableObject {
         Task { await resolveLocationForSelectedEventIfNeeded() }
     }
 
-    func markBatchSeenAndClear() async {
-        defer { clear() }
+    func moveToPreviousEvent() {
+        guard canGoPrevious else { return }
+        selectedIndex -= 1
+        Task { await resolveLocationForSelectedEventIfNeeded() }
+    }
 
+    func markBatchSeen() async {
         guard let activeUserId, !events.isEmpty else { return }
 
         do {
@@ -122,6 +130,11 @@ final class TerritoryLossPromptViewModel: ObservableObject {
         } catch {
             AppLogger.firebase.error("Failed to mark territory losses seen: \(error.localizedDescription)")
         }
+    }
+
+    func markBatchSeenAndClear() async {
+        defer { clear() }
+        await markBatchSeen()
     }
 
     func clear() {

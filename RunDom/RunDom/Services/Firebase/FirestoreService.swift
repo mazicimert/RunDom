@@ -141,6 +141,21 @@ final class FirestoreService {
         ])
     }
 
+    func syncUserSeasonState(_ user: User) async throws -> User {
+        let expectedSeasonId = generatedSeasonIdForCurrentWeek()
+        guard user.currentSeasonId != expectedSeasonId else { return user }
+
+        try await usersCollection.document(user.id).updateData([
+            "currentSeasonId": expectedSeasonId,
+            "currentSeasonTrail": 0
+        ])
+
+        var syncedUser = user
+        syncedUser.currentSeasonId = expectedSeasonId
+        syncedUser.currentSeasonTrail = 0
+        return syncedUser
+    }
+
     func saveTerritoryLossEvent(_ event: TerritoryLossEvent, userId: String) async throws {
         try territoryLossEventsCollection(userId: userId)
             .document(event.id)
@@ -240,9 +255,12 @@ final class FirestoreService {
         var userUpdates: [String: Any] = [
             "totalTrail": FieldValue.increment(-run.trail),
             "totalDistance": FieldValue.increment(-run.distance),
-            "totalRuns": FieldValue.increment(Int64(-1)),
-            "currentSeasonTrail": FieldValue.increment(-run.trail)
+            "totalRuns": FieldValue.increment(Int64(-1))
         ]
+
+        if run.seasonId == generatedSeasonIdForCurrentWeek() {
+            userUpdates["currentSeasonTrail"] = FieldValue.increment(-run.trail)
+        }
 
         if let latestRunDate = try await latestRunStartDate(userId: run.userId) {
             userUpdates["lastRunDate"] = latestRunDate
@@ -306,72 +324,103 @@ final class FirestoreService {
 
     // MARK: - Leaderboard
 
-    func getLeaderboard(scope: LeaderboardScope, seasonId: String, neighborhood: String? = nil, limit: Int = 50) async throws -> [LeaderboardEntry] {
+    func getLeaderboard(
+        scope: LeaderboardScope,
+        period: LeaderboardPeriod,
+        seasonId: String,
+        neighborhood: String? = nil,
+        limit: Int = 50
+    ) async throws -> [LeaderboardEntry] {
+        let entries = try await buildDerivedLeaderboardEntries(
+            scope: scope,
+            period: period,
+            seasonId: seasonId,
+            neighborhood: neighborhood
+        )
+        return Array(entries.prefix(limit))
+    }
+
+    func getCurrentUserLeaderboardEntry(
+        userId: String,
+        scope: LeaderboardScope,
+        period: LeaderboardPeriod,
+        seasonId: String,
+        neighborhood: String? = nil
+    ) async throws -> LeaderboardEntry? {
+        let entries = try await buildDerivedLeaderboardEntries(
+            scope: scope,
+            period: period,
+            seasonId: seasonId,
+            neighborhood: neighborhood
+        )
+        return entries.first(where: { $0.userId == userId })
+    }
+
+    private func buildDerivedLeaderboardEntries(
+        scope: LeaderboardScope,
+        period: LeaderboardPeriod,
+        seasonId: String,
+        neighborhood: String?
+    ) async throws -> [LeaderboardEntry] {
         let normalizedNeighborhood = neighborhood?
             .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        var query: Query = leaderboardCollection
-            .whereField("seasonId", isEqualTo: seasonId)
-            .order(by: "trail", descending: true)
-            .limit(to: limit)
-
-        if scope == .neighborhood, let hood = normalizedNeighborhood, !hood.isEmpty {
-            query = leaderboardCollection
-                .whereField("seasonId", isEqualTo: seasonId)
-                .whereField("neighborhood", isEqualTo: hood)
-                .order(by: "trail", descending: true)
-                .limit(to: limit)
-        }
-
-        let snapshot = try await query.getDocuments()
-        let entries = try snapshot.documents.compactMap { try $0.data(as: LeaderboardEntry.self) }
-
-        // Fallback: some environments do not write to `leaderboard` yet.
-        // In that case derive rankings from users' current season trail values.
-        if !entries.isEmpty {
-            let filteredEntries = await filterEntriesWithExistingUsers(entries)
-            return assignRanks(filteredEntries)
-        }
-
-        let fallbackLimit = scope == .neighborhood ? max(limit * 4, 200) : limit
-        let usersSnapshot = try await usersCollection
-            .order(by: "currentSeasonTrail", descending: true)
-            .limit(to: fallbackLimit)
-            .getDocuments()
-
-        let users = try usersSnapshot.documents.compactMap { try $0.data(as: User.self) }
+        let snapshot = try await usersCollection.getDocuments()
+        let users = try snapshot.documents.compactMap { try $0.data(as: User.self) }
+        let effectiveSeasonId = seasonId.isEmpty ? generatedSeasonIdForCurrentWeek() : seasonId
 
         let filteredUsers: [User]
-        if scope == .neighborhood {
-            guard let hood = normalizedNeighborhood, !hood.isEmpty else {
-                return []
-            }
-
+        switch period {
+        case .weekly:
             filteredUsers = users.filter { user in
-                user.totalRuns > 0 &&
-                user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == hood
+                guard user.currentSeasonId == effectiveSeasonId,
+                      user.currentSeasonTrail > 0 else {
+                    return false
+                }
+
+                if scope == .neighborhood {
+                    return user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNeighborhood
+                }
+                return true
             }
-        } else {
-            filteredUsers = users.filter { $0.totalRuns > 0 }
+        case .allTime:
+            filteredUsers = users.filter { user in
+                guard user.totalRuns > 0,
+                      user.totalTrail > 0 else {
+                    return false
+                }
+
+                if scope == .neighborhood {
+                    return user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNeighborhood
+                }
+                return true
+            }
         }
 
-        let effectiveSeasonId = seasonId.isEmpty ? generatedSeasonIdForCurrentWeek() : seasonId
-        let derivedEntries = Array(filteredUsers.prefix(limit)).enumerated().map { index, user in
+        let sortedUsers = filteredUsers.sorted { lhs, rhs in
+            let lhsScore = period == .weekly ? lhs.currentSeasonTrail : lhs.totalTrail
+            let rhsScore = period == .weekly ? rhs.currentSeasonTrail : rhs.totalTrail
+
+            if lhsScore != rhsScore {
+                return lhsScore > rhsScore
+            }
+
+            return lhs.id < rhs.id
+        }
+
+        return sortedUsers.enumerated().map { index, user in
             LeaderboardEntry(
                 id: user.id,
                 userId: user.id,
                 displayName: user.displayName,
                 photoURL: user.photoURL,
                 color: user.color,
-                trail: user.currentSeasonTrail,
+                trail: period == .weekly ? user.currentSeasonTrail : user.totalTrail,
                 rank: index + 1,
                 neighborhood: user.neighborhood,
                 seasonId: effectiveSeasonId,
                 territoriesOwned: 0
             )
         }
-
-        return derivedEntries
     }
 
     private func filterEntriesWithExistingUsers(_ entries: [LeaderboardEntry]) async -> [LeaderboardEntry] {
@@ -550,13 +599,19 @@ final class FirestoreService {
     // MARK: - Batch Updates
 
     func incrementUserTrail(userId: String, trail: Double, distance: Double, neighborhood: String? = nil) async throws {
+        let currentSeasonId = generatedSeasonIdForCurrentWeek()
+        let currentUser = try await getUser(id: userId)
+        let isCurrentSeason = currentUser?.currentSeasonId == currentSeasonId
+
         var updates: [String: Any] = [
             "totalTrail": FieldValue.increment(trail),
             "totalDistance": FieldValue.increment(distance),
             "totalRuns": FieldValue.increment(Int64(1)),
-            "currentSeasonTrail": FieldValue.increment(trail),
+            "currentSeasonId": currentSeasonId,
             "lastRunDate": Date()
         ]
+
+        updates["currentSeasonTrail"] = isCurrentSeason ? FieldValue.increment(trail) : trail
 
         if let neighborhood = neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines),
            !neighborhood.isEmpty {
@@ -567,9 +622,14 @@ final class FirestoreService {
     }
 
     func grantDailyChallengeReward(userId: String, bonusTrail: Double) async throws {
+        let currentSeasonId = generatedSeasonIdForCurrentWeek()
+        let currentUser = try await getUser(id: userId)
+        let isCurrentSeason = currentUser?.currentSeasonId == currentSeasonId
+
         try await usersCollection.document(userId).updateData([
             "totalTrail": FieldValue.increment(bonusTrail),
-            "currentSeasonTrail": FieldValue.increment(bonusTrail)
+            "currentSeasonId": currentSeasonId,
+            "currentSeasonTrail": isCurrentSeason ? FieldValue.increment(bonusTrail) : bonusTrail
         ])
     }
 }

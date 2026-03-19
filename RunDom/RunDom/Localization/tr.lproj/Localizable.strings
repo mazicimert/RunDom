@@ -162,7 +162,12 @@
 "territoryLoss.prompt.body.multiple" = "%d bölgen ele geçirildi. Haritada sırayla inceleyebilirsin.";
 "territoryLoss.prompt.dismiss" = "Şimdilik Kapat";
 "territoryLoss.prompt.showOnMap" = "Haritada Göster";
+"territoryLoss.prompt.mapBrowserTitle" = "Ele geçirilen bölgeler";
+"territoryLoss.prompt.closeBrowser" = "Bölge gezinmesini kapat";
+"territoryLoss.prompt.previous" = "Önceki Bölge";
+"territoryLoss.prompt.previousShort" = "Önceki";
 "territoryLoss.prompt.next" = "Sonraki Bölge";
+"territoryLoss.prompt.nextShort" = "Sonraki";
 "territoryLoss.prompt.locationLoading" = "Konum yükleniyor...";
 "territoryLoss.prompt.locationFallback" = "Konum bilgisi bulunamadı";
 "territoryLoss.prompt.capturedBy" = "%@ tarafından ele geçirildi";
@@ -196,8 +201,23 @@
 "profile.selectColor" = "Renk Seç";
 
 // MARK: - Leaderboard
+"leaderboard.filters.title" = "Sıralama Görünümü";
+"leaderboard.activeBoard" = "Aktif Sıralama";
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Mahalle";
+"leaderboard.period.weekly" = "Haftalık";
+"leaderboard.period.allTime" = "Tüm Zamanlar";
+"leaderboard.context.subtitle" = "%@ • %@";
+"leaderboard.context.description.weeklyGlobal" = "Bu haftanın global yarışını görüyorsun.";
+"leaderboard.context.description.weeklyNeighborhood" = "Mahallendeki haftalık yarışı görüyorsun.";
+"leaderboard.context.description.allTimeGlobal" = "Tüm zamanların global liderlerini görüyorsun.";
+"leaderboard.context.description.allTimeNeighborhood" = "Mahallendeki tüm zamanlar liderlerini görüyorsun.";
+"leaderboard.you" = "Sen";
+"leaderboard.pinned.title" = "Sıralaman";
+"leaderboard.weekly.endsIn" = "Hafta bitimine";
+"leaderboard.weekly.remaining.daysHours" = "%dg %dsa";
+"leaderboard.weekly.remaining.hoursMinutes" = "%dsa %ddk";
+"leaderboard.weekly.remaining.minutes" = "%ddk";
 "leaderboard.empty" = "Henüz sıralama yok.";
 "leaderboard.empty.subtitle" = "Sıralamada yer almak için koşu tamamla.";
 

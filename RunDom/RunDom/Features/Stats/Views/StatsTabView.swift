@@ -10,43 +10,56 @@ struct StatsTabView: View {
     @State private var pendingDeleteRun: RunSession?
     @State private var showDeleteConfirmation = false
     @State private var deleteErrorMessage: String?
+    @State private var hasCompletedInitialLoad = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Period Picker
-                Picker("", selection: $statsVM.period) {
-                    ForEach(StatsPeriod.allCases, id: \.self) { period in
-                        Text(period.localized)
-                            .tag(period)
+        Group {
+            if shouldShowInitialLoading {
+                skeletonContent
+            } else {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Period Picker
+                        Picker("", selection: $statsVM.period) {
+                            ForEach(StatsPeriod.allCases, id: \.self) { period in
+                                Text(period.localized)
+                                    .tag(period)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .screenPadding()
+
+                        // Summary Cards
+                        summarySection
+
+                        // Trail Chart
+                        chartSection
+
+                        // Distance Chart
+                        distanceChartSection
+
+                        // Weekly Report Card
+                        if let report = reportVM.latestReport {
+                            weeklyReportCard(report: report)
+                        }
+
+                        // Run History
+                        historySection
                     }
+                    .padding(.vertical)
                 }
-                .pickerStyle(.segmented)
-                .screenPadding()
-
-                // Summary Cards
-                summarySection
-
-                // Trail Chart
-                chartSection
-
-                // Distance Chart
-                distanceChartSection
-
-                // Weekly Report Card
-                if let report = reportVM.latestReport {
-                    weeklyReportCard(report: report)
-                }
-
-                // Run History
-                historySection
             }
-            .padding(.vertical)
         }
         .navigationTitle("tab.stats".localized)
-        .onAppear {
-            guard let userId = appState.currentUser?.id else { return }
-            Task { await reloadAll(userId: userId) }
+        .task(id: appState.currentUser?.id) {
+            guard let userId = appState.currentUser?.id else {
+                hasCompletedInitialLoad = false
+                return
+            }
+
+            hasCompletedInitialLoad = false
+            await reloadAll(userId: userId)
+            hasCompletedInitialLoad = true
         }
         .refreshable {
             guard let userId = appState.currentUser?.id else { return }
@@ -211,6 +224,89 @@ struct StatsTabView: View {
 
     // MARK: - Data Reload
 
+    private var shouldShowInitialLoading: Bool {
+        !hasCompletedInitialLoad
+    }
+
+    private var skeletonContent: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Picker("", selection: .constant(StatsPeriod.thisWeek)) {
+                    ForEach(StatsPeriod.allCases, id: \.self) { period in
+                        Text(period.localized)
+                            .tag(period)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .screenPadding()
+                .disabled(true)
+
+                skeletonSummarySection
+                skeletonChartSection(title: "stats.trailChart".localized)
+                skeletonChartSection(title: "stats.distanceChart".localized)
+                skeletonWeeklyReportSection
+                skeletonHistorySection
+            }
+            .padding(.vertical)
+        }
+        .allowsHitTesting(false)
+    }
+
+    private var skeletonSummarySection: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            StatsSkeletonCard()
+            StatsSkeletonCard()
+            StatsSkeletonCard()
+            StatsSkeletonCard()
+        }
+        .screenPadding()
+    }
+
+    private func skeletonChartSection(title: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.headline)
+
+            StatsSkeletonChart()
+        }
+        .cardStyle()
+        .screenPadding()
+    }
+
+    private var skeletonWeeklyReportSection: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                StatsSkeletonBlock(width: 120, height: 18)
+                StatsSkeletonBlock(width: 92, height: 14)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.quaternary)
+        }
+        .cardStyle()
+        .screenPadding()
+    }
+
+    private var skeletonHistorySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("stats.runHistory".localized)
+                .font(.headline)
+                .screenPadding()
+
+            VStack(spacing: 0) {
+                StatsSkeletonHistoryRow()
+                Divider()
+                    .padding(.leading, AppConstants.UI.screenPadding)
+                StatsSkeletonHistoryRow()
+                Divider()
+                    .padding(.leading, AppConstants.UI.screenPadding)
+                StatsSkeletonHistoryRow()
+            }
+        }
+    }
+
     private func reloadAll(userId: String) async {
         async let stats: () = statsVM.loadStats(userId: userId)
         async let history: () = historyVM.loadRuns(userId: userId)
@@ -223,5 +319,73 @@ struct StatsTabView: View {
     NavigationStack {
         StatsTabView()
             .environmentObject(AppState())
+    }
+}
+
+private struct StatsSkeletonCard: View {
+    var body: some View {
+        VStack(spacing: 10) {
+            Circle()
+                .fill(Color.secondary.opacity(0.16))
+                .frame(width: 22, height: 22)
+
+            StatsSkeletonBlock(width: 72, height: 22)
+            StatsSkeletonBlock(width: 58, height: 12)
+        }
+        .frame(maxWidth: .infinity)
+        .cardStyle()
+    }
+}
+
+private struct StatsSkeletonChart: View {
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 10) {
+            ForEach([0.38, 0.64, 0.28, 0.82, 0.52, 0.7, 0.44], id: \.self) { ratio in
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color.secondary.opacity(0.16))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48 + (110 * ratio))
+            }
+        }
+        .frame(height: 180, alignment: .bottom)
+    }
+}
+
+private struct StatsSkeletonHistoryRow: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(Color.secondary.opacity(0.16))
+                .frame(width: 40, height: 40)
+
+            VStack(alignment: .leading, spacing: 8) {
+                StatsSkeletonBlock(width: 110, height: 14)
+                StatsSkeletonBlock(width: 140, height: 12)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 8) {
+                StatsSkeletonBlock(width: 52, height: 14)
+                StatsSkeletonBlock(width: 36, height: 10)
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.quaternary)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, AppConstants.UI.screenPadding)
+    }
+}
+
+private struct StatsSkeletonBlock: View {
+    let width: CGFloat?
+    let height: CGFloat
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color.secondary.opacity(0.16))
+            .frame(width: width, height: height)
     }
 }

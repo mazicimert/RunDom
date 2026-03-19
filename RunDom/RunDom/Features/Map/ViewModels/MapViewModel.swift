@@ -18,6 +18,7 @@ final class MapViewModel: ObservableObject {
     @Published var selectedTerritory: Territory?
     @Published var selectedDropzone: Dropzone?
     @Published var userTerritoryCount: Int = 0
+    @Published var hasLoadedInitialTerritories = false
 
     // MARK: - Services
 
@@ -96,7 +97,7 @@ final class MapViewModel: ObservableObject {
         withAnimation(.easeInOut(duration: AppConstants.Animation.standard)) {
             region = MKCoordinateRegion(
                 center: coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
+                span: MKCoordinateSpan(latitudeDelta: 0.0032, longitudeDelta: 0.0032)
             )
         }
     }
@@ -127,6 +128,7 @@ final class MapViewModel: ObservableObject {
 
     private func observeTerritories() {
         guard let seasonId = currentSeasonId else { return }
+        hasLoadedInitialTerritories = false
 
         if let observerId = territoryObserverId {
             realtimeDB.removeObserver(id: observerId, seasonId: seasonId)
@@ -135,6 +137,7 @@ final class MapViewModel: ObservableObject {
         territoryObserverId = realtimeDB.observeTerritories(seasonId: seasonId) { [weak self] territories in
             Task { @MainActor in
                 self?.territories = territories
+                self?.hasLoadedInitialTerritories = true
             }
         }
 
@@ -146,6 +149,7 @@ final class MapViewModel: ObservableObject {
             realtimeDB.removeObserver(id: observerId, seasonId: seasonId)
             territoryObserverId = nil
         }
+        hasLoadedInitialTerritories = false
     }
 
     // MARK: - User Territory Count

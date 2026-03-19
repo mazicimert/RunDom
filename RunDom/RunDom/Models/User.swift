@@ -12,6 +12,7 @@ struct User: Codable, Identifiable, Equatable {
     var totalDistance: Double = 0
     var totalRuns: Int = 0
     var currentSeasonTrail: Double = 0
+    var currentSeasonId: String?
     var neighborhood: String?
     var dropzoneMultiplierExpiry: Date?
     var lastRunDate: Date?

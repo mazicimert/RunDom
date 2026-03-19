@@ -67,7 +67,7 @@ struct MapTabView: View {
                 currentUserId: appState.currentUser?.id
             )
         }
-        .task {
+        .task(id: appState.currentUser?.id) {
             await viewModel.onAppear(currentUser: appState.currentUser)
         }
         .onDisappear {
@@ -90,8 +90,15 @@ struct MapTabView: View {
         HStack(spacing: 6) {
             Image(systemName: "hexagon.fill")
                 .font(.subheadline)
-            Text("\(viewModel.userTerritoryCount)")
-                .font(.subheadline.bold().monospacedDigit())
+
+            if viewModel.hasLoadedInitialTerritories {
+                Text("\(viewModel.userTerritoryCount)")
+                    .font(.subheadline.bold().monospacedDigit())
+            } else {
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(mapControlForegroundColor.opacity(0.18))
+                    .frame(width: 18, height: 14)
+            }
         }
         .foregroundStyle(mapControlForegroundColor)
         .padding(.horizontal, 12)
@@ -100,7 +107,9 @@ struct MapTabView: View {
         .overlay(Capsule().stroke(mapControlBorderColor, lineWidth: 1))
         .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
         .accessibilityLabel(
-            "accessibility.map.territoryCount".localized(with: viewModel.userTerritoryCount)
+            viewModel.hasLoadedInitialTerritories
+                ? "accessibility.map.territoryCount".localized(with: viewModel.userTerritoryCount)
+                : "common.loading".localized
         )
         .accessibilityAddTraits(.isStaticText)
     }

@@ -5,6 +5,11 @@ enum LeaderboardScope: String, Codable, CaseIterable {
     case neighborhood
 }
 
+enum LeaderboardPeriod: String, Codable, CaseIterable {
+    case weekly
+    case allTime
+}
+
 struct LeaderboardEntry: Codable, Identifiable, Equatable {
     let id: String
     let userId: String

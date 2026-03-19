@@ -86,11 +86,6 @@ struct PreRunView: View {
         .task(id: appState.currentUser?.id) {
             await reloadScreen()
         }
-        .onAppear {
-            Task {
-                await reloadScreen()
-            }
-        }
     }
 
     private func reloadScreen() async {

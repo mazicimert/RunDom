@@ -4,6 +4,7 @@ struct TerritoryLossPromptSheet: View {
     @ObservedObject var viewModel: TerritoryLossPromptViewModel
     let onDismiss: () -> Void
     let onShowOnMap: () -> Void
+    let onPrevious: () -> Void
     let onNext: () -> Void
 
     var body: some View {
@@ -43,10 +44,6 @@ struct TerritoryLossPromptSheet: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-
-                    Text(selectedEvent.h3Index)
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.tertiary)
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -69,19 +66,35 @@ struct TerritoryLossPromptSheet: View {
             }
 
             if viewModel.events.count > 1 {
-                Button {
-                    onNext()
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("territoryLoss.prompt.next".localized)
-                        Image(systemName: "arrow.right.circle.fill")
+                HStack(spacing: 16) {
+                    Button {
+                        onPrevious()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.left.circle.fill")
+                            Text("territoryLoss.prompt.previous".localized)
+                        }
+                        .font(.body.bold())
+                        .frame(maxWidth: .infinity)
                     }
-                    .font(.body.bold())
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(viewModel.canGoPrevious ? Color.accentColor : .secondary)
+                    .disabled(!viewModel.canGoPrevious)
+
+                    Button {
+                        onNext()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text("territoryLoss.prompt.next".localized)
+                            Image(systemName: "arrow.right.circle.fill")
+                        }
+                        .font(.body.bold())
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(viewModel.canGoNext ? Color.accentColor : .secondary)
+                    .disabled(!viewModel.canGoNext)
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(viewModel.canGoNext ? Color.accentColor : .secondary)
-                .disabled(!viewModel.canGoNext)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

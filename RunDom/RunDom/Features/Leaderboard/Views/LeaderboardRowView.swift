@@ -7,10 +7,15 @@ struct LeaderboardRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             // Rank
-            Text("\(entry.rank)")
-                .font(.headline.monospacedDigit())
-                .foregroundStyle(.secondary)
-                .frame(width: 30, alignment: .center)
+            Text("#\(entry.rank)")
+                .font(.caption.bold().monospacedDigit())
+                .foregroundStyle(isCurrentUser ? Color.accentColor : .secondary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    (isCurrentUser ? Color.accentColor.opacity(0.16) : Color(uiColor: .tertiarySystemBackground)),
+                    in: Capsule()
+                )
 
             // Avatar
             AvatarView(
@@ -45,10 +50,16 @@ struct LeaderboardRowView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 10)
         .padding(.horizontal, AppConstants.UI.cardPadding)
-        .background(isCurrentUser ? Color.accentColor.opacity(0.08) : Color.clear)
-        .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.smallCornerRadius, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(isCurrentUser ? Color.accentColor.opacity(0.1) : Color(uiColor: .secondarySystemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(isCurrentUser ? Color.accentColor.opacity(0.18) : Color.white.opacity(0.06), lineWidth: 1)
+        )
     }
 }
 

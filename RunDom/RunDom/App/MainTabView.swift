@@ -10,7 +10,9 @@ struct MainTabView: View {
     @State private var completedRunSession: RunSession?
     @StateObject private var territoryLossPromptViewModel = TerritoryLossPromptViewModel()
     @State private var showTerritoryLossPrompt = false
+    @State private var showTerritoryLossMapBrowser = false
     @State private var showDailyChallengePrompt = false
+    @State private var skipTerritoryLossPromptDismissHandling = false
 
     private let dailyChallengeService = DailyChallengeService()
 
@@ -84,6 +86,35 @@ struct MainTabView: View {
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
             }
+
+            if shouldShowTerritoryLossMapBrowser {
+                VStack {
+                    Spacer()
+
+                    TerritoryLossMapBrowserBar(
+                        viewModel: territoryLossPromptViewModel,
+                        onPrevious: {
+                            territoryLossPromptViewModel.moveToPreviousEvent()
+                            if let event = territoryLossPromptViewModel.selectedEvent {
+                                router.focusMap(onTerritoryLoss: event.h3Index)
+                            }
+                        },
+                        onNext: {
+                            territoryLossPromptViewModel.moveToNextEvent()
+                            if let event = territoryLossPromptViewModel.selectedEvent {
+                                router.focusMap(onTerritoryLoss: event.h3Index)
+                            }
+                        },
+                        onClose: {
+                            closeTerritoryLossMapBrowser()
+                        }
+                    )
+                    .padding(.horizontal, AppConstants.UI.screenPadding)
+                    .padding(.bottom, 92)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .zIndex(2)
+            }
         }
         .onChange(of: router.selectedTab) {
             Haptics.selection()
@@ -107,7 +138,17 @@ struct MainTabView: View {
                 },
                 onShowOnMap: {
                     guard let event = territoryLossPromptViewModel.selectedEvent else { return }
+                    skipTerritoryLossPromptDismissHandling = true
+                    showTerritoryLossMapBrowser = true
                     router.focusMap(onTerritoryLoss: event.h3Index)
+                    showTerritoryLossPrompt = false
+                    Task { await territoryLossPromptViewModel.markBatchSeen() }
+                },
+                onPrevious: {
+                    territoryLossPromptViewModel.moveToPreviousEvent()
+                    if let event = territoryLossPromptViewModel.selectedEvent {
+                        router.focusMap(onTerritoryLoss: event.h3Index)
+                    }
                 },
                 onNext: {
                     territoryLossPromptViewModel.moveToNextEvent()
@@ -177,7 +218,18 @@ struct MainTabView: View {
         !router.isRunActive
             && router.presentedSheet == nil
             && completedRunSession == nil
+            && !showTerritoryLossMapBrowser
             && !showDailyChallengePrompt
+    }
+
+    private var shouldShowTerritoryLossMapBrowser: Bool {
+        showTerritoryLossMapBrowser
+            && router.selectedTab == .map
+            && !showTerritoryLossPrompt
+            && router.presentedSheet == nil
+            && !router.isRunActive
+            && completedRunSession == nil
+            && territoryLossPromptViewModel.hasEvents
     }
 
     private func consumePendingNotificationLossEventId() -> String? {
@@ -221,9 +273,24 @@ struct MainTabView: View {
     }
 
     private func dismissTerritoryLossPromptIfNeeded() async {
+        if skipTerritoryLossPromptDismissHandling {
+            skipTerritoryLossPromptDismissHandling = false
+            return
+        }
+
         guard territoryLossPromptViewModel.hasEvents else { return }
+        showTerritoryLossMapBrowser = false
         await territoryLossPromptViewModel.markBatchSeenAndClear()
         await refreshPromptQueue()
+    }
+
+    private func closeTerritoryLossMapBrowser() {
+        showTerritoryLossMapBrowser = false
+        Task {
+            await territoryLossPromptViewModel.markBatchSeen()
+            territoryLossPromptViewModel.clear()
+            await refreshPromptQueue()
+        }
     }
 
     private func presentDailyChallengePromptIfNeeded() async {

@@ -15,7 +15,7 @@ struct ProfileTabView: View {
                 statsSection
 
                 // Streak Info
-                if let user = viewModel.user ?? appState.currentUser, user.streakDays > 0 {
+                if let user = resolvedUser, user.streakDays > 0 {
                     streakSection(user: user)
                 }
 
@@ -46,36 +46,39 @@ struct ProfileTabView: View {
                 viewModel.badges = []
             }
         }
-        .overlay {
-            if viewModel.isLoading && viewModel.user == nil {
-                LoadingView()
-            }
-        }
     }
 
     // MARK: - Badges Accessor (for sheet routing)
 
     var loadedBadges: [Badge] { viewModel.badges }
 
+    private var resolvedUser: User? {
+        viewModel.user ?? appState.currentUser
+    }
+
     // MARK: - Profile Header
 
     private var profileHeader: some View {
         VStack(spacing: 12) {
-            let user = viewModel.user ?? appState.currentUser
+            if let user = resolvedUser {
+                AvatarView(
+                    photoURL: user.photoURL,
+                    userColor: user.color,
+                    size: 100
+                )
 
-            AvatarView(
-                photoURL: user?.photoURL,
-                userColor: user?.color ?? "#4ECDC4",
-                size: 100
-            )
+                Text(user.displayName)
+                    .font(.title2.bold())
 
-            Text(user?.displayName ?? "runner.defaultName".localized)
-                .font(.title2.bold())
-
-            if let neighborhood = user?.neighborhood {
-                Label(neighborhood, systemImage: "mappin.circle.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if let neighborhood = user.neighborhood {
+                    Label(neighborhood, systemImage: "mappin.circle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                ProfileSkeletonAvatar()
+                ProfileSkeletonBlock(width: 132, height: 22)
+                ProfileSkeletonBlock(width: 96, height: 14)
             }
         }
         .screenPadding()
@@ -84,27 +87,31 @@ struct ProfileTabView: View {
     // MARK: - Stats Section
 
     private var statsSection: some View {
-        let user = viewModel.user ?? appState.currentUser
-
-        return HStack(spacing: 12) {
-            StatCardView(
-                icon: "flame.fill",
-                value: (user?.totalTrail ?? 0).formattedTrail,
-                label: "profile.totalTrail".localized,
-                iconColor: .orange
-            )
-            StatCardView(
-                icon: "figure.run",
-                value: "\(user?.totalRuns ?? 0)",
-                label: "profile.totalRuns".localized,
-                iconColor: .blue
-            )
-            StatCardView(
-                icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
-                value: (user?.totalDistance ?? 0).formattedDistanceFromMeters,
-                label: "profile.totalDistance".localized,
-                iconColor: .green
-            )
+        HStack(spacing: 12) {
+            if let user = resolvedUser {
+                StatCardView(
+                    icon: "flame.fill",
+                    value: user.totalTrail.formattedTrail,
+                    label: "profile.totalTrail".localized,
+                    iconColor: .orange
+                )
+                StatCardView(
+                    icon: "figure.run",
+                    value: "\(user.totalRuns)",
+                    label: "profile.totalRuns".localized,
+                    iconColor: .blue
+                )
+                StatCardView(
+                    icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
+                    value: user.totalDistance.formattedDistanceFromMeters,
+                    label: "profile.totalDistance".localized,
+                    iconColor: .green
+                )
+            } else {
+                ProfileSkeletonStatCard()
+                ProfileSkeletonStatCard()
+                ProfileSkeletonStatCard()
+            }
         }
         .screenPadding()
     }
@@ -150,12 +157,7 @@ struct ProfileTabView: View {
             }
 
             if viewModel.isLoading && viewModel.badges.isEmpty {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-                .padding(.vertical, 24)
+                ProfileBadgesSkeleton()
             } else {
                 BadgeGridView(badges: viewModel.badges) { badge in
                     router.presentedSheet = .badgeDetail(badge: badge)
@@ -195,5 +197,62 @@ struct ProfileTabView: View {
         ProfileTabView()
             .environmentObject(AppState())
             .environmentObject(AppRouter())
+    }
+}
+
+private struct ProfileSkeletonAvatar: View {
+    var body: some View {
+        Circle()
+            .fill(Color.secondary.opacity(0.16))
+            .frame(width: 100, height: 100)
+    }
+}
+
+private struct ProfileSkeletonStatCard: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Circle()
+                .fill(Color.secondary.opacity(0.16))
+                .frame(width: 20, height: 20)
+
+            ProfileSkeletonBlock(width: 56, height: 22)
+            ProfileSkeletonBlock(width: 44, height: 12)
+        }
+        .frame(maxWidth: .infinity)
+        .cardStyle()
+    }
+}
+
+private struct ProfileBadgesSkeleton: View {
+    private let columns = [
+        GridItem(.adaptive(minimum: 80), spacing: 16)
+    ]
+
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: 16) {
+            ForEach(0..<6, id: \.self) { _ in
+                VStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.secondary.opacity(0.16))
+                        .frame(width: 56, height: 56)
+
+                    ProfileSkeletonBlock(width: 54, height: 12)
+                    ProfileSkeletonBlock(width: 38, height: 4)
+                }
+                .frame(width: 80)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+private struct ProfileSkeletonBlock: View {
+    let width: CGFloat
+    let height: CGFloat
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color.secondary.opacity(0.16))
+            .frame(width: width, height: height)
     }
 }

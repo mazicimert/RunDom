@@ -162,7 +162,12 @@
 "territoryLoss.prompt.body.multiple" = "%d of your territories were captured. You can review them one by one on the map.";
 "territoryLoss.prompt.dismiss" = "Close for Now";
 "territoryLoss.prompt.showOnMap" = "Show on Map";
+"territoryLoss.prompt.mapBrowserTitle" = "Captured territories";
+"territoryLoss.prompt.closeBrowser" = "Close territory browser";
+"territoryLoss.prompt.previous" = "Previous Territory";
+"territoryLoss.prompt.previousShort" = "Previous";
 "territoryLoss.prompt.next" = "Next Territory";
+"territoryLoss.prompt.nextShort" = "Next";
 "territoryLoss.prompt.locationLoading" = "Loading location...";
 "territoryLoss.prompt.locationFallback" = "Location unavailable";
 "territoryLoss.prompt.capturedBy" = "Captured by %@";
@@ -196,8 +201,23 @@
 "profile.selectColor" = "Select Color";
 
 // MARK: - Leaderboard
+"leaderboard.filters.title" = "Leaderboard View";
+"leaderboard.activeBoard" = "Active Board";
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Neighborhood";
+"leaderboard.period.weekly" = "Weekly";
+"leaderboard.period.allTime" = "All Time";
+"leaderboard.context.subtitle" = "%@ • %@";
+"leaderboard.context.description.weeklyGlobal" = "You're viewing this week's global race.";
+"leaderboard.context.description.weeklyNeighborhood" = "You're viewing this week's neighborhood race.";
+"leaderboard.context.description.allTimeGlobal" = "You're viewing the all-time global leaders.";
+"leaderboard.context.description.allTimeNeighborhood" = "You're viewing the all-time leaders in your neighborhood.";
+"leaderboard.you" = "You";
+"leaderboard.pinned.title" = "Your position";
+"leaderboard.weekly.endsIn" = "Season ends in";
+"leaderboard.weekly.remaining.daysHours" = "%dd %dh";
+"leaderboard.weekly.remaining.hoursMinutes" = "%dh %dm";
+"leaderboard.weekly.remaining.minutes" = "%dm";
 "leaderboard.empty" = "No rankings yet.";
 "leaderboard.empty.subtitle" = "Complete runs to appear on the leaderboard.";
 

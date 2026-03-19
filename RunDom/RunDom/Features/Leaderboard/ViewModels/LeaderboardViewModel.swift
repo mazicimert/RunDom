@@ -6,7 +6,9 @@ final class LeaderboardViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var scope: LeaderboardScope = .global
+    @Published var period: LeaderboardPeriod = .weekly
     @Published var entries: [LeaderboardEntry] = []
+    @Published var currentUserEntry: LeaderboardEntry?
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -42,6 +44,39 @@ final class LeaderboardViewModel: ObservableObject {
         entries.isEmpty && !isLoading
     }
 
+    var contextTitle: String {
+        switch period {
+        case .weekly:
+            return "leaderboard.period.weekly".localized
+        case .allTime:
+            return "leaderboard.period.allTime".localized
+        }
+    }
+
+    var contextSubtitle: String {
+        let scopeTitle = scope == .global
+            ? "leaderboard.global".localized
+            : "leaderboard.neighborhood".localized
+        return "leaderboard.context.subtitle".localized(with: contextTitle, scopeTitle)
+    }
+
+    var contextHeadline: String {
+        contextSubtitle
+    }
+
+    var contextDescription: String {
+        switch (period, scope) {
+        case (.weekly, .global):
+            return "leaderboard.context.description.weeklyGlobal".localized
+        case (.weekly, .neighborhood):
+            return "leaderboard.context.description.weeklyNeighborhood".localized
+        case (.allTime, .global):
+            return "leaderboard.context.description.allTimeGlobal".localized
+        case (.allTime, .neighborhood):
+            return "leaderboard.context.description.allTimeNeighborhood".localized
+        }
+    }
+
     // MARK: - Data Loading
 
     func loadLeaderboard(currentUser: User? = nil) async {
@@ -61,12 +96,25 @@ final class LeaderboardViewModel: ObservableObject {
 
             entries = try await firestoreService.getLeaderboard(
                 scope: scope,
+                period: period,
                 seasonId: seasonId,
                 neighborhood: neighborhood
             )
+            if let currentUserId = currentUser?.id {
+                currentUserEntry = try await firestoreService.getCurrentUserLeaderboardEntry(
+                    userId: currentUserId,
+                    scope: scope,
+                    period: period,
+                    seasonId: seasonId,
+                    neighborhood: neighborhood
+                )
+            } else {
+                currentUserEntry = nil
+            }
         } catch {
             AppLogger.firebase.error("Failed to load leaderboard: \(error.localizedDescription)")
             errorMessage = "error.generic".localized
+            currentUserEntry = nil
         }
 
         isLoading = false
@@ -74,6 +122,11 @@ final class LeaderboardViewModel: ObservableObject {
 
     func switchScope(to newScope: LeaderboardScope, currentUser: User? = nil) async {
         scope = newScope
+        await loadLeaderboard(currentUser: currentUser)
+    }
+
+    func switchPeriod(to newPeriod: LeaderboardPeriod, currentUser: User? = nil) async {
+        period = newPeriod
         await loadLeaderboard(currentUser: currentUser)
     }
 

@@ -12,26 +12,20 @@ struct LeaderboardListView: View {
             // Podium (top 3)
             if !podium.isEmpty {
                 PodiumView(entries: podium, currentUserId: currentUserId)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 22)
             }
 
             // Remaining entries
             if !rest.isEmpty {
-                Divider()
-                    .padding(.horizontal)
-
-                LazyVStack(spacing: 0) {
+                LazyVStack(spacing: 10) {
                     ForEach(rest) { entry in
                         LeaderboardRowView(
                             entry: entry,
                             isCurrentUser: entry.userId == currentUserId
                         )
-                        if entry.id != rest.last?.id {
-                            Divider()
-                                .padding(.leading, 56)
-                        }
                     }
                 }
+                .screenPadding()
             }
         }
     }
@@ -100,13 +94,31 @@ private struct PodiumView: View {
                 .clipShape(Capsule())
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
+        .frame(height: height + 74)
         .background(
-            entry.userId == currentUserId
-                ? Color.accentColor.opacity(0.08)
-                : Color.clear
+            RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
+                .fill(
+                    entry.rank == 1
+                        ? LinearGradient(
+                            colors: [Color.yellow.opacity(0.2), Color.accentColor.opacity(0.12)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        : LinearGradient(
+                            colors: [
+                                entry.userId == currentUserId ? Color.accentColor.opacity(0.14) : Color.clear,
+                                Color(uiColor: .secondarySystemBackground)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                )
         )
-        .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
     }
 
     private func rankColor(for rank: Int) -> Color {
