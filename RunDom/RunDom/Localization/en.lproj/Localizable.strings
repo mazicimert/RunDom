@@ -50,6 +50,13 @@
 "permission.notification.subtitle" = "Get notified when your territories are under attack.";
 "permission.notification.button" = "Enable Notifications";
 
+// MARK: - Welcome
+"welcome.title.named" = "Welcome, %@!";
+"welcome.title.generic" = "Welcome!";
+"welcome.subtitle" = "Your first run is ready. Start conquering your neighborhood now.";
+"welcome.cta" = "Continue";
+"welcome.character.placeholder" = "Once you add the character artwork, the large welcome illustration will appear here.";
+
 // MARK: - Auth
 "auth.signInApple" = "Sign in with Apple";
 "auth.signInGoogle" = "Sign in with Google";
@@ -103,6 +110,11 @@
 "run.stop" = "Stop";
 "run.pause" = "Pause";
 "run.resume" = "Resume";
+"run.speedShort" = "Speed";
+"run.timeShort" = "Time";
+"run.distanceShort" = "Distance";
+"run.zonesShort" = "Zones";
+"run.slideToFinish" = "Slide to finish";
 "run.modeNormal" = "Normal";
 "run.modeBoost" = "Boost";
 "run.boostThreshold" = "Keep above %@ to maintain Boost";
@@ -225,6 +237,15 @@
 "map.decaying" = "Decaying";
 "map.defenseDecaying" = "Defense is decaying due to inactivity.";
 "map.lastActive" = "Last Active";
+"map.filter.all" = "All";
+"map.filter.mine" = "Mine";
+"map.filter.rivals" = "Rivals";
+"map.badge.mine" = "Mine";
+"map.badge.rival" = "Rival";
+"map.viewDetails" = "Details";
+"map.territoriesOwned" = "%d territories";
+"map.ownerCalloutMeta" = "Active %@ | %@";
+"map.ownerCalloutNoArea" = "Area unknown";
 
 // MARK: - Profile
 "profile.totalTrail" = "Total Points";

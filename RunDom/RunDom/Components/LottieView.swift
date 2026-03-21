@@ -8,9 +8,17 @@ struct LottieView: UIViewRepresentable {
     var animationSpeed: CGFloat = 1.0
     var onCompletion: (() -> Void)? = nil
 
-    func makeUIView(context: Context) -> some UIView {
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    func makeUIView(context: Context) -> UIView {
         let container = UIView(frame: .zero)
-        let animationView = LottieAnimationView(name: animationName)
+        let configuration = LottieConfiguration(renderingEngine: .mainThread)
+        let animation = LottieAnimation.named(animationName)
+        let animationView = LottieAnimationView(animation: animation, configuration: configuration)
+
+        animationView.backgroundBehavior = .forceFinish
         animationView.loopMode = loopMode
         animationView.contentMode = contentMode
         animationView.animationSpeed = animationSpeed
@@ -24,14 +32,48 @@ struct LottieView: UIViewRepresentable {
             animationView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
 
-        animationView.play { finished in
-            guard finished else { return }
-            onCompletion?()
-        }
+        context.coordinator.animationView = animationView
+        context.coordinator.onCompletion = onCompletion
+        context.coordinator.startPlaybackIfNeeded()
+
         return container
     }
 
-    func updateUIView(_ uiView: UIViewType, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {
+        // Only update the completion handler — do NOT re-set animationView
+        // properties during playback, as that restarts the animation.
+        context.coordinator.onCompletion = onCompletion
+    }
+
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        coordinator.teardown()
+    }
+
+    final class Coordinator {
+        var animationView: LottieAnimationView?
+        var onCompletion: (() -> Void)?
+        private var didStartPlayback = false
+
+        func startPlaybackIfNeeded() {
+            guard !didStartPlayback, let animationView else { return }
+            didStartPlayback = true
+
+            animationView.play { [weak self] finished in
+                guard finished else { return }
+                DispatchQueue.main.async {
+                    self?.onCompletion?()
+                }
+            }
+        }
+
+        func teardown() {
+            animationView?.stop()
+            animationView?.removeFromSuperview()
+            animationView = nil
+            onCompletion = nil
+            didStartPlayback = false
+        }
+    }
 }
 
 #Preview {

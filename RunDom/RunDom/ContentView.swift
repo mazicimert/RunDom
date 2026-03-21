@@ -23,6 +23,8 @@ struct ContentView: View {
                     viewModel: AuthViewModel(authService: appState.authService, appState: appState),
                     onComplete: {}
                 )
+            } else if appState.shouldShowWelcome {
+                WelcomeView()
             } else if appState.requiresProfileCompletion {
                 CompleteProfileView()
             } else {
@@ -32,6 +34,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isLoading)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isAuthenticated)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.isOnboardingComplete)
+        .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.shouldShowWelcome)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.requiresProfileCompletion)
         .onAppear {
             onboardingVM.locationManager = appState.locationManager

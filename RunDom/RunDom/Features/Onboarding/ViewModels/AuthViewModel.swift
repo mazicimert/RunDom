@@ -167,15 +167,21 @@ final class AuthViewModel: ObservableObject {
             do {
                 if isSignUpMode {
                     try await authService.signUpWithEmail(email: email, password: password)
-                    // Set display name on Firebase Auth profile
+
+                    // Email sign-up already collects the user's name. Persist it immediately
+                    // so the app doesn't ask for the same info again in CompleteProfile.
                     let trimmedFirst = firstName.trimmingCharacters(in: .whitespaces)
                     let trimmedLast = lastName.trimmingCharacters(in: .whitespaces)
                     let fullName = trimmedLast.isEmpty ? trimmedFirst : "\(trimmedFirst) \(trimmedLast)"
+
                     let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
                     changeRequest?.displayName = fullName
                     try await changeRequest?.commitChanges()
-                    // Reload user to sync displayName to Firestore
+
+                    // Reload first to ensure a user document exists, then sync the collected
+                    // name into Firestore/current session state.
                     await appState?.loadCurrentUser()
+                    await appState?.completeProfile(displayName: fullName)
                     AppLogger.auth.info("Email Sign Up completed")
                 } else {
                     try await authService.signInWithEmail(email: email, password: password)

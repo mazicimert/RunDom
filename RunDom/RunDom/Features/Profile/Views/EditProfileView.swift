@@ -13,6 +13,7 @@ struct EditProfileView: View {
     @State private var errorMessage: String?
 
     private let storageService = StorageService()
+    private let realtimeDBService = RealtimeDBService()
     private let colorColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 6)
 
     var body: some View {
@@ -168,6 +169,15 @@ struct EditProfileView: View {
             user.color = selectedColor
 
             try await appState.firestoreService.updateUser(user)
+
+            if user.color != appState.currentUser?.color {
+                do {
+                    _ = try await realtimeDBService.updateTerritoryColorsOwned(by: user.id, newColor: user.color)
+                } catch {
+                    AppLogger.firebase.warning("Failed to sync territory colors after profile update: \(error.localizedDescription)")
+                }
+            }
+
             appState.currentUser = user
             Haptics.notification(.success)
             dismiss()

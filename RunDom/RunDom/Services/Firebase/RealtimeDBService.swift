@@ -194,6 +194,37 @@ final class RealtimeDBService {
         return refsToDelete.count
     }
 
+    func updateTerritoryColorsOwned(by userId: String, newColor: String) async throws -> Int {
+        let snapshot = try await db.child("territories").getData()
+        guard snapshot.exists() else { return 0 }
+
+        var refsToUpdate: [DatabaseReference] = []
+
+        for seasonChild in snapshot.children {
+            guard let seasonSnapshot = seasonChild as? DataSnapshot else { continue }
+
+            for territoryChild in seasonSnapshot.children {
+                guard let territorySnapshot = territoryChild as? DataSnapshot,
+                      let dict = territorySnapshot.value as? [String: Any],
+                      let ownerId = dict["ownerId"] as? String,
+                      ownerId == userId else {
+                    continue
+                }
+                refsToUpdate.append(territorySnapshot.ref.child("ownerColor"))
+            }
+        }
+
+        for ref in refsToUpdate {
+            try await ref.setValue(newColor)
+        }
+
+        if !refsToUpdate.isEmpty {
+            AppLogger.firebase.info("Updated territory colors for \(refsToUpdate.count) territories of user \(userId)")
+        }
+
+        return refsToUpdate.count
+    }
+
     // MARK: - Territory Decode
 
     private func decodeTerritory(from dict: [String: Any]) -> Territory? {

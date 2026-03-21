@@ -8,6 +8,7 @@ struct ActiveRunView: View {
     @State private var hasStartedRun = false
     @State private var showTerritoryConquestAnimation = false
     @State private var pendingTerritoryConquestAnimations = 0
+    @State private var territoryAnimationId = 0
 
     var body: some View {
         ZStack {
@@ -24,69 +25,37 @@ struct ActiveRunView: View {
                 .padding(.top, 60)
             }
 
-            // Speed Indicator (top right)
-            VStack {
-                HStack {
-                    Spacer()
-                    SpeedIndicatorView(
-                        currentSpeed: viewModel.currentSpeed,
-                        mode: viewModel.mode,
-                        isBoostActive: viewModel.isBoostActive
-                    )
-                }
-                .padding(.top, 60)
-                .padding(.trailing, 16)
-
-                Spacer()
-            }
-
             // Bottom stats + controls
             VStack {
                 Spacer()
 
                 // Stats overlay
                 RunStatsOverlayView(
+                    currentSpeed: viewModel.currentSpeed,
+                    mode: viewModel.mode,
+                    isBoostActive: viewModel.isBoostActive,
                     distance: viewModel.distanceKm,
                     elapsedTime: viewModel.formattedElapsedTime,
-                    pace: viewModel.pace,
-                    territories: viewModel.territoriesCaptured,
-                    uniqueZones: viewModel.uniqueZones.count
+                    territories: viewModel.territoriesCaptured
                 )
                 .padding(.horizontal, AppConstants.UI.screenPadding)
 
                 // Control button
-                HStack(spacing: 24) {
-                    // Pause button
-                    Button {
-                        Haptics.impact(.medium)
-                        viewModel.pauseRun()
-                    } label: {
-                        Image(systemName: "pause.fill")
-                            .font(.title)
-                            .foregroundStyle(.white)
-                            .frame(width: 64, height: 64)
-                            .background(Color.orange)
-                            .clipShape(Circle())
-                            .shadow(radius: 4)
-                    }
-                    .accessibilityLabel("run.pause".localized)
-
-                    // Stop button
-                    Button {
-                        Haptics.impact(.heavy)
-                        let session = viewModel.stopRun()
-                        onFinish(session)
-                    } label: {
-                        Image(systemName: "stop.fill")
-                            .font(.title)
-                            .foregroundStyle(.white)
-                            .frame(width: 64, height: 64)
-                            .background(Color.red)
-                            .clipShape(Circle())
-                            .shadow(radius: 4)
-                    }
-                    .accessibilityLabel("run.stop".localized)
+                Button {
+                    Haptics.impact(.medium)
+                    viewModel.pauseRun()
+                } label: {
+                    Image(systemName: "pause.fill")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 72, height: 72)
+                        .background(
+                            Circle()
+                                .fill(Color.orange)
+                                .shadow(color: .black.opacity(0.26), radius: 14, y: 8)
+                        )
                 }
+                .accessibilityLabel("run.pause".localized)
                 .padding(.top, 16)
                 .padding(.bottom, 40)
             }
@@ -122,30 +91,40 @@ struct ActiveRunView: View {
                     .frame(width: 260, height: 260)
             }
 
+        }
+        .overlay {
             if showTerritoryConquestAnimation {
-                Color.black.opacity(0.22)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
+                ZStack {
+                    Color.black.opacity(0.22)
+                        .ignoresSafeArea()
 
-                VStack(spacing: 12) {
-                    LottieView(
-                        animationName: "Unlocked",
-                        loopMode: .playOnce,
-                        contentMode: .scaleAspectFit,
-                        animationSpeed: 1.0,
-                        onCompletion: { finishTerritoryConquestAnimation() }
-                    )
-                    .frame(width: 220, height: 220)
+                    VStack(spacing: 12) {
+                        LottieView(
+                            animationName: "Unlocked",
+                            loopMode: .playOnce,
+                            contentMode: .scaleAspectFit,
+                            animationSpeed: 1.0,
+                            onCompletion: { finishTerritoryConquestAnimation() }
+                        )
+                        .id(territoryAnimationId)
+                        .frame(width: 220, height: 220)
 
-                    Text("run.territoryConquered".localized)
-                        .font(.headline.bold())
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.green.opacity(0.2))
-                        .clipShape(Capsule())
+                        Text("run.territoryConquered".localized)
+                            .font(.headline.bold())
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.green.opacity(0.2))
+                            .clipShape(Capsule())
+                    }
                 }
                 .allowsHitTesting(false)
                 .transition(.opacity)
+                .task(id: territoryAnimationId) {
+                    try? await Task.sleep(for: .seconds(4))
+                    if !Task.isCancelled && showTerritoryConquestAnimation {
+                        finishTerritoryConquestAnimation()
+                    }
+                }
             }
         }
         .onAppear {
@@ -189,6 +168,7 @@ struct ActiveRunView: View {
             return
         }
 
+        territoryAnimationId += 1
         showTerritoryConquestAnimation = true
         if count > 1 {
             pendingTerritoryConquestAnimations += (count - 1)
@@ -199,7 +179,8 @@ struct ActiveRunView: View {
         if pendingTerritoryConquestAnimations > 0 {
             pendingTerritoryConquestAnimations -= 1
             showTerritoryConquestAnimation = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                territoryAnimationId += 1
                 showTerritoryConquestAnimation = true
             }
             return

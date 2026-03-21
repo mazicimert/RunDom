@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     @Published var currentUser: User?
     @Published var isLoading = true
     @Published var requiresProfileCompletion = false
+    @Published var shouldShowWelcome = false
 
     // MARK: - Services
 
@@ -79,6 +80,7 @@ final class AppState: ObservableObject {
                     Task { await self.loadCurrentUser() }
                 } else {
                     self.currentUser = nil
+                    self.shouldShowWelcome = false
                     self.isLoading = false
                 }
             }
@@ -114,6 +116,7 @@ final class AppState: ObservableObject {
                 try await firestoreService.createUser(newUser)
                 currentUser = newUser
                 requiresProfileCompletion = needsCompletion
+                shouldShowWelcome = true
             }
 
             Task {
@@ -137,6 +140,10 @@ final class AppState: ObservableObject {
     func completeOnboarding() {
         isOnboardingComplete = true
         UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete)
+    }
+
+    func dismissWelcome() {
+        shouldShowWelcome = false
     }
 
     // MARK: - Sign Out

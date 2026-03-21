@@ -13,9 +13,32 @@ final class TerritoryOverlayRenderer: MKPolygonRenderer {
         self.isDecaying = isDecaying
         super.init(overlay: polygon)
 
-        fillColor = color.withAlphaComponent(isDecaying ? 0.25 : 0.4)
-        strokeColor = color.withAlphaComponent(isDecaying ? 0.4 : 0.8)
-        lineWidth = 1.5
+        lineJoin = .round
+        lineCap = .round
+    }
+
+    func applyStyle(isSelected: Bool, isOwnedByCurrentUser: Bool, isDimmed: Bool) {
+        let fillAlpha: CGFloat
+        let strokeAlpha: CGFloat
+
+        if isDimmed {
+            fillAlpha = 0.08
+            strokeAlpha = 0.18
+        } else if isSelected {
+            fillAlpha = isDecaying ? 0.34 : 0.52
+            strokeAlpha = 1.0
+        } else if isOwnedByCurrentUser {
+            fillAlpha = isDecaying ? 0.22 : 0.34
+            strokeAlpha = 0.9
+        } else {
+            fillAlpha = isDecaying ? 0.14 : 0.22
+            strokeAlpha = 0.62
+        }
+
+        fillColor = territoryColor.withAlphaComponent(fillAlpha)
+        strokeColor = territoryColor.withAlphaComponent(strokeAlpha)
+        lineWidth = isSelected ? (isOwnedByCurrentUser ? 4.8 : 4.0) : (isOwnedByCurrentUser ? 3.0 : 1.6)
+        lineDashPattern = isOwnedByCurrentUser ? nil : [6 as NSNumber, 4 as NSNumber]
     }
 }
 

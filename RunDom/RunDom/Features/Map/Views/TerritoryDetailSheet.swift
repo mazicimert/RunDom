@@ -43,14 +43,25 @@ struct TerritoryDetailSheet: View {
 
     private var ownerBadge: some View {
         HStack(spacing: 12) {
-            Circle()
-                .fill(viewModel.ownerColor)
-                .frame(width: 40, height: 40)
-                .overlay {
-                    Image(systemName: viewModel.isCurrentUser ? "crown.fill" : "person.fill")
-                        .font(.subheadline)
+            ZStack(alignment: .bottomTrailing) {
+                AvatarView(
+                    photoURL: viewModel.ownerPhotoURL,
+                    userColor: viewModel.territory.ownerColor,
+                    size: 48
+                )
+
+                if viewModel.isCurrentUser {
+                    Image(systemName: "crown.fill")
+                        .font(.caption2.bold())
                         .foregroundStyle(.white)
+                        .padding(6)
+                        .background(viewModel.ownerColor, in: Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(Color(uiColor: .systemBackground), lineWidth: 2)
+                        )
                 }
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("map.owner".localized)

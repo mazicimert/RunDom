@@ -61,21 +61,84 @@ struct PauseRunView: View {
                             .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius))
                     }
 
-                    Button {
-                        onStop()
-                    } label: {
-                        Label("run.stop".localized, systemImage: "stop.fill")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red.opacity(0.8))
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius))
-                    }
+                    SlideToFinishControl(onComplete: onStop)
                 }
                 .padding(.horizontal, AppConstants.UI.screenPadding)
                 .padding(.bottom, 40)
             }
         }
+    }
+}
+
+private struct SlideToFinishControl: View {
+    let onComplete: () -> Void
+
+    @State private var dragOffset: CGFloat = 0
+    @State private var isCompleting = false
+
+    private let knobSize: CGFloat = 60
+    private let horizontalInset: CGFloat = 6
+
+    var body: some View {
+        GeometryReader { proxy in
+            let maxOffset = max(proxy.size.width - knobSize - (horizontalInset * 2), 0)
+
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(Color.red.opacity(0.88))
+
+                HStack {
+                    Spacer()
+                    Text("run.slideToFinish".localized)
+                        .font(.headline.bold())
+                        .foregroundStyle(.white.opacity(0.92))
+                    Spacer()
+                }
+                .padding(.horizontal, 56)
+
+                HStack(spacing: 4) {
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.caption.bold())
+                .foregroundStyle(.white.opacity(0.35))
+                .padding(.trailing, 20)
+
+                Circle()
+                    .fill(.white)
+                    .frame(width: knobSize, height: knobSize)
+                    .overlay {
+                        Image(systemName: "stop.fill")
+                            .font(.headline.bold())
+                            .foregroundStyle(Color.red)
+                    }
+                    .offset(x: horizontalInset + dragOffset)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                guard !isCompleting else { return }
+                                dragOffset = min(max(value.translation.width, 0), maxOffset)
+                            }
+                            .onEnded { _ in
+                                guard !isCompleting else { return }
+
+                                if dragOffset > maxOffset * 0.82 {
+                                    isCompleting = true
+                                    dragOffset = maxOffset
+                                    Haptics.notification(.success)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                                        onComplete()
+                                    }
+                                } else {
+                                    withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                                        dragOffset = 0
+                                    }
+                                }
+                            }
+                    )
+            }
+        }
+        .frame(height: 72)
     }
 }

@@ -18,25 +18,18 @@ struct MapTabView: View {
             TerritoryMapView(
                 region: $viewModel.region,
                 territories: viewModel.shouldRenderOverlays ? viewModel.visibleTerritories : [],
+                selectedTerritoryId: viewModel.selectedTerritory?.h3Index,
+                currentUserId: appState.currentUser?.id,
                 dropzones: [],
                 onTerritoryTapped: { viewModel.selectTerritory($0) },
+                onMapBackgroundTapped: { viewModel.clearSelection() },
                 onDropzoneTapped: nil
             )
             .ignoresSafeArea(edges: .top)
 
             // Overlays
-            VStack {
-                // Error Banner
-                if let error = viewModel.errorMessage {
-                    ErrorBannerView(
-                        message: error,
-                        onDismiss: { viewModel.dismissError() },
-                        onRetry: {
-                            Task { await viewModel.onAppear(currentUser: appState.currentUser) }
-                        }
-                    )
-                    .padding(.top, 8)
-                }
+            VStack(spacing: 12) {
+                headerOverlay
 
                 Spacer()
 
@@ -61,7 +54,7 @@ struct MapTabView: View {
         }
         .navigationTitle("tab.map".localized)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $viewModel.selectedTerritory) { territory in
+        .sheet(item: $viewModel.presentedTerritory) { territory in
             TerritoryDetailSheet(
                 territory: territory,
                 currentUserId: appState.currentUser?.id
@@ -77,10 +70,133 @@ struct MapTabView: View {
             if let userId = appState.currentUser?.id {
                 viewModel.updateUserTerritoryCount(userId: userId)
             }
+            viewModel.refreshSelection()
         }
         .onReceive(router.$mapFocusRequest.compactMap { $0 }) { request in
             viewModel.focusTerritoryLoss(h3Index: request.h3Index)
             router.clearMapFocusRequest()
+        }
+    }
+
+    private var headerOverlay: some View {
+        VStack(spacing: 12) {
+            if let error = viewModel.errorMessage {
+                ErrorBannerView(
+                    message: error,
+                    onDismiss: { viewModel.dismissError() },
+                    onRetry: {
+                        Task { await viewModel.onAppear(currentUser: appState.currentUser) }
+                    }
+                )
+            }
+
+            territoryFilterBar
+
+            if let selectedTerritory = viewModel.selectedTerritory {
+                selectedTerritoryCallout(territory: selectedTerritory)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .padding(.horizontal, AppConstants.UI.screenPadding)
+        .padding(.top, 8)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.selectedTerritory?.h3Index)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.territoryFilter)
+    }
+
+    private var territoryFilterBar: some View {
+        HStack(spacing: 8) {
+            ForEach(TerritoryFilter.allCases) { filter in
+                let isSelected = viewModel.territoryFilter == filter
+
+                Button {
+                    Haptics.selection()
+                    viewModel.setTerritoryFilter(filter)
+                } label: {
+                    Text(filter.titleKey.localized)
+                        .font(.caption.bold())
+                        .foregroundStyle(isSelected ? .white : mapControlForegroundColor)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule()
+                                .fill(isSelected ? Color.accentColor : mapControlBackgroundColor)
+                        )
+                        .overlay(
+                            Capsule()
+                                .stroke(isSelected ? Color.accentColor : mapControlBorderColor, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func selectedTerritoryCallout(territory: Territory) -> some View {
+        HStack(spacing: 12) {
+            AvatarView(
+                photoURL: viewModel.selectedTerritoryOwnerPhotoURL,
+                userColor: territory.ownerColor,
+                size: 52
+            )
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(viewModel.selectedTerritoryOwnerName)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    Text(
+                        viewModel.selectedTerritoryIsCurrentUserOwned
+                            ? "map.badge.mine".localized
+                            : "map.badge.rival".localized
+                    )
+                    .font(.caption2.bold())
+                    .foregroundStyle(viewModel.selectedTerritoryIsCurrentUserOwned ? Color.boostGreen : Color.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        (viewModel.selectedTerritoryIsCurrentUserOwned ? Color.boostGreen : Color.orange)
+                            .opacity(0.14),
+                        in: Capsule()
+                    )
+                }
+
+                Text("map.territoriesOwned".localized(with: viewModel.selectedTerritoryOwnedCount))
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.primary)
+
+                Text(
+                    "map.ownerCalloutMeta".localized(
+                        with: viewModel.selectedTerritoryLastActiveText,
+                        viewModel.selectedTerritoryOwnerNeighborhood ?? "map.ownerCalloutNoArea".localized
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            }
+
+            Spacer(minLength: 0)
+
+            Button {
+                Haptics.impact(.light)
+                viewModel.presentSelectedTerritoryDetails()
+            } label: {
+                Text("map.viewDetails".localized)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.accentColor, in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .cardStyle()
+        .contentShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
+        .onTapGesture {
+            viewModel.presentSelectedTerritoryDetails()
         }
     }
 
@@ -158,8 +274,11 @@ struct MapTabView: View {
 struct TerritoryMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     let territories: [Territory]
+    let selectedTerritoryId: String?
+    let currentUserId: String?
     let dropzones: [Dropzone]
     var onTerritoryTapped: ((Territory) -> Void)?
+    var onMapBackgroundTapped: (() -> Void)?
     var onDropzoneTapped: ((Dropzone) -> Void)?
 
     func makeUIView(context: Context) -> MKMapView {
@@ -182,8 +301,11 @@ struct TerritoryMapView: UIViewRepresentable {
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         context.coordinator.territories = territories
+        context.coordinator.selectedTerritoryId = selectedTerritoryId
+        context.coordinator.currentUserId = currentUserId
         context.coordinator.dropzones = dropzones
         context.coordinator.onTerritoryTapped = onTerritoryTapped
+        context.coordinator.onMapBackgroundTapped = onMapBackgroundTapped
         context.coordinator.onDropzoneTapped = onDropzoneTapped
 
         // Apply programmatic region changes
@@ -202,6 +324,7 @@ struct TerritoryMapView: UIViewRepresentable {
         }
 
         updateOverlays(mapView)
+        context.coordinator.refreshOverlayStylesIfNeeded(on: mapView)
         updateAnnotations(mapView)
     }
 
@@ -212,12 +335,33 @@ struct TerritoryMapView: UIViewRepresentable {
     // MARK: - Update Overlays
 
     private func updateOverlays(_ mapView: MKMapView) {
-        mapView.removeOverlays(mapView.overlays)
+        let existingOverlays = mapView.overlays.compactMap { overlay -> (String, MKPolygon)? in
+            guard let polygon = overlay as? MKPolygon,
+                  let h3Index = polygon.title else {
+                return nil
+            }
+            return (h3Index, polygon)
+        }
+        let existingById = Dictionary(uniqueKeysWithValues: existingOverlays)
 
-        for territory in territories {
-            guard let polygon = MKPolygon.fromH3Index(territory.h3Index) else { continue }
-            polygon.title = territory.h3Index
-            mapView.addOverlay(polygon)
+        let targetTerritories = Dictionary(uniqueKeysWithValues: territories.map { ($0.h3Index, $0) })
+        let targetIds = Set(targetTerritories.keys)
+        let existingIds = Set(existingById.keys)
+
+        let idsToRemove = existingIds.subtracting(targetIds)
+        if !idsToRemove.isEmpty {
+            let overlaysToRemove = idsToRemove.compactMap { existingById[$0] }
+            mapView.removeOverlays(overlaysToRemove)
+        }
+
+        let idsToAdd = targetIds.subtracting(existingIds)
+        if !idsToAdd.isEmpty {
+            let overlaysToAdd = idsToAdd.compactMap { h3Index -> MKPolygon? in
+                guard let polygon = MKPolygon.fromH3Index(h3Index) else { return nil }
+                polygon.title = h3Index
+                return polygon
+            }
+            mapView.addOverlays(overlaysToAdd)
         }
     }
 
@@ -239,10 +383,14 @@ struct TerritoryMapView: UIViewRepresentable {
     final class Coordinator: NSObject, MKMapViewDelegate {
         let parent: TerritoryMapView
         var territories: [Territory] = []
+        var selectedTerritoryId: String?
+        var currentUserId: String?
         var dropzones: [Dropzone] = []
         var onTerritoryTapped: ((Territory) -> Void)?
+        var onMapBackgroundTapped: (() -> Void)?
         var onDropzoneTapped: ((Dropzone) -> Void)?
         var isUpdatingRegion = false
+        private var overlayStyleCache: [String: OverlayStyle] = [:]
 
         init(_ parent: TerritoryMapView) {
             self.parent = parent
@@ -258,12 +406,25 @@ struct TerritoryMapView: UIViewRepresentable {
                 return MKOverlayRenderer(overlay: overlay)
             }
 
+            overlayStyleCache[h3Index] = OverlayStyle(
+                ownerColor: territory.ownerColor,
+                isDecaying: territory.isDecaying,
+                isSelected: h3Index == selectedTerritoryId,
+                isOwnedByCurrentUser: territory.ownerId == currentUserId
+            )
+
             let uiColor = UIColor(Color(hex: territory.ownerColor) ?? .blue)
-            return TerritoryOverlayRenderer(
+            let renderer = TerritoryOverlayRenderer(
                 polygon: polygon,
                 color: uiColor,
                 isDecaying: territory.isDecaying
             )
+            renderer.applyStyle(
+                isSelected: h3Index == selectedTerritoryId,
+                isOwnedByCurrentUser: territory.ownerId == currentUserId,
+                isDimmed: selectedTerritoryId != nil && h3Index != selectedTerritoryId
+            )
+            return renderer
         }
 
         // MARK: - Annotation Views
@@ -300,6 +461,37 @@ struct TerritoryMapView: UIViewRepresentable {
             parent.region = mapView.region
         }
 
+        func refreshOverlayStylesIfNeeded(on mapView: MKMapView) {
+            for overlay in mapView.overlays {
+                guard let polygon = overlay as? MKPolygon,
+                      let h3Index = polygon.title,
+                      let territory = territories.first(where: { $0.h3Index == h3Index }),
+                      let renderer = mapView.renderer(for: polygon) as? TerritoryOverlayRenderer else {
+                    continue
+                }
+
+                let newStyle = OverlayStyle(
+                    ownerColor: territory.ownerColor,
+                    isDecaying: territory.isDecaying,
+                    isSelected: h3Index == selectedTerritoryId,
+                    isOwnedByCurrentUser: territory.ownerId == currentUserId
+                )
+
+                guard overlayStyleCache[h3Index] != newStyle else { continue }
+
+                overlayStyleCache[h3Index] = newStyle
+                renderer.applyStyle(
+                    isSelected: newStyle.isSelected,
+                    isOwnedByCurrentUser: newStyle.isOwnedByCurrentUser,
+                    isDimmed: selectedTerritoryId != nil && !newStyle.isSelected
+                )
+                renderer.setNeedsDisplay()
+            }
+
+            let liveIds = Set(territories.map(\.h3Index))
+            overlayStyleCache = overlayStyleCache.filter { liveIds.contains($0.key) }
+        }
+
         // MARK: - Tap Handling
 
         @objc func handleMapTap(_ gesture: UITapGestureRecognizer) {
@@ -323,7 +515,16 @@ struct TerritoryMapView: UIViewRepresentable {
             let tappedIndex = coordinate.h3Index(resolution: AppConstants.Location.h3Resolution)
             if let territory = territories.first(where: { $0.h3Index == tappedIndex }) {
                 onTerritoryTapped?(territory)
+            } else {
+                onMapBackgroundTapped?()
             }
+        }
+
+        private struct OverlayStyle: Equatable {
+            let ownerColor: String
+            let isDecaying: Bool
+            let isSelected: Bool
+            let isOwnedByCurrentUser: Bool
         }
     }
 }

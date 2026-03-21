@@ -2,6 +2,25 @@ import SwiftUI
 import MapKit
 import Combine
 
+enum TerritoryFilter: CaseIterable, Identifiable {
+    case all
+    case mine
+    case rivals
+
+    var id: Self { self }
+
+    var titleKey: String {
+        switch self {
+        case .all:
+            return "map.filter.all"
+        case .mine:
+            return "map.filter.mine"
+        case .rivals:
+            return "map.filter.rivals"
+        }
+    }
+}
+
 @MainActor
 final class MapViewModel: ObservableObject {
 
@@ -16,9 +35,12 @@ final class MapViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var selectedTerritory: Territory?
+    @Published var presentedTerritory: Territory?
     @Published var selectedDropzone: Dropzone?
     @Published var userTerritoryCount: Int = 0
     @Published var hasLoadedInitialTerritories = false
+    @Published var territoryFilter: TerritoryFilter = .all
+    @Published private(set) var selectedOwnerProfile: User?
 
     // MARK: - Services
 
@@ -31,7 +53,9 @@ final class MapViewModel: ObservableObject {
 
     private var territoryObserverId: String?
     private var currentSeasonId: String?
+    private var currentUserId: String?
     private var cancellables = Set<AnyCancellable>()
+    private var ownerProfilesById: [String: User] = [:]
 
     // MARK: - Init
 
@@ -43,6 +67,10 @@ final class MapViewModel: ObservableObject {
     // MARK: - Setup
 
     func onAppear(currentUser: User?) async {
+        currentUserId = currentUser?.id
+        if let currentUser {
+            ownerProfilesById[currentUser.id] = currentUser
+        }
         isLoading = true
         await loadCurrentSeason()
         observeTerritories()
@@ -91,8 +119,7 @@ final class MapViewModel: ObservableObject {
     func focusTerritoryLoss(h3Index: String) {
         guard let coordinate = h3Service.coordinate(fromIndex: h3Index) else { return }
 
-        selectedTerritory = nil
-        selectedDropzone = nil
+        clearSelection()
 
         withAnimation(.easeInOut(duration: AppConstants.Animation.standard)) {
             region = MKCoordinateRegion(
@@ -138,6 +165,7 @@ final class MapViewModel: ObservableObject {
             Task { @MainActor in
                 self?.territories = territories
                 self?.hasLoadedInitialTerritories = true
+                self?.refreshSelection()
             }
         }
 
@@ -161,18 +189,53 @@ final class MapViewModel: ObservableObject {
     // MARK: - Selection
 
     func selectTerritory(_ territory: Territory) {
+        if selectedTerritory?.h3Index == territory.h3Index {
+            presentSelectedTerritoryDetails()
+            return
+        }
+
         selectedTerritory = territory
         selectedDropzone = nil
+        Task { await loadOwnerProfile(for: territory.ownerId) }
     }
 
     func selectDropzone(_ dropzone: Dropzone) {
         selectedDropzone = dropzone
         selectedTerritory = nil
+        selectedOwnerProfile = nil
     }
 
     func clearSelection() {
         selectedTerritory = nil
         selectedDropzone = nil
+        selectedOwnerProfile = nil
+    }
+
+    func presentSelectedTerritoryDetails() {
+        guard let selectedTerritory else { return }
+        presentedTerritory = selectedTerritory
+    }
+
+    func setTerritoryFilter(_ filter: TerritoryFilter) {
+        territoryFilter = filter
+
+        if let selectedTerritory,
+           !filteredTerritories.contains(where: { $0.h3Index == selectedTerritory.h3Index }) {
+            clearSelection()
+        }
+    }
+
+    func refreshSelection() {
+        if let selectedId = selectedTerritory?.h3Index {
+            selectedTerritory = territories.first(where: { $0.h3Index == selectedId })
+            if selectedTerritory == nil {
+                selectedOwnerProfile = nil
+            }
+        }
+
+        if let presentedId = presentedTerritory?.h3Index {
+            presentedTerritory = territories.first(where: { $0.h3Index == presentedId })
+        }
     }
 
     func dismissError() {
@@ -185,11 +248,53 @@ final class MapViewModel: ObservableObject {
 
     var visibleTerritories: [Territory] {
         let visibleIndices = Set(h3Service.cellIndices(in: region))
-        return territories.filter { visibleIndices.contains($0.h3Index) }
+        return filteredTerritories.filter { visibleIndices.contains($0.h3Index) }
     }
 
     var shouldRenderOverlays: Bool {
         h3Service.estimatedCellCount(in: region) < 5000
+    }
+
+    var filteredTerritories: [Territory] {
+        switch territoryFilter {
+        case .all:
+            return territories
+        case .mine:
+            guard let currentUserId else { return territories }
+            return territories.filter { $0.ownerId == currentUserId }
+        case .rivals:
+            guard let currentUserId else { return territories }
+            return territories.filter { $0.ownerId != currentUserId }
+        }
+    }
+
+    var selectedTerritoryOwnedCount: Int {
+        guard let selectedTerritory else { return 0 }
+        return territories.filter { $0.ownerId == selectedTerritory.ownerId }.count
+    }
+
+    var selectedTerritoryOwnerName: String {
+        guard let selectedTerritory else { return "" }
+        if selectedTerritory.ownerId == currentUserId {
+            return "map.myTerritory".localized
+        }
+        return selectedOwnerProfile?.displayName ?? selectedTerritory.ownerId
+    }
+
+    var selectedTerritoryOwnerPhotoURL: String? {
+        selectedOwnerProfile?.photoURL
+    }
+
+    var selectedTerritoryLastActiveText: String {
+        selectedTerritory?.lastRunDate.relativeFormatted() ?? ""
+    }
+
+    var selectedTerritoryIsCurrentUserOwned: Bool {
+        selectedTerritory?.ownerId == currentUserId
+    }
+
+    var selectedTerritoryOwnerNeighborhood: String? {
+        selectedOwnerProfile?.neighborhood
     }
 
     // MARK: - Helpers
@@ -199,6 +304,26 @@ final class MapViewModel: ObservableObject {
             return "map.myTerritory".localized
         }
         return territory.ownerId
+    }
+
+    private func loadOwnerProfile(for userId: String) async {
+        if let cached = ownerProfilesById[userId] {
+            selectedOwnerProfile = cached
+            return
+        }
+
+        do {
+            if let user = try await firestoreService.getUser(id: userId) {
+                ownerProfilesById[userId] = user
+                if selectedTerritory?.ownerId == userId {
+                    selectedOwnerProfile = user
+                }
+            } else if selectedTerritory?.ownerId == userId {
+                selectedOwnerProfile = nil
+            }
+        } catch {
+            AppLogger.firebase.error("Failed to load territory owner preview: \(error.localizedDescription)")
+        }
     }
 }
 

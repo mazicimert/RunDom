@@ -50,6 +50,13 @@
 "permission.notification.subtitle" = "Bölgelerin saldırı altındayken bildirim al.";
 "permission.notification.button" = "Bildirimleri Aç";
 
+// MARK: - Welcome
+"welcome.title.named" = "Hoş geldin, %@!";
+"welcome.title.generic" = "Hoş geldin!";
+"welcome.subtitle" = "İlk koşuna hazırsın. Mahalleni fethetmeye şimdi başlayabilirsin.";
+"welcome.cta" = "Devam et";
+"welcome.character.placeholder" = "Karakter görselini eklediğinde burada büyük welcome illüstrasyonu görünecek.";
+
 // MARK: - Auth
 "auth.signInApple" = "Apple ile Giriş Yap";
 "auth.signInGoogle" = "Google ile Giriş Yap";
@@ -103,6 +110,11 @@
 "run.stop" = "Bitir";
 "run.pause" = "Duraklat";
 "run.resume" = "Devam Et";
+"run.speedShort" = "Hız";
+"run.timeShort" = "Süre";
+"run.distanceShort" = "Mesafe";
+"run.zonesShort" = "Bölge";
+"run.slideToFinish" = "Bitirmek için kaydır";
 "run.modeNormal" = "Normal";
 "run.modeBoost" = "Boost";
 "run.boostThreshold" = "Boost'u korumak için %@ üzerinde kal";
@@ -225,6 +237,15 @@
 "map.decaying" = "Zayıflıyor";
 "map.defenseDecaying" = "Hareketsizlik nedeniyle savunma zayıflıyor.";
 "map.lastActive" = "Son Aktivite";
+"map.filter.all" = "Tümü";
+"map.filter.mine" = "Benim";
+"map.filter.rivals" = "Rakipler";
+"map.badge.mine" = "Benim";
+"map.badge.rival" = "Rakip";
+"map.viewDetails" = "Detay";
+"map.territoriesOwned" = "%d bölge";
+"map.ownerCalloutMeta" = "Aktif %@ | %@";
+"map.ownerCalloutNoArea" = "Bölge bilinmiyor";
 
 // MARK: - Profile
 "profile.totalTrail" = "Toplam Puan";

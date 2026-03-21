@@ -133,13 +133,17 @@ struct AuthView: View {
                         Button {
                             viewModel.signInWithGoogle()
                         } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "g.circle.fill")
-                                    .font(.title2)
+                            HStack(spacing: 10) {
+                                Image("google_logo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
 
                                 Text("auth.signInGoogle".localized)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.headline.weight(.semibold))
                             }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
                         }
                         .buttonStyle(AuthSecondaryActionStyle())
                     }
@@ -265,11 +269,15 @@ struct AuthView: View {
                                 }
                             }
 
-                            Button(showPassword ? "auth.password.hide".localized : "auth.password.show".localized) {
+                            Button {
                                 showPassword.toggle()
+                            } label: {
+                                Image(systemName: showPassword ? "eye.slash" : "eye")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.accentColor)
+                                    .frame(width: 28, height: 28)
                             }
-                            .font(.caption.bold())
-                            .foregroundStyle(Color.accentColor)
+                            .accessibilityLabel(showPassword ? "auth.password.hide".localized : "auth.password.show".localized)
                         }
                     }
 
@@ -291,11 +299,15 @@ struct AuthView: View {
                                 .submitLabel(.go)
                                 .onSubmit { viewModel.signInWithEmail() }
 
-                                Button(showConfirmPassword ? "auth.password.hide".localized : "auth.password.show".localized) {
+                                Button {
                                     showConfirmPassword.toggle()
+                                } label: {
+                                    Image(systemName: showConfirmPassword ? "eye.slash" : "eye")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(Color.accentColor)
+                                        .frame(width: 28, height: 28)
                                 }
-                                .font(.caption.bold())
-                                .foregroundStyle(Color.accentColor)
+                                .accessibilityLabel(showConfirmPassword ? "auth.password.hide".localized : "auth.password.show".localized)
                             }
                         }
                     }
@@ -475,14 +487,12 @@ private enum AuthNoticeTone {
 private struct AuthSecondaryActionStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline.weight(.semibold))
             .foregroundStyle(.white)
-            .padding(.horizontal, 18)
-            .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
                     .fill(Color.white.opacity(0.08))
             )
+            .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
                     .stroke(Color.white.opacity(0.08), lineWidth: 1)

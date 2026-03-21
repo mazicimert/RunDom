@@ -7,6 +7,7 @@ final class TerritoryDetailViewModel: ObservableObject {
 
     @Published var territory: Territory
     @Published var ownerName: String = ""
+    @Published var ownerPhotoURL: String?
     @Published var isCurrentUser = false
 
     // MARK: - Services
@@ -19,17 +20,18 @@ final class TerritoryDetailViewModel: ObservableObject {
         self.territory = territory
         self.isCurrentUser = territory.ownerId == currentUserId
         self.ownerName = isCurrentUser ? "map.myTerritory".localized : territory.ownerId
-        if !isCurrentUser {
-            Task { await loadOwnerName() }
-        }
+        Task { await loadOwnerDetails() }
     }
 
     // MARK: - Data Loading
 
-    private func loadOwnerName() async {
+    private func loadOwnerDetails() async {
         do {
             if let user = try await firestoreService.getUser(id: territory.ownerId) {
-                ownerName = user.displayName
+                ownerPhotoURL = user.photoURL
+                if !isCurrentUser {
+                    ownerName = user.displayName
+                }
             }
         } catch {
             AppLogger.firebase.error("Failed to load territory owner: \(error.localizedDescription)")
