@@ -20,6 +20,16 @@ extension Double {
         String(format: "%.1f km/h", locale: appLocale, self)
     }
 
+    /// Formats meters as compact kilometer value without a unit (e.g. 3240 -> "3.24")
+    var formattedCompactDistanceValueFromMeters: String {
+        String(format: "%.2f", locale: appLocale, self / 1000.0)
+    }
+
+    /// Formats as compact speed value without a unit (e.g. "8.5")
+    var formattedCompactSpeedValue: String {
+        String(format: "%.1f", locale: appLocale, self)
+    }
+
     /// Formats as pace in min/km (e.g. "5'30\"")
     var formattedPace: String {
         guard self > 0 else { return "--" }

@@ -29,6 +29,22 @@ extension Date {
         return formatter.string(from: self)
     }
 
+    func formattedHistoryWeekday() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = appLocale
+        formatter.setLocalizedDateFormatFromTemplate("EEE")
+        return formatter.string(from: self)
+            .replacingOccurrences(of: ".", with: "")
+            .uppercased(with: appLocale)
+    }
+
+    func formattedHistoryDayMonth() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = appLocale
+        formatter.setLocalizedDateFormatFromTemplate("d MMM")
+        return formatter.string(from: self)
+    }
+
     func relativeFormatted() -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.locale = appLocale

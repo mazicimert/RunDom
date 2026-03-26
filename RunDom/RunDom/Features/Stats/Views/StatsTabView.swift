@@ -295,15 +295,12 @@ struct StatsTabView: View {
                 .font(.headline)
                 .screenPadding()
 
-            VStack(spacing: 0) {
+            VStack(spacing: 12) {
                 StatsSkeletonHistoryRow()
-                Divider()
-                    .padding(.leading, AppConstants.UI.screenPadding)
                 StatsSkeletonHistoryRow()
-                Divider()
-                    .padding(.leading, AppConstants.UI.screenPadding)
                 StatsSkeletonHistoryRow()
             }
+            .screenPadding()
         }
     }
 
@@ -353,29 +350,45 @@ private struct StatsSkeletonChart: View {
 
 private struct StatsSkeletonHistoryRow: View {
     var body: some View {
-        HStack(spacing: 12) {
-            Circle()
+        HStack(spacing: 14) {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color.secondary.opacity(0.16))
-                .frame(width: 40, height: 40)
+                .frame(width: 114, height: 104)
 
-            VStack(alignment: .leading, spacing: 8) {
-                StatsSkeletonBlock(width: 110, height: 14)
-                StatsSkeletonBlock(width: 140, height: 12)
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 10) {
+                    StatsSkeletonBlock(width: 58, height: 28)
+
+                    Spacer()
+
+                    StatsSkeletonBlock(width: 52, height: 28)
+                    StatsSkeletonBlock(width: 8, height: 12)
+                        .padding(.top, 8)
+                }
+
+                HStack(spacing: 18) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        StatsSkeletonBlock(width: 64, height: 18)
+                        StatsSkeletonBlock(width: 42, height: 10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        StatsSkeletonBlock(width: 52, height: 18)
+                        StatsSkeletonBlock(width: 34, height: 10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        StatsSkeletonBlock(width: 66, height: 18)
+                        StatsSkeletonBlock(width: 48, height: 10)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 8) {
-                StatsSkeletonBlock(width: 52, height: 14)
-                StatsSkeletonBlock(width: 36, height: 10)
-            }
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(.quaternary)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, AppConstants.UI.screenPadding)
+        .padding(10)
+        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
 

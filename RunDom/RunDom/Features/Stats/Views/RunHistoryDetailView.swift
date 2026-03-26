@@ -3,7 +3,7 @@ import MapKit
 
 struct RunHistoryDetailView: View {
     let run: RunSession
-    @Environment(\.dismiss) private var dismiss
+    @State private var isGalleryPresented = false
 
     var body: some View {
         ScrollView {
@@ -94,6 +94,17 @@ struct RunHistoryDetailView: View {
         }
         .navigationTitle("run.summary".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: openGallery) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                }
+                .accessibilityLabel("run.gallery".localized)
+            }
+        }
+        .fullScreenCover(isPresented: $isGalleryPresented) {
+            RunGalleryView(session: run)
+        }
     }
 
     // MARK: - Route Map
@@ -125,6 +136,10 @@ struct RunHistoryDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
         .screenPadding()
         .allowsHitTesting(false)
+    }
+
+    private func openGallery() {
+        isGalleryPresented = true
     }
 }
 

@@ -124,6 +124,7 @@ struct MainTabView: View {
                 completedRunSession = nil
             }
             .environmentObject(appState)
+            .environmentObject(router)
         }
         .sheet(isPresented: $showTerritoryLossPrompt, onDismiss: {
             Task { await dismissTerritoryLossPromptIfNeeded() }

@@ -160,7 +160,23 @@ final class PostRunViewModel: ObservableObject {
     }
 
     var trailText: String {
-        (trailResult?.totalTrail ?? 0).formattedTrail
+        (trailResult?.totalTrail ?? session.trail).formattedTrail
+    }
+
+    var shareHeadlineText: String {
+        performanceSummaryText
+    }
+
+    var shareSubtitleText: String {
+        return heroSubtitleText
+    }
+
+    var shareBrandText: String {
+        "Runpire"
+    }
+
+    var shareDateText: String {
+        "\(session.startDate.formatted(style: .medium)) • \(session.startDate.formattedTime())"
     }
 
     var modeText: String {
@@ -171,8 +187,69 @@ final class PostRunViewModel: ObservableObject {
         }
     }
 
+    var performanceSummaryText: String {
+        if session.territoriesCaptured > 1 {
+            return "run.summary.performance.captured.multiple".localized(with: session.territoriesCaptured)
+        } else if session.territoriesCaptured == 1 {
+            return "run.summary.performance.captured.single".localized(with: session.territoriesCaptured)
+        }
+
+        switch modeBadgeKind {
+        case .normal:
+            return "run.summary.performance.saved".localized
+        case .boostActive:
+            return "run.summary.performance.boostKept".localized
+        case .boostCancelled:
+            return "run.summary.performance.boostLost".localized
+        }
+    }
+
+    var heroSubtitleText: String {
+        "run.summary.heroSubtitle".localized(with: distanceKm.formattedDistance, durationText)
+    }
+
+    var resultReasonText: String? {
+        guard let result = trailResult, result.totalTrail == 0 else { return nil }
+
+        if result.wasDailyCapped {
+            return "run.summary.reason.dailyCap".localized
+        }
+
+        if result.speedMultiplier == 0 {
+            return "run.summary.reason.speedThreshold".localized(with: String(format: "%.0f km/h", AppConstants.Game.minSpeedKmh))
+        }
+
+        return nil
+    }
+
+    var modeBadgeKind: SummaryModeBadgeKind {
+        switch session.mode {
+        case .normal:
+            return .normal
+        case .boost:
+            return session.isBoostActive ? .boostActive : .boostCancelled
+        }
+    }
+
+    var modeBadgeText: String {
+        switch modeBadgeKind {
+        case .normal:
+            return "run.normalMode".localized
+        case .boostActive:
+            return "run.boostActive".localized
+        case .boostCancelled:
+            return "run.boostCancelled".localized
+        }
+    }
+
     var streakExtendedText: String? {
         guard didExtendStreak, let days = newStreakDays else { return nil }
         return "run.streak".localized(with: "\(days)")
+    }
+
+    enum SummaryModeBadgeKind {
+        case normal
+        case boostActive
+        case boostCancelled
     }
 }

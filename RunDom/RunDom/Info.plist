@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDisplayName</key>
 	<string>Runpire</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save run gallery images to your photo library.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
