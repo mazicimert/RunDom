@@ -321,6 +321,14 @@
 "stats.noData" = "No data";
 "stats.totalDistance" = "Total Distance";
 "stats.totalTrail" = "Total Points";
+"stats.runCount.single" = "%d run";
+"stats.runCount.multiple" = "%d runs";
+"stats.periodSummary" = "%@ • %@ • %@ points";
+"stats.periodSummary.loading" = "Preparing your summary...";
+"stats.delta.previousWeek" = "%@ vs last week";
+"stats.delta.previousMonth" = "%@ vs last month";
+"stats.delta.noComparison" = "Not enough data to compare";
+"stats.delta.newActivity" = "First activity this period";
 "stats.weekOverWeek" = "vs last week";
 "stats.trailChart" = "Points";
 "stats.distanceChart" = "Distance (km)";

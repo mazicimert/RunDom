@@ -1,5 +1,27 @@
 import Foundation
 
+private enum FormatterCache {
+    static let trail: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.maximumFractionDigits = 0
+        return f
+    }()
+
+    static func decimal(max: Int, min: Int) -> NumberFormatter {
+        let key = "\(max)-\(min)"
+        if let cached = decimalCache[key] { return cached }
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.maximumFractionDigits = max
+        f.minimumFractionDigits = min
+        decimalCache[key] = f
+        return f
+    }
+
+    private static var decimalCache: [String: NumberFormatter] = [:]
+}
+
 extension Double {
     private var appLocale: Locale {
         LocalizationManager.shared.locale
@@ -30,6 +52,12 @@ extension Double {
         String(format: "%.1f", locale: appLocale, self)
     }
 
+    func formattedDecimal(maxFractionDigits: Int, minFractionDigits: Int = 0) -> String {
+        let formatter = FormatterCache.decimal(max: maxFractionDigits, min: minFractionDigits)
+        formatter.locale = appLocale
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+    }
+
     /// Formats as pace in min/km (e.g. "5'30\"")
     var formattedPace: String {
         guard self > 0 else { return "--" }
@@ -41,9 +69,7 @@ extension Double {
 
     /// Formats as Trail points (e.g. "1,250")
     var formattedTrail: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0
+        let formatter = FormatterCache.trail
         formatter.locale = appLocale
         return formatter.string(from: NSNumber(value: self)) ?? "\(Int(self))"
     }

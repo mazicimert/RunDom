@@ -11,6 +11,8 @@ struct StatsTabView: View {
     @State private var showDeleteConfirmation = false
     @State private var deleteErrorMessage: String?
     @State private var hasCompletedInitialLoad = false
+    @State private var selectedTrailPoint: ChartDataPoint?
+    @State private var selectedDistancePoint: ChartDataPoint?
 
     var body: some View {
         Group {
@@ -28,6 +30,11 @@ struct StatsTabView: View {
                         }
                         .pickerStyle(.segmented)
                         .screenPadding()
+
+                        Text(statsVM.periodSummaryText)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                            .screenPadding()
 
                         // Summary Cards
                         summarySection
@@ -67,6 +74,10 @@ struct StatsTabView: View {
         }
         .navigationDestination(item: $selectedRun) { run in
             RunHistoryDetailView(run: run)
+        }
+        .onChange(of: statsVM.period) { _ in
+            selectedTrailPoint = nil
+            selectedDistancePoint = nil
         }
         .confirmationDialog(
             "run.delete.confirmTitle".localized,
@@ -110,31 +121,41 @@ struct StatsTabView: View {
     // MARK: - Summary Section
 
     private var summarySection: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+        VStack(spacing: 12) {
             StatCardView(
                 icon: "flame.fill",
-                value: statsVM.totalTrail.formattedTrail,
+                value: statsVM.heroTrailText,
                 label: "stats.totalTrail".localized,
-                iconColor: .orange
+                iconColor: .orange,
+                variant: .hero,
+                supportingText: statsVM.period.localized,
+                detailText: statsVM.trailDeltaText,
+                detailColor: statsVM.trailDeltaSummary.tone.color
             )
-            StatCardView(
-                icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
-                value: statsVM.totalDistanceText,
-                label: "stats.totalDistance".localized,
-                iconColor: .green
-            )
-            StatCardView(
-                icon: "figure.run",
-                value: "\(statsVM.totalRunsCount)",
-                label: "profile.totalRuns".localized,
-                iconColor: .blue
-            )
-            StatCardView(
-                icon: "hexagon.fill",
-                value: "\(statsVM.totalTerritories)",
-                label: "run.territories".localized,
-                iconColor: .purple
-            )
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                StatCardView(
+                    icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
+                    value: statsVM.totalDistanceCompactText,
+                    label: "stats.totalDistance".localized,
+                    iconColor: .green,
+                    variant: .compact
+                )
+                StatCardView(
+                    icon: "figure.run",
+                    value: "\(statsVM.totalRunsCount)",
+                    label: "profile.totalRuns".localized,
+                    iconColor: .blue,
+                    variant: .compact
+                )
+                StatCardView(
+                    icon: "hexagon.fill",
+                    value: "\(statsVM.totalTerritories)",
+                    label: "run.territories".localized,
+                    iconColor: .purple,
+                    variant: .compact
+                )
+            }
         }
         .screenPadding()
     }
@@ -142,26 +163,34 @@ struct StatsTabView: View {
     // MARK: - Chart Section
 
     private var chartSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("stats.trailChart".localized)
-                .font(.headline)
-
-            TrailChartView(data: statsVM.chartData)
-        }
-        .cardStyle()
+        TrailChartView(
+            title: "stats.trailChart".localized,
+            data: statsVM.chartData,
+            style: .bar,
+            accentColor: .orange,
+            insightText: statsVM.trailDeltaText,
+            insightColor: statsVM.trailDeltaSummary.tone.color,
+            valueFormatter: { "\($0.formattedTrail) \("trail.unit".localized)" },
+            axisValueFormatter: { $0.formattedTrail },
+            selectedPoint: $selectedTrailPoint
+        )
         .screenPadding()
     }
 
     // MARK: - Distance Chart Section
 
     private var distanceChartSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("stats.distanceChart".localized)
-                .font(.headline)
-
-            TrailChartView(data: statsVM.distanceChartData, barColor: .green)
-        }
-        .cardStyle()
+        TrailChartView(
+            title: "stats.distanceChart".localized,
+            data: statsVM.distanceChartData,
+            style: .lineArea,
+            accentColor: .green,
+            insightText: statsVM.distanceDeltaText,
+            insightColor: statsVM.distanceDeltaSummary.tone.color,
+            valueFormatter: { "\($0.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) km" },
+            axisValueFormatter: { $0.formattedDecimal(maxFractionDigits: 1) },
+            selectedPoint: $selectedDistancePoint
+        )
         .screenPadding()
     }
 
@@ -241,6 +270,11 @@ struct StatsTabView: View {
                 .screenPadding()
                 .disabled(true)
 
+                Text("stats.periodSummary.loading".localized)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .screenPadding()
+
                 skeletonSummarySection
                 skeletonChartSection(title: "stats.trailChart".localized)
                 skeletonChartSection(title: "stats.distanceChart".localized)
@@ -253,23 +287,39 @@ struct StatsTabView: View {
     }
 
     private var skeletonSummarySection: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            StatsSkeletonCard()
-            StatsSkeletonCard()
-            StatsSkeletonCard()
-            StatsSkeletonCard()
+        VStack(spacing: 12) {
+            StatsSkeletonHeroCard()
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                StatsSkeletonCard()
+                StatsSkeletonCard()
+                StatsSkeletonCard()
+            }
         }
         .screenPadding()
     }
 
     private func skeletonChartSection(title: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(.headline)
+                    StatsSkeletonBlock(width: 140, height: 12)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 6) {
+                    StatsSkeletonBlock(width: 62, height: 14)
+                    StatsSkeletonBlock(width: 76, height: 10)
+                }
+            }
 
             StatsSkeletonChart()
         }
-        .cardStyle()
+        .padding(AppConstants.UI.cardPadding)
+        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .screenPadding()
     }
 
@@ -321,16 +371,47 @@ struct StatsTabView: View {
 
 private struct StatsSkeletonCard: View {
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Circle()
                 .fill(Color.secondary.opacity(0.16))
-                .frame(width: 22, height: 22)
+                .frame(width: 34, height: 34)
 
-            StatsSkeletonBlock(width: 72, height: 22)
-            StatsSkeletonBlock(width: 58, height: 12)
+            Spacer(minLength: 0)
+
+            StatsSkeletonBlock(width: 54, height: 18)
+            StatsSkeletonBlock(width: 46, height: 10)
         }
-        .frame(maxWidth: .infinity)
-        .cardStyle()
+        .frame(maxWidth: .infinity, minHeight: 122, alignment: .leading)
+        .padding(14)
+        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private struct StatsSkeletonHeroCard: View {
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color.cardBackground)
+
+            Circle()
+                .fill(Color.secondary.opacity(0.12))
+                .frame(width: 180, height: 180)
+                .blur(radius: 24)
+                .offset(x: 180, y: -20)
+
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    StatsSkeletonBlock(width: 110, height: 32)
+                    Spacer()
+                    StatsSkeletonBlock(width: 88, height: 28)
+                }
+
+                StatsSkeletonBlock(width: 132, height: 42)
+                StatsSkeletonBlock(width: 86, height: 14)
+            }
+            .padding(20)
+        }
+        .frame(maxWidth: .infinity, minHeight: 172, alignment: .leading)
     }
 }
 

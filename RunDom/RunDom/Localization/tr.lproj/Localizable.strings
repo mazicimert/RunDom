@@ -321,6 +321,14 @@
 "stats.noData" = "Veri yok";
 "stats.totalDistance" = "Toplam Mesafe";
 "stats.totalTrail" = "Toplam Puan";
+"stats.runCount.single" = "%d koşu";
+"stats.runCount.multiple" = "%d koşu";
+"stats.periodSummary" = "%@ • %@ • %@ puan";
+"stats.periodSummary.loading" = "Özet hazırlanıyor...";
+"stats.delta.previousWeek" = "Geçen haftaya göre %@";
+"stats.delta.previousMonth" = "Geçen aya göre %@";
+"stats.delta.noComparison" = "Karşılaştırma için yeterli veri yok";
+"stats.delta.newActivity" = "Bu dönemin ilk aktivitesi";
 "stats.weekOverWeek" = "geçen haftaya göre";
 "stats.trailChart" = "Puanlar";
 "stats.distanceChart" = "Mesafe (km)";

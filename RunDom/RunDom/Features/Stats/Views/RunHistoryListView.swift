@@ -72,7 +72,7 @@ private struct RunHistoryRow: View {
 
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.28))
+                        .foregroundStyle(.secondary.opacity(0.5))
                         .padding(.top, 8)
                 }
 
@@ -103,7 +103,7 @@ private struct RunHistoryRow: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.04), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.04), lineWidth: 1)
         )
     }
 
@@ -111,17 +111,17 @@ private struct RunHistoryRow: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(run.trail.formattedTrail)
                 .font(.subheadline.bold().monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             Text("trail.unit".localized)
                 .font(.caption2.weight(.medium))
-                .foregroundStyle(.white.opacity(0.58))
+                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(
             Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.04))
+                .fill(Color.primary.opacity(0.04))
         )
     }
 
@@ -155,7 +155,7 @@ private struct RunHistoryRow: View {
         VStack(alignment: .leading, spacing: 5) {
             Text(value)
                 .font(.system(size: 18, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.62)
@@ -163,7 +163,7 @@ private struct RunHistoryRow: View {
 
             Text(title)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(.white.opacity(0.52))
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .allowsTightening(true)
@@ -205,7 +205,7 @@ private struct RunHistoryRouteThumbnail: View {
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.05), lineWidth: 1)
             )
 
             Image(systemName: run.mode == .boost ? "bolt.fill" : "figure.run")
@@ -261,7 +261,7 @@ private struct RunHistoryRouteThumbnail: View {
             .overlay(
                 Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
                     .font(.title3.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.18))
+                    .foregroundStyle(.primary.opacity(0.18))
             )
         }
     }

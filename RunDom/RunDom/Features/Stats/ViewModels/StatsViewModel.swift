@@ -12,6 +12,31 @@ enum StatsPeriod: String, CaseIterable {
     }
 }
 
+enum StatsDeltaTone {
+    case positive
+    case negative
+    case neutral
+    case unavailable
+
+    var color: Color {
+        switch self {
+        case .positive:
+            return .green
+        case .negative:
+            return .red
+        case .neutral:
+            return .secondary
+        case .unavailable:
+            return .secondary
+        }
+    }
+}
+
+struct StatsDeltaSummary {
+    let text: String
+    let tone: StatsDeltaTone
+}
+
 @MainActor
 final class StatsViewModel: ObservableObject {
 
@@ -46,12 +71,27 @@ final class StatsViewModel: ObservableObject {
         totalDistanceMeters.formattedDistanceFromMeters
     }
 
+    var totalDistanceCompactText: String {
+        "\(totalDistanceKm.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) km"
+    }
+
     var totalTrail: Double {
         filteredRuns.reduce(0) { $0 + $1.trail }
     }
 
+    var heroTrailText: String {
+        totalTrail.formattedTrail
+    }
+
     var totalRunsCount: Int {
         filteredRuns.count
+    }
+
+    var runCountSummaryText: String {
+        if totalRunsCount == 1 {
+            return "stats.runCount.single".localized(with: totalRunsCount)
+        }
+        return "stats.runCount.multiple".localized(with: totalRunsCount)
     }
 
     var totalTerritories: Int {
@@ -81,6 +121,42 @@ final class StatsViewModel: ObservableObject {
         buildChartData { $0.distance / 1000.0 }
     }
 
+    var previousPeriodTrailTotal: Double {
+        previousPeriodRuns.reduce(0) { $0 + $1.trail }
+    }
+
+    var previousPeriodDistanceTotal: Double {
+        previousPeriodRuns.reduce(0) { $0 + $1.distance }
+    }
+
+    var periodSummaryText: String {
+        "stats.periodSummary".localized(
+            with: runCountSummaryText,
+            totalDistanceText,
+            totalTrail.formattedTrail
+        )
+    }
+
+    var trailDeltaSummary: StatsDeltaSummary {
+        buildDeltaSummary(current: totalTrail, previous: previousPeriodTrailTotal, hasPreviousData: !previousPeriodRuns.isEmpty)
+    }
+
+    var distanceDeltaSummary: StatsDeltaSummary {
+        buildDeltaSummary(
+            current: totalDistanceKm,
+            previous: previousPeriodDistanceTotal / 1000.0,
+            hasPreviousData: !previousPeriodRuns.isEmpty
+        )
+    }
+
+    var trailDeltaText: String {
+        trailDeltaSummary.text
+    }
+
+    var distanceDeltaText: String {
+        distanceDeltaSummary.text
+    }
+
     private func buildChartData(valueFor: (RunSession) -> Double) -> [ChartDataPoint] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: filteredRuns) { run -> Date in
@@ -98,18 +174,84 @@ final class StatsViewModel: ObservableObject {
         }.reversed()
     }
 
-    private var filteredRuns: [RunSession] {
+    private var currentPeriodInterval: DateInterval? {
         let calendar = Calendar.current
         let now = Date()
 
-        return runs.filter { run in
-            switch period {
-            case .thisWeek:
-                return calendar.isDate(run.startDate, equalTo: now, toGranularity: .weekOfYear)
-            case .thisMonth:
-                return calendar.isDate(run.startDate, equalTo: now, toGranularity: .month)
-            }
+        switch period {
+        case .thisWeek:
+            return calendar.dateInterval(of: .weekOfYear, for: now)
+        case .thisMonth:
+            return calendar.dateInterval(of: .month, for: now)
         }
+    }
+
+    private var previousPeriodInterval: DateInterval? {
+        let calendar = Calendar.current
+
+        guard let currentPeriodInterval else { return nil }
+
+        switch period {
+        case .thisWeek:
+            guard let previousDate = calendar.date(byAdding: .weekOfYear, value: -1, to: currentPeriodInterval.start) else {
+                return nil
+            }
+            return calendar.dateInterval(of: .weekOfYear, for: previousDate)
+        case .thisMonth:
+            guard let previousDate = calendar.date(byAdding: .month, value: -1, to: currentPeriodInterval.start) else {
+                return nil
+            }
+            return calendar.dateInterval(of: .month, for: previousDate)
+        }
+    }
+
+    private var filteredRuns: [RunSession] {
+        guard let currentPeriodInterval else { return [] }
+        return runs.filter { currentPeriodInterval.contains($0.startDate) }
+    }
+
+    private var previousPeriodRuns: [RunSession] {
+        guard let previousPeriodInterval else { return [] }
+        return runs.filter { previousPeriodInterval.contains($0.startDate) }
+    }
+
+    private func buildDeltaSummary(current: Double, previous: Double, hasPreviousData: Bool) -> StatsDeltaSummary {
+        guard hasPreviousData else {
+            return StatsDeltaSummary(
+                text: "stats.delta.noComparison".localized,
+                tone: .unavailable
+            )
+        }
+
+        if previous == 0 {
+            if current == 0 {
+                return StatsDeltaSummary(
+                    text: "stats.delta.noComparison".localized,
+                    tone: .neutral
+                )
+            }
+            return StatsDeltaSummary(
+                text: "stats.delta.newActivity".localized,
+                tone: .positive
+            )
+        }
+
+        let deltaPercent = ((current - previous) / previous) * 100
+
+        let deltaTextKey = period == .thisWeek ? "stats.delta.previousWeek" : "stats.delta.previousMonth"
+        let tone: StatsDeltaTone
+        if deltaPercent > 0 {
+            tone = .positive
+        } else if deltaPercent < 0 {
+            tone = .negative
+        } else {
+            tone = .neutral
+        }
+
+        return StatsDeltaSummary(
+            text: deltaTextKey.localized(with: deltaPercent.formattedPercentChange),
+            tone: tone
+        )
     }
 
     // MARK: - Data Loading
@@ -119,7 +261,9 @@ final class StatsViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            let result = try await firestoreService.getRuns(userId: userId, limit: 100)
+            // Fetch enough runs to cover the current + previous period for delta comparison.
+            // Monthly view needs ~60 days of data; at ~3 runs/day that's ~180 runs.
+            let result = try await firestoreService.getRuns(userId: userId, limit: 200)
             runs = result.runs
         } catch {
             AppLogger.firebase.error("Failed to load stats: \(error.localizedDescription)")
@@ -133,7 +277,7 @@ final class StatsViewModel: ObservableObject {
 // MARK: - Chart Data Point
 
 struct ChartDataPoint: Identifiable {
-    let id = UUID()
+    var id: Date { date }
     let date: Date
     let value: Double
 }
