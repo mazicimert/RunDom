@@ -122,6 +122,8 @@
 "run.duration" = "Süre";
 "run.pace" = "Tempo";
 "run.avgSpeed" = "Ort. Hız";
+"run.maxSpeed" = "Maks. Hız";
+"run.uniqueZones" = "Tekil Bölge";
 "run.trailEarned" = "Kazanılan Puan";
 "run.territoriesCaptured" = "Fethedilen Bölge";
 "run.summary" = "Koşu Özeti";

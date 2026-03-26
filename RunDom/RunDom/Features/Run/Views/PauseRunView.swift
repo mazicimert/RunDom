@@ -70,13 +70,13 @@ struct PauseRunView: View {
     }
 }
 
-private struct SlideToFinishControl: View {
+struct SlideToFinishControl: View {
     let onComplete: () -> Void
 
     @State private var dragOffset: CGFloat = 0
     @State private var isCompleting = false
 
-    private let knobSize: CGFloat = 60
+    private let knobSize: CGFloat = 54
     private let horizontalInset: CGFloat = 6
 
     var body: some View {
@@ -139,6 +139,6 @@ private struct SlideToFinishControl: View {
                     )
             }
         }
-        .frame(height: 72)
+        .frame(height: 64)
     }
 }

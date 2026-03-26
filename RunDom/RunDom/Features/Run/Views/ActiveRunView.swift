@@ -9,6 +9,8 @@ struct ActiveRunView: View {
     @State private var showTerritoryConquestAnimation = false
     @State private var pendingTerritoryConquestAnimations = 0
     @State private var territoryAnimationId = 0
+    @State private var statsDetent: PresentationDetent = RunStatsOverlayView.compactDetent
+    @State private var showStatsSheet = true
 
     var body: some View {
         ZStack {
@@ -23,55 +25,6 @@ struct ActiveRunView: View {
                     Spacer()
                 }
                 .padding(.top, 60)
-            }
-
-            // Bottom stats + controls
-            VStack {
-                Spacer()
-
-                // Stats overlay
-                RunStatsOverlayView(
-                    currentSpeed: viewModel.currentSpeed,
-                    mode: viewModel.mode,
-                    isBoostActive: viewModel.isBoostActive,
-                    distance: viewModel.distanceKm,
-                    elapsedTime: viewModel.formattedElapsedTime,
-                    territories: viewModel.territoriesCaptured
-                )
-                .padding(.horizontal, AppConstants.UI.screenPadding)
-
-                // Control button
-                Button {
-                    Haptics.impact(.medium)
-                    viewModel.pauseRun()
-                } label: {
-                    Image(systemName: "pause.fill")
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 72, height: 72)
-                        .background(
-                            Circle()
-                                .fill(Color.orange)
-                                .shadow(color: .black.opacity(0.26), radius: 14, y: 8)
-                        )
-                }
-                .accessibilityLabel("run.pause".localized)
-                .padding(.top, 16)
-                .padding(.bottom, 40)
-            }
-
-            // Pause overlay
-            if viewModel.runState == .paused {
-                PauseRunView(
-                    elapsedTime: viewModel.formattedElapsedTime,
-                    distance: viewModel.distanceKm,
-                    onResume: { viewModel.resumeRun() },
-                    onStop: {
-                        let session = viewModel.stopRun()
-                        onFinish(session)
-                    }
-                )
-                .transition(.opacity)
             }
 
             if showCountdown {
@@ -126,6 +79,43 @@ struct ActiveRunView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showStatsSheet) {
+            RunStatsOverlayView(
+                currentSpeed: viewModel.currentSpeed,
+                avgSpeed: viewModel.avgSpeed,
+                maxSpeed: viewModel.maxSpeed,
+                pace: viewModel.pace,
+                mode: viewModel.mode,
+                isBoostActive: viewModel.isBoostActive,
+                distance: viewModel.distanceKm,
+                elapsedTime: viewModel.formattedElapsedTime,
+                territories: viewModel.territoriesCaptured,
+                uniqueZones: viewModel.uniqueZones.count,
+                runState: viewModel.runState,
+                gpsSignalLost: viewModel.gpsSignalLost,
+                onPause: {
+                    Haptics.impact(.medium)
+                    viewModel.pauseRun()
+                },
+                onResume: {
+                    Haptics.impact(.light)
+                    viewModel.resumeRun()
+                },
+                onStop: {
+                    let session = viewModel.stopRun()
+                    onFinish(session)
+                },
+                selectedDetent: $statsDetent
+            )
+            .presentationDetents(
+                [RunStatsOverlayView.compactDetent, RunStatsOverlayView.expandedDetent],
+                selection: $statsDetent
+            )
+            .presentationBackgroundInteraction(.enabled(upThrough: RunStatsOverlayView.compactDetent))
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(30)
+            .interactiveDismissDisabled()
         }
         .onAppear {
             guard !hasStartedRun else { return }

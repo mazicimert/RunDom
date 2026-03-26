@@ -129,23 +129,18 @@ private struct RunHistoryRow: View {
         Button(role: .destructive) {
             action()
         } label: {
-            HStack(spacing: 5) {
-                Image(systemName: "trash")
-                    .font(.caption.weight(.bold))
-                Text("common.delete".localized)
-                    .font(.caption.weight(.bold))
-            }
-            .foregroundStyle(.red)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(Color.red.opacity(0.12))
-            )
-            .overlay(
-                Capsule(style: .continuous)
-                    .stroke(Color.red.opacity(0.28), lineWidth: 1)
-            )
+            Image(systemName: "trash")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.red)
+                .frame(width: 44, height: 44)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(Color.red.opacity(0.12))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(Color.red.opacity(0.28), lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("common.delete".localized)

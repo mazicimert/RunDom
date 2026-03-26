@@ -122,6 +122,8 @@
 "run.duration" = "Duration";
 "run.pace" = "Pace";
 "run.avgSpeed" = "Avg Speed";
+"run.maxSpeed" = "Max Speed";
+"run.uniqueZones" = "Unique Zones";
 "run.trailEarned" = "Points Earned";
 "run.territoriesCaptured" = "Territories Captured";
 "run.summary" = "Run Summary";
