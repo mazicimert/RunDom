@@ -21,6 +21,7 @@ struct MapTabView: View {
                 selectedTerritoryId: viewModel.selectedTerritory?.h3Index,
                 currentUserId: appState.currentUser?.id,
                 dropzones: [],
+                mapType: viewModel.mapStyle.mkMapType,
                 onTerritoryTapped: { viewModel.selectTerritory($0) },
                 onMapBackgroundTapped: { viewModel.clearSelection() },
                 onDropzoneTapped: nil
@@ -34,14 +35,17 @@ struct MapTabView: View {
                 Spacer()
 
                 // Bottom Controls
-                HStack {
+                HStack(alignment: .bottom) {
                     // Territory Count Badge
                     territoryCountBadge
 
                     Spacer()
 
-                    // Center on User Button
-                    centerButton
+                    VStack(spacing: 12) {
+                        zoomInButton
+                        zoomOutButton
+                        centerButton
+                    }
                 }
                 .padding(.horizontal, AppConstants.UI.screenPadding)
                 .padding(.bottom, 16)
@@ -130,7 +134,37 @@ struct MapTabView: View {
             }
 
             Spacer(minLength: 0)
+
+            mapStyleMenu
         }
+    }
+
+    private var mapStyleMenu: some View {
+        Menu {
+            Picker(
+                "map.style.title".localized,
+                selection: Binding(
+                    get: { viewModel.mapStyle },
+                    set: { newValue in
+                        Haptics.selection()
+                        viewModel.mapStyle = newValue
+                    }
+                )
+            ) {
+                ForEach(MapStyleOption.allCases) { option in
+                    Text(option.titleKey.localized).tag(option)
+                }
+            }
+        } label: {
+            Image(systemName: "map")
+                .font(.caption.bold())
+                .foregroundStyle(mapControlForegroundColor)
+                .frame(width: 36, height: 36)
+                .background(mapControlBackgroundColor, in: Circle())
+                .overlay(Circle().stroke(mapControlBorderColor, lineWidth: 1))
+                .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
+        }
+        .accessibilityLabel("accessibility.map.style".localized)
     }
 
     private func selectedTerritoryCallout(territory: Territory) -> some View {
@@ -230,7 +264,39 @@ struct MapTabView: View {
         .accessibilityAddTraits(.isStaticText)
     }
 
-    // MARK: - Center Button
+    // MARK: - Zoom & Center Buttons
+
+    private var zoomInButton: some View {
+        Button {
+            Haptics.selection()
+            viewModel.zoomIn()
+        } label: {
+            Image(systemName: "plus.magnifyingglass")
+                .font(.body.bold())
+                .foregroundStyle(mapControlForegroundColor)
+                .frame(width: 44, height: 44)
+                .background(mapControlBackgroundColor, in: Circle())
+                .overlay(Circle().stroke(mapControlBorderColor, lineWidth: 1))
+                .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
+        }
+        .accessibilityLabel("accessibility.map.zoomIn".localized)
+    }
+
+    private var zoomOutButton: some View {
+        Button {
+            Haptics.selection()
+            viewModel.zoomOut()
+        } label: {
+            Image(systemName: "minus.magnifyingglass")
+                .font(.body.bold())
+                .foregroundStyle(mapControlForegroundColor)
+                .frame(width: 44, height: 44)
+                .background(mapControlBackgroundColor, in: Circle())
+                .overlay(Circle().stroke(mapControlBorderColor, lineWidth: 1))
+                .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
+        }
+        .accessibilityLabel("accessibility.map.zoomOut".localized)
+    }
 
     private var centerButton: some View {
         Button {
@@ -277,6 +343,7 @@ struct TerritoryMapView: UIViewRepresentable {
     let selectedTerritoryId: String?
     let currentUserId: String?
     let dropzones: [Dropzone]
+    var mapType: MKMapType = .standard
     var onTerritoryTapped: ((Territory) -> Void)?
     var onMapBackgroundTapped: (() -> Void)?
     var onDropzoneTapped: ((Dropzone) -> Void)?
@@ -288,7 +355,7 @@ struct TerritoryMapView: UIViewRepresentable {
         mapView.setRegion(region, animated: false)
         mapView.showsCompass = true
         mapView.isRotateEnabled = false
-        mapView.mapType = .standard
+        mapView.mapType = mapType
 
         let tapGesture = UITapGestureRecognizer(
             target: context.coordinator,
@@ -308,13 +375,25 @@ struct TerritoryMapView: UIViewRepresentable {
         context.coordinator.onMapBackgroundTapped = onMapBackgroundTapped
         context.coordinator.onDropzoneTapped = onDropzoneTapped
 
+        if mapView.mapType != mapType {
+            mapView.mapType = mapType
+        }
+
         // Apply programmatic region changes
         let currentCenter = mapView.region.center
         let targetCenter = region.center
-        let threshold = 0.0001  // ~11 meters
-        if abs(currentCenter.latitude - targetCenter.latitude) > threshold
-            || abs(currentCenter.longitude - targetCenter.longitude) > threshold
-        {
+        let currentSpan = mapView.region.span
+        let targetSpan = region.span
+        let centerThreshold = 0.0001  // ~11 meters
+        let centerChanged = abs(currentCenter.latitude - targetCenter.latitude) > centerThreshold
+            || abs(currentCenter.longitude - targetCenter.longitude) > centerThreshold
+        // Span delta threshold is relative so it triggers at any zoom level.
+        let spanChanged =
+            abs(currentSpan.latitudeDelta - targetSpan.latitudeDelta)
+                > currentSpan.latitudeDelta * 0.05
+            || abs(currentSpan.longitudeDelta - targetSpan.longitudeDelta)
+                > currentSpan.longitudeDelta * 0.05
+        if centerChanged || spanChanged {
             context.coordinator.isUpdatingRegion = true
             mapView.setRegion(region, animated: true)
             // Reset flag after animation completes

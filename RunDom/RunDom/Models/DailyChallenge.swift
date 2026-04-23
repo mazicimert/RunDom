@@ -19,14 +19,18 @@ enum DailyChallengeMetricType: String, Codable, CaseIterable {
             return "challenge.duration.value".localized(with: Int(value.rounded()))
         case .distanceMeters:
             let locale = LocalizationManager.shared.locale
-            let kilometers = value / 1000.0
+            let distanceValue = UnitPreference.distanceValue(
+                fromKilometers: value / 1000.0,
+                useMiles: UnitPreference.shared.useMiles
+            )
             let formatter = NumberFormatter()
             formatter.numberStyle = .decimal
-            formatter.minimumFractionDigits = kilometers.truncatingRemainder(dividingBy: 1) == 0 ? 0 : 1
+            formatter.minimumFractionDigits = distanceValue.truncatingRemainder(dividingBy: 1) == 0 ? 0 : 1
             formatter.maximumFractionDigits = formatter.minimumFractionDigits
             formatter.locale = locale
-            let number = formatter.string(from: NSNumber(value: kilometers)) ?? String(format: "%.1f", locale: locale, kilometers)
-            return "challenge.distance.value".localized(with: number)
+            let number = formatter.string(from: NSNumber(value: distanceValue))
+                ?? String(format: "%.1f", locale: locale, distanceValue)
+            return "challenge.distance.value".localized(with: number, UnitPreference.shared.distanceUnitLabel)
         }
     }
 }

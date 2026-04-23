@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct RunStatsOverlayView: View {
+    @EnvironmentObject private var unitPreference: UnitPreference
     let currentSpeed: Double
     let avgSpeed: Double
     let maxSpeed: Double
@@ -71,7 +72,7 @@ struct RunStatsOverlayView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
 
-                Text("km/h")
+                Text(unitPreference.speedUnitLabel)
                     .font(.headline.weight(.bold))
                     .foregroundStyle(sheetSecondaryText)
                     .offset(y: -2)
@@ -139,19 +140,19 @@ struct RunStatsOverlayView: View {
             ], spacing: 12) {
                 statCard(
                     value: currentSpeed.formattedCompactSpeedValue,
-                    unit: "km/h",
+                    unit: unitPreference.speedUnitLabel,
                     label: "run.speedShort".localized,
                     valueColor: speedColor
                 )
                 statCard(
                     value: avgSpeed.formattedCompactSpeedValue,
-                    unit: "km/h",
+                    unit: unitPreference.speedUnitLabel,
                     label: "run.avgSpeed".localized,
                     valueColor: sheetPrimaryText
                 )
                 statCard(
                     value: pace,
-                    unit: "/km",
+                    unit: unitPreference.paceUnitLabel,
                     label: "run.pace".localized,
                     valueColor: sheetPrimaryText
                 )
@@ -301,11 +302,19 @@ struct RunStatsOverlayView: View {
         } else if currentSpeed >= threshold {
             return "run.boostApproaching".localized
         }
-        return String(format: "%.0f km/h %@", threshold, "run.boostRequired".localized)
+        let thresholdText = UnitPreference.speedValue(
+            fromKilometersPerHour: threshold,
+            useMiles: unitPreference.useMiles
+        ).formattedDecimal(maxFractionDigits: 0)
+        return "\(thresholdText) \(unitPreference.speedUnitLabel) \("run.boostRequired".localized)"
     }
 
     private var distanceText: String {
-        "\(distance.formattedDecimal(maxFractionDigits: 2, minFractionDigits: 2)) km"
+        let convertedDistance = UnitPreference.distanceValue(
+            fromKilometers: distance,
+            useMiles: unitPreference.useMiles
+        )
+        return "\(convertedDistance.formattedDecimal(maxFractionDigits: 2, minFractionDigits: 2)) \(unitPreference.distanceUnitLabel)"
     }
 
     private var sheetPrimaryText: Color {

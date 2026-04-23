@@ -26,6 +26,14 @@
 "trail.unit" = "Points";
 "trail.points" = "%@ points";
 
+// MARK: - Measurement Units
+"unit.distance.km" = "km";
+"unit.distance.mi" = "mi";
+"unit.speed.kmh" = "km/h";
+"unit.speed.mph" = "mph";
+"unit.pace.km" = "/km";
+"unit.pace.mi" = "/mi";
+
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Conquer Your City";
 "onboarding.slide1.subtitle" = "See real zones on the map and paint them with your color by running.";
@@ -210,6 +218,23 @@
 "run.delete.confirmMessage" = "This run will be permanently deleted.";
 "run.delete.failed" = "Failed to delete run.";
 
+// MARK: - Run Review
+"run.review.title" = "How was your run?";
+"run.review.rate" = "Rate your run";
+"run.review.tags" = "Add tags";
+"run.review.note" = "Leave a note...";
+"run.review.save" = "Save Review";
+"run.review.button" = "Rate Your Run";
+"run.review.edit" = "Edit Review";
+"tag.morning" = "Morning";
+"tag.evening" = "Evening";
+"tag.rainy" = "Rainy";
+"tag.hot" = "Hot";
+"tag.tempo" = "Tempo Run";
+"tag.long" = "Long Run";
+"tag.race" = "Race";
+"tag.addCustom" = "+ Add";
+
 // MARK: - Daily Challenge
 "challenge.loading" = "Loading daily challenges...";
 "challenge.sectionTitle" = "Daily Challenge";
@@ -223,7 +248,7 @@
 "challenge.duration.title" = "Complete %d min in total today";
 "challenge.distance.title" = "Complete %@ in total today";
 "challenge.duration.value" = "%d min";
-"challenge.distance.value" = "%@ km";
+"challenge.distance.value" = "%@ %@";
 "challenge.progress.value" = "%@ / %@";
 "challenge.reward.value" = "+%@ trail";
 "challenge.reward.granted" = "Daily challenge bonus: +%@ trail";
@@ -274,6 +299,10 @@
 "map.territoriesOwned" = "%d territories";
 "map.ownerCalloutMeta" = "Active %@ | %@";
 "map.ownerCalloutNoArea" = "Area unknown";
+"map.style.title" = "Map Style";
+"map.style.standard" = "Standard";
+"map.style.hybrid" = "Hybrid";
+"map.style.satellite" = "Satellite";
 
 // MARK: - Profile
 "profile.totalTrail" = "Total Points";
@@ -333,7 +362,7 @@
 "stats.delta.newActivity" = "First activity this period";
 "stats.weekOverWeek" = "vs last week";
 "stats.trailChart" = "Points";
-"stats.distanceChart" = "Distance (km)";
+"stats.distanceChart" = "Distance";
 "stats.date" = "Date";
 "stats.uniqueZones" = "Unique Zones";
 "stats.week" = "Week %d, %d";
@@ -366,11 +395,11 @@
 "badge.first_run.name" = "First Steps";
 "badge.first_run.description" = "Complete your first run.";
 "badge.distance_5k.name" = "5K Runner";
-"badge.distance_5k.description" = "Complete a single run of 5 km.";
+"badge.distance_5k.description" = "Complete a single run of %@.";
 "badge.distance_10k.name" = "10K Runner";
-"badge.distance_10k.description" = "Complete a single run of 10 km.";
+"badge.distance_10k.description" = "Complete a single run of %@.";
 "badge.total_distance_100k.name" = "Centurion";
-"badge.total_distance_100k.description" = "Reach 100 km total running distance.";
+"badge.total_distance_100k.description" = "Reach %@ total running distance.";
 "badge.boost_5.name" = "Boost Pilot";
 "badge.boost_5.description" = "Finish 5 runs in Boost mode.";
 "badge.first_territory.name" = "First Capture";
@@ -415,6 +444,10 @@
 "settings.enabled" = "Enabled";
 "settings.enable" = "Enable";
 "settings.language" = "Language";
+"settings.voiceFeedback" = "Voice Km Feedback";
+"settings.unit" = "Distance Unit";
+"settings.unit.km" = "Kilometers (km)";
+"settings.unit.miles" = "Miles (mi)";
 "settings.language.turkish" = "Turkish";
 "settings.language.english" = "English";
 "settings.account" = "Account";
@@ -433,7 +466,10 @@
 "accessibility.notSelected" = "Not selected";
 "accessibility.run.startHint" = "Double tap to start your run";
 "accessibility.map.centerOnUser" = "Center map on my location";
+"accessibility.map.style" = "Change map style";
 "accessibility.map.territoryCount" = "%d territories conquered";
+"accessibility.map.zoomIn" = "Zoom in";
+"accessibility.map.zoomOut" = "Zoom out";
 "accessibility.badge.locked" = "Locked badge";
 "accessibility.badge.unlocked" = "Unlocked badge";
 "accessibility.leaderboard.rank" = "Rank %d";

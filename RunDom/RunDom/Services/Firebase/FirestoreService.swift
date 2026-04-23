@@ -249,6 +249,24 @@ final class FirestoreService {
         return runs.reduce(0) { $0 + $1.trail }
     }
 
+    func updateRunReview(runId: String, review: RunReview) async throws {
+        var updates: [String: Any] = [
+            "tags": review.tags
+        ]
+        if let rating = review.rating {
+            updates["rating"] = rating
+        } else {
+            updates["rating"] = FieldValue.delete()
+        }
+        if let note = review.note, !note.isEmpty {
+            updates["note"] = note
+        } else {
+            updates["note"] = FieldValue.delete()
+        }
+        try await runsCollection.document(runId).updateData(updates)
+        AppLogger.firebase.info("Run review updated: \(runId)")
+    }
+
     func deleteRun(_ run: RunSession) async throws {
         try await runsCollection.document(run.id).delete()
 

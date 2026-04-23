@@ -9,6 +9,8 @@ struct PostRunSummaryView: View {
     @State private var showConfetti = false
     @State private var showStreakFire = false
     @State private var isGalleryPresented = false
+    @State private var showReviewSheet = false
+    @State private var reviewBinding: RunReview?
     let onDismiss: () -> Void
 
     init(session: RunSession, onDismiss: @escaping () -> Void) {
@@ -55,6 +57,8 @@ struct PostRunSummaryView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .summarySurface(fill: summaryCardFill)
                         }
+
+                        reviewActionSection
                     }
                     .padding(.horizontal, AppConstants.UI.screenPadding)
                     .padding(.top, 14)
@@ -78,6 +82,11 @@ struct PostRunSummaryView: View {
             }
             .fullScreenCover(isPresented: $isGalleryPresented) {
                 RunGalleryView(session: viewModel.session)
+            }
+            .sheet(isPresented: $showReviewSheet) {
+                RunReviewSheet(review: $reviewBinding) { review in
+                    viewModel.submitReview(review)
+                }
             }
             .task {
                 if let user = appState.currentUser {
@@ -458,6 +467,33 @@ struct PostRunSummaryView: View {
             }
         }
         .summarySurface(fill: summaryCardFill)
+    }
+
+    private var reviewActionSection: some View {
+        VStack(spacing: 10) {
+            Button {
+                reviewBinding = viewModel.review
+                showReviewSheet = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: viewModel.review?.hasContent == true ? "star.fill" : "star")
+                    Text(viewModel.review?.hasContent == true
+                         ? "run.review.edit".localized
+                         : "run.review.button".localized)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(SecondaryButtonStyle())
+
+            Button {
+                onDismiss()
+            } label: {
+                Text("common.done".localized)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(viewModel.isSaving)
+        }
+        .padding(.top, 4)
     }
 
     private var bottomActionBar: some View {

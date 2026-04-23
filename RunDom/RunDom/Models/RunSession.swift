@@ -29,6 +29,9 @@ struct RunSession: Codable, Identifiable, Equatable, Hashable {
     var route: [RoutePoint] = []
     var isBoostActive: Bool = true
     var seasonId: String?
+    var rating: Int?
+    var tags: [String] = []
+    var note: String?
 
     var duration: TimeInterval {
         let end = endDate ?? Date()

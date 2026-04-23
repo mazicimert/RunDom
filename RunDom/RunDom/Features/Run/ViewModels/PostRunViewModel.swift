@@ -12,6 +12,7 @@ final class PostRunViewModel: ObservableObject {
     @Published var didExtendStreak = false
     @Published var newStreakDays: Int?
     @Published var dailyChallengeReward: DailyChallengeReward?
+    @Published var review: RunReview?
 
     // MARK: - Properties
 
@@ -82,6 +83,9 @@ final class PostRunViewModel: ObservableObject {
 
         trailResult = result
         session.trail = result.totalTrail
+        session.rating = review?.rating
+        session.tags = review?.tags ?? []
+        session.note = review?.note
 
         let detectedNeighborhood = await detectedNeighborhoodFromRun()
 
@@ -127,6 +131,24 @@ final class PostRunViewModel: ObservableObject {
         }
 
         isSaving = false
+    }
+
+    func submitReview(_ newReview: RunReview) {
+        review = newReview
+        session.rating = newReview.rating
+        session.tags = newReview.tags
+        session.note = newReview.note
+
+        guard isSaved else { return }
+
+        let runId = session.id
+        Task {
+            do {
+                try await firestoreService.updateRunReview(runId: runId, review: newReview)
+            } catch {
+                AppLogger.firebase.warning("Failed to update run review: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func detectedNeighborhoodFromRun() async -> String? {
@@ -216,7 +238,12 @@ final class PostRunViewModel: ObservableObject {
         }
 
         if result.speedMultiplier == 0 {
-            return "run.summary.reason.speedThreshold".localized(with: String(format: "%.0f km/h", AppConstants.Game.minSpeedKmh))
+            let threshold = UnitPreference.speedValue(
+                fromKilometersPerHour: AppConstants.Game.minSpeedKmh,
+                useMiles: UnitPreference.shared.useMiles
+            )
+            let thresholdText = "\(threshold.formattedDecimal(maxFractionDigits: 0)) \(UnitPreference.shared.speedUnitLabel)"
+            return "run.summary.reason.speedThreshold".localized(with: thresholdText)
         }
 
         return nil

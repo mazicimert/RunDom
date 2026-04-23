@@ -32,11 +32,11 @@ struct SpeedIndicatorView: View {
     var body: some View {
         VStack(spacing: 4) {
             // Speed value
-            Text(String(format: "%.1f", currentSpeed))
+            Text(currentSpeed.formattedCompactSpeedValue)
                 .font(.system(size: 48, weight: .bold, design: .rounded))
                 .foregroundStyle(speedColor)
 
-            Text("km/h")
+            Text(UnitPreference.shared.speedUnitLabel)
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -78,6 +78,10 @@ struct SpeedIndicatorView: View {
         } else if diff >= 0 {
             return "run.boostApproaching".localized
         }
-        return String(format: "%.0f km/h %@", threshold, "run.boostRequired".localized)
+        let thresholdText = UnitPreference.speedValue(
+            fromKilometersPerHour: threshold,
+            useMiles: UnitPreference.shared.useMiles
+        ).formattedDecimal(maxFractionDigits: 0)
+        return "\(thresholdText) \(UnitPreference.shared.speedUnitLabel) \("run.boostRequired".localized)"
     }
 }

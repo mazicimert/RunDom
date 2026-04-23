@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var localizationManager: LocalizationManager
+    @EnvironmentObject private var unitPreference: UnitPreference
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: SettingsViewModel
 
@@ -42,6 +43,25 @@ struct SettingsView: View {
                             .tag(AppLanguage.english.rawValue)
                     }
                     .pickerStyle(.segmented)
+                }
+
+                Section {
+                    Toggle("settings.voiceFeedback".localized, isOn: $viewModel.isVoiceFeedbackEnabled)
+                }
+
+                Section {
+                    Toggle(isOn: $unitPreference.useMiles) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("settings.unit".localized)
+                            Text(
+                                unitPreference.useMiles
+                                    ? "settings.unit.miles".localized
+                                    : "settings.unit.km".localized
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
                 }
 
                 // Account
@@ -136,4 +156,5 @@ struct SettingsView: View {
     SettingsView(authService: AuthService())
         .environmentObject(AppState())
         .environmentObject(LocalizationManager.shared)
+        .environmentObject(UnitPreference.shared)
 }

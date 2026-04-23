@@ -94,26 +94,28 @@ private struct LeaderboardFilterCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top) {
                     Text("leaderboard.activeBoard".localized)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
 
-                    Text(contextHeadline)
-                        .font(.title3.bold())
-                        .foregroundStyle(.primary)
+                    Spacer(minLength: 8)
 
-                    Text(contextDescription)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer(minLength: 12)
-
-                if selectedPeriod == .weekly {
                     WeeklySeasonCountdownPill()
+                        .opacity(selectedPeriod == .weekly ? 1 : 0)
                 }
+
+                Text(contextHeadline)
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(contextDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .frame(minHeight: 32, alignment: .top)
             }
 
             HStack(spacing: 10) {

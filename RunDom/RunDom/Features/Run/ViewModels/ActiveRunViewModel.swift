@@ -60,6 +60,8 @@ final class ActiveRunViewModel: ObservableObject {
     private var previousRoutePoint: RoutePoint?
     private var speedSamples: [Double] = []
     private var currentSeasonId: String?
+    private var lastMilestoneKm: Int = 0
+    private var lastMilestoneElapsedTime: TimeInterval = 0
 
     // MARK: - Init
 
@@ -170,6 +172,7 @@ final class ActiveRunViewModel: ObservableObject {
             // Calculate distance
             let segmentDistance = prev.coordinate.distance(to: point.coordinate)
             distance += segmentDistance
+            triggerKilometerMilestoneIfNeeded()
         }
 
         // Add to route
@@ -197,6 +200,27 @@ final class ActiveRunViewModel: ObservableObject {
                 AppLogger.run.info("Boost cancelled: avg speed \(self.avgSpeed) < threshold")
             }
         }
+    }
+
+    // MARK: - Kilometer Milestones
+
+    private func triggerKilometerMilestoneIfNeeded() {
+        let useMiles = UnitPreference.shared.useMiles
+        let metersPerUnit = useMiles ? (1000.0 / UnitPreference.milesPerKilometer) : 1000.0
+        let currentUnit = Int(distance / metersPerUnit)
+        guard currentUnit > lastMilestoneKm else { return }
+        let paceSecondsPerUnit = elapsedTime - lastMilestoneElapsedTime
+        lastMilestoneKm = currentUnit
+        lastMilestoneElapsedTime = elapsedTime
+        Haptics.notification(.success)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            Haptics.impact(.heavy)
+        }
+        RunAudioService.shared.announceKilometer(
+            km: currentUnit,
+            paceSecondsPerKm: paceSecondsPerUnit,
+            useMiles: useMiles
+        )
     }
 
     // MARK: - Territory Capture
@@ -273,6 +297,9 @@ final class ActiveRunViewModel: ObservableObject {
         locationManager.stopTracking()
         motionManager.stopMonitoring()
         cancellables.removeAll()
+        lastMilestoneKm = 0
+        lastMilestoneElapsedTime = 0
+        RunAudioService.shared.stopSpeaking()
 
         // Build session
         let session = RunSession(

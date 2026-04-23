@@ -26,6 +26,14 @@
 "trail.unit" = "Puan";
 "trail.points" = "%@ Puan";
 
+// MARK: - Measurement Units
+"unit.distance.km" = "km";
+"unit.distance.mi" = "mi";
+"unit.speed.kmh" = "km/h";
+"unit.speed.mph" = "mph";
+"unit.pace.km" = "/km";
+"unit.pace.mi" = "/mi";
+
 // MARK: - Onboarding
 "onboarding.slide1.title" = "Şehrini Fethet";
 "onboarding.slide1.subtitle" = "Haritada gerçek bölgeleri gör, koşarak alanları kendi renginle kapla.";
@@ -210,6 +218,23 @@
 "run.delete.confirmMessage" = "Bu koşu kalıcı olarak silinir.";
 "run.delete.failed" = "Koşu silinemedi.";
 
+// MARK: - Run Review
+"run.review.title" = "Koşun nasıldı?";
+"run.review.rate" = "Koşunu puanla";
+"run.review.tags" = "Etiket ekle";
+"run.review.note" = "Bir not bırak...";
+"run.review.save" = "Değerlendirmeyi Kaydet";
+"run.review.button" = "Koşunu Değerlendir";
+"run.review.edit" = "Değerlendirmeyi Düzenle";
+"tag.morning" = "Sabah";
+"tag.evening" = "Akşam";
+"tag.rainy" = "Yağmurlu";
+"tag.hot" = "Sıcak";
+"tag.tempo" = "Tempo";
+"tag.long" = "Uzun";
+"tag.race" = "Yarışma";
+"tag.addCustom" = "+ Ekle";
+
 // MARK: - Daily Challenge
 "challenge.loading" = "Günlük görevler yükleniyor...";
 "challenge.sectionTitle" = "Günlük Görev";
@@ -223,7 +248,7 @@
 "challenge.duration.title" = "Bugün toplam %d dk tamamla";
 "challenge.distance.title" = "Bugün toplam %@ tamamla";
 "challenge.duration.value" = "%d dk";
-"challenge.distance.value" = "%@ km";
+"challenge.distance.value" = "%@ %@";
 "challenge.progress.value" = "%@ / %@";
 "challenge.reward.value" = "+%@ trail";
 "challenge.reward.granted" = "Günlük görev bonusu: +%@ trail";
@@ -274,6 +299,10 @@
 "map.territoriesOwned" = "%d bölge";
 "map.ownerCalloutMeta" = "Aktif %@ | %@";
 "map.ownerCalloutNoArea" = "Bölge bilinmiyor";
+"map.style.title" = "Harita Türü";
+"map.style.standard" = "Standart";
+"map.style.hybrid" = "Hibrit";
+"map.style.satellite" = "Uydu";
 
 // MARK: - Profile
 "profile.totalTrail" = "Toplam Puan";
@@ -333,7 +362,7 @@
 "stats.delta.newActivity" = "Bu dönemin ilk aktivitesi";
 "stats.weekOverWeek" = "geçen haftaya göre";
 "stats.trailChart" = "Puanlar";
-"stats.distanceChart" = "Mesafe (km)";
+"stats.distanceChart" = "Mesafe";
 "stats.date" = "Tarih";
 "stats.uniqueZones" = "Benzersiz Bölge";
 "stats.week" = "Hafta %d, %d";
@@ -366,11 +395,11 @@
 "badge.first_run.name" = "İlk Adım";
 "badge.first_run.description" = "İlk koşunu tamamla.";
 "badge.distance_5k.name" = "5K Koşucusu";
-"badge.distance_5k.description" = "Tek bir koşuda 5 km tamamla.";
+"badge.distance_5k.description" = "Tek bir koşuda %@ tamamla.";
 "badge.distance_10k.name" = "10K Koşucusu";
-"badge.distance_10k.description" = "Tek bir koşuda 10 km tamamla.";
+"badge.distance_10k.description" = "Tek bir koşuda %@ tamamla.";
 "badge.total_distance_100k.name" = "Yüzlük Kulübü";
-"badge.total_distance_100k.description" = "Toplamda 100 km koşu mesafesine ulaş.";
+"badge.total_distance_100k.description" = "Toplamda %@ koşu mesafesine ulaş.";
 "badge.boost_5.name" = "Boost Pilotu";
 "badge.boost_5.description" = "Boost modunda 5 koşu bitir.";
 "badge.first_territory.name" = "İlk Fetih";
@@ -415,6 +444,10 @@
 "settings.enabled" = "Açık";
 "settings.enable" = "Aç";
 "settings.language" = "Dil";
+"settings.voiceFeedback" = "Sesli Km Bildirimi";
+"settings.unit" = "Mesafe Birimi";
+"settings.unit.km" = "Kilometre (km)";
+"settings.unit.miles" = "Mil (mi)";
 "settings.language.turkish" = "Türkçe";
 "settings.language.english" = "English";
 "settings.account" = "Hesap";
@@ -433,7 +466,10 @@
 "accessibility.notSelected" = "Seçili değil";
 "accessibility.run.startHint" = "Koşuyu başlatmak için çift dokunun";
 "accessibility.map.centerOnUser" = "Haritayı konumuma ortala";
+"accessibility.map.style" = "Harita türünü değiştir";
 "accessibility.map.territoryCount" = "%d bölge fethedildi";
+"accessibility.map.zoomIn" = "Yakınlaştır";
+"accessibility.map.zoomOut" = "Uzaklaştır";
 "accessibility.badge.locked" = "Kilitli rozet";
 "accessibility.badge.unlocked" = "Açılmış rozet";
 "accessibility.leaderboard.rank" = "%d. sıra";

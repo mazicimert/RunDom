@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PreRunView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var unitPreference: UnitPreference
     @StateObject private var viewModel: PreRunViewModel
     let onStartRun: (RunMode) -> Void
 
@@ -11,50 +12,49 @@ struct PreRunView: View {
     }
 
     var body: some View {
-        VStack(spacing: 14) {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    headerSection
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 28) {
+                headerSection
+                    .padding(.horizontal, AppConstants.UI.screenPadding)
+
+                modesSection
+
+                dailyChallengeSection
+
+                if let reward = viewModel.dailyChallengeReward {
+                    rewardBanner(reward)
                         .padding(.horizontal, AppConstants.UI.screenPadding)
-
-                    modesSection
-
-                    dailyChallengeSection
-
-                    if let reward = viewModel.dailyChallengeReward {
-                        rewardBanner(reward)
-                            .padding(.horizontal, AppConstants.UI.screenPadding)
-                    }
                 }
-                .padding(.vertical, 24)
-            }
-            .refreshable {
-                await reloadScreen()
-            }
 
-            footerStatusRow
-
-            Button {
-                guard viewModel.canStartRun() else { return }
-                Haptics.impact(.medium)
-                onStartRun(viewModel.selectedMode)
-            } label: {
-                Label("run.start".localized, systemImage: "play.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
+                if !viewModel.isLocationReady || viewModel.streakInfo != nil {
+                    footerStatusRow
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, AppConstants.UI.screenPadding)
+                }
             }
-            .buttonStyle(PrimaryButtonStyle())
-            .disabled(!viewModel.isLocationReady)
+            .padding(.vertical, 24)
+        }
+        .refreshable {
+            await reloadScreen()
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 8) {
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .transition(.opacity)
+                }
+
+                StartRunButton(isEnabled: viewModel.isLocationReady) {
+                    guard viewModel.canStartRun() else { return }
+                    Haptics.impact(.medium)
+                    onStartRun(viewModel.selectedMode)
+                }
+                .accessibilityHint("accessibility.run.startHint".localized)
+            }
             .padding(.horizontal, AppConstants.UI.screenPadding)
-            .accessibilityHint("accessibility.run.startHint".localized)
-
-            if let error = viewModel.errorMessage {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .transition(.opacity)
-            }
+            .padding(.vertical, 16)
         }
         .navigationTitle("tab.run".localized)
         .fullScreenCover(isPresented: $viewModel.isChallengeSelectionPresented) {
@@ -218,7 +218,7 @@ struct PreRunView: View {
                     icon: "bolt.fill",
                     title: "run.boostMode".localized,
                     description: "run.boostMode.desc".localized(
-                        with: viewModel.boostThresholdText,
+                        with: boostThresholdText,
                         viewModel.boostMultiplierText
                     ),
                     color: .orange
@@ -430,7 +430,7 @@ struct PreRunView: View {
                         Text(description)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Spacer(minLength: 12)
@@ -511,10 +511,60 @@ struct PreRunView: View {
             ]
         case .boost:
             return [
-                "run.modeBoost.feature1".localized(with: viewModel.boostThresholdText),
+                "run.modeBoost.feature1".localized(with: boostThresholdText),
                 "run.modeBoost.feature2".localized(with: viewModel.boostMultiplierText)
             ]
         }
+    }
+
+    private var boostThresholdText: String {
+        let threshold = UnitPreference.speedValue(
+            fromKilometersPerHour: AppConstants.Game.boostMinSpeedKmh,
+            useMiles: unitPreference.useMiles
+        )
+        return "\(threshold.formattedDecimal(maxFractionDigits: 0)) \(unitPreference.speedUnitLabel)"
+    }
+}
+
+private struct StartRunButton: View {
+    let isEnabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: "play.fill")
+                    .font(.subheadline.bold())
+                Text("run.start".localized)
+                    .font(.headline)
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 52)
+            .padding(.vertical, 16)
+            .background {
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.accentColor, Color.accentColor.opacity(0.78)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: Color.accentColor.opacity(0.38), radius: 16, x: 0, y: 6)
+            }
+            .opacity(isEnabled ? 1 : 0.45)
+        }
+        .buttonStyle(StartRunButtonStyle())
+        .disabled(!isEnabled)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct StartRunButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

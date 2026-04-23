@@ -205,6 +205,7 @@ private struct ProfileSkeletonAvatar: View {
         Circle()
             .fill(Color.secondary.opacity(0.16))
             .frame(width: 100, height: 100)
+            .shimmer()
     }
 }
 
@@ -214,6 +215,7 @@ private struct ProfileSkeletonStatCard: View {
             Circle()
                 .fill(Color.secondary.opacity(0.16))
                 .frame(width: 20, height: 20)
+                .shimmer()
 
             ProfileSkeletonBlock(width: 56, height: 22)
             ProfileSkeletonBlock(width: 44, height: 12)
@@ -235,6 +237,7 @@ private struct ProfileBadgesSkeleton: View {
                     Circle()
                         .fill(Color.secondary.opacity(0.16))
                         .frame(width: 56, height: 56)
+                        .shimmer()
 
                     ProfileSkeletonBlock(width: 54, height: 12)
                     ProfileSkeletonBlock(width: 38, height: 4)
@@ -254,5 +257,6 @@ private struct ProfileSkeletonBlock: View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)
             .fill(Color.secondary.opacity(0.16))
             .frame(width: width, height: height)
+            .shimmer()
     }
 }

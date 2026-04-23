@@ -7,6 +7,7 @@ struct RunDomApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var router = AppRouter()
     @StateObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var unitPreference = UnitPreference.shared
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +15,7 @@ struct RunDomApp: App {
                 .environmentObject(appState)
                 .environmentObject(router)
                 .environmentObject(localizationManager)
+                .environmentObject(unitPreference)
                 .environment(\.locale, localizationManager.locale)
                 .id(localizationManager.selectedLanguageCode)
                 .onOpenURL { url in

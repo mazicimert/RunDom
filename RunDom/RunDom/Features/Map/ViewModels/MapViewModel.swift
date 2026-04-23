@@ -21,6 +21,36 @@ enum TerritoryFilter: CaseIterable, Identifiable {
     }
 }
 
+enum MapStyleOption: String, CaseIterable, Identifiable {
+    case standard
+    case hybrid
+    case satellite
+
+    var id: String { rawValue }
+
+    var titleKey: String {
+        switch self {
+        case .standard:
+            return "map.style.standard"
+        case .hybrid:
+            return "map.style.hybrid"
+        case .satellite:
+            return "map.style.satellite"
+        }
+    }
+
+    var mkMapType: MKMapType {
+        switch self {
+        case .standard:
+            return .standard
+        case .hybrid:
+            return .hybrid
+        case .satellite:
+            return .satellite
+        }
+    }
+}
+
 @MainActor
 final class MapViewModel: ObservableObject {
 
@@ -40,6 +70,15 @@ final class MapViewModel: ObservableObject {
     @Published var userTerritoryCount: Int = 0
     @Published var hasLoadedInitialTerritories = false
     @Published var territoryFilter: TerritoryFilter = .all
+    @Published var mapStyle: MapStyleOption {
+        didSet {
+            guard mapStyle != oldValue else { return }
+            UserDefaults.standard.set(
+                mapStyle.rawValue,
+                forKey: AppConstants.UserDefaultsKeys.mapStyle
+            )
+        }
+    }
     @Published private(set) var selectedOwnerProfile: User?
 
     // MARK: - Services
@@ -61,6 +100,10 @@ final class MapViewModel: ObservableObject {
 
     init(locationManager: LocationManager) {
         self.locationManager = locationManager
+        let savedRawValue = UserDefaults.standard.string(
+            forKey: AppConstants.UserDefaultsKeys.mapStyle
+        )
+        self.mapStyle = savedRawValue.flatMap(MapStyleOption.init(rawValue:)) ?? .standard
         observeUserLocation()
     }
 
@@ -113,6 +156,27 @@ final class MapViewModel: ObservableObject {
     func centerOnUser() {
         if let location = locationManager.currentLocation {
             centerOnLocation(location.coordinate)
+        }
+    }
+
+    func zoomIn() {
+        applyZoom(factor: 0.5)
+    }
+
+    func zoomOut() {
+        applyZoom(factor: 2.0)
+    }
+
+    private func applyZoom(factor: Double) {
+        let minSpan = 0.002
+        let maxSpan = 180.0
+        let newLat = min(max(region.span.latitudeDelta * factor, minSpan), maxSpan)
+        let newLon = min(max(region.span.longitudeDelta * factor, minSpan), maxSpan)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            region = MKCoordinateRegion(
+                center: region.center,
+                span: MKCoordinateSpan(latitudeDelta: newLat, longitudeDelta: newLon)
+            )
         }
     }
 

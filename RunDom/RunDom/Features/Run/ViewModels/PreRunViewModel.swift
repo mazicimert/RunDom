@@ -104,7 +104,11 @@ final class PreRunViewModel: ObservableObject {
     // MARK: - Mode Selection
 
     var boostThresholdText: String {
-        String(format: "%.0f km/h", AppConstants.Game.boostMinSpeedKmh)
+        let threshold = UnitPreference.speedValue(
+            fromKilometersPerHour: AppConstants.Game.boostMinSpeedKmh,
+            useMiles: UnitPreference.shared.useMiles
+        )
+        return "\(threshold.formattedDecimal(maxFractionDigits: 0)) \(UnitPreference.shared.speedUnitLabel)"
     }
 
     var boostMultiplierText: String {

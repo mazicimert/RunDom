@@ -25,7 +25,10 @@ struct Badge: Codable, Identifiable, Equatable {
     }
 
     var localizedDescription: String {
-        resolvedLocalizedString(primaryKey: descriptionKey, fallbackKey: "badge.\(id).description")
+        if let localizedDistanceDescription {
+            return localizedDistanceDescription
+        }
+        return resolvedLocalizedString(primaryKey: descriptionKey, fallbackKey: "badge.\(id).description")
     }
 
     var isDistanceBased: Bool {
@@ -55,9 +58,31 @@ struct Badge: Codable, Identifiable, Equatable {
 
     private func formattedProgressValue(_ value: Double) -> String {
         if isDistanceBased {
-            return String(format: "%.1f km", locale: LocalizationManager.shared.locale, value / 1000.0)
+            return Self.formattedDistanceValue(value)
         }
         return String(Int(value.rounded(.down)))
+    }
+
+    private var localizedDistanceDescription: String? {
+        guard isDistanceBased else { return nil }
+
+        let format = LocalizationManager.shared.localizedString(forKey: descriptionKey)
+        guard format != descriptionKey else { return nil }
+
+        return String(
+            format: format,
+            locale: LocalizationManager.shared.locale,
+            Self.formattedDistanceValue(targetValue)
+        )
+    }
+
+    private static func formattedDistanceValue(_ value: Double) -> String {
+        let distanceValue = UnitPreference.distanceValue(
+            fromKilometers: value / 1000.0,
+            useMiles: UnitPreference.shared.useMiles
+        )
+        let formattedValue = distanceValue.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)
+        return "\(formattedValue) \(UnitPreference.shared.distanceUnitLabel)"
     }
 
     private func resolvedLocalizedString(primaryKey: String, fallbackKey: String) -> String {

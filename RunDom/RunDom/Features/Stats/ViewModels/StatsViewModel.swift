@@ -72,7 +72,11 @@ final class StatsViewModel: ObservableObject {
     }
 
     var totalDistanceCompactText: String {
-        "\(totalDistanceKm.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) km"
+        let distanceValue = UnitPreference.distanceValue(
+            fromKilometers: totalDistanceKm,
+            useMiles: UnitPreference.shared.useMiles
+        )
+        return "\(distanceValue.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) \(UnitPreference.shared.distanceUnitLabel)"
     }
 
     var totalTrail: Double {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StatsTabView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var unitPreference: UnitPreference
     @StateObject private var statsVM = StatsViewModel()
     @StateObject private var historyVM = RunHistoryViewModel()
     @StateObject private var reportVM = WeeklyReportViewModel()
@@ -187,8 +188,20 @@ struct StatsTabView: View {
             accentColor: .green,
             insightText: statsVM.distanceDeltaText,
             insightColor: statsVM.distanceDeltaSummary.tone.color,
-            valueFormatter: { "\($0.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) km" },
-            axisValueFormatter: { $0.formattedDecimal(maxFractionDigits: 1) },
+            valueFormatter: { value in
+                let convertedValue = UnitPreference.distanceValue(
+                    fromKilometers: value,
+                    useMiles: unitPreference.useMiles
+                )
+                return "\(convertedValue.formattedDecimal(maxFractionDigits: 1, minFractionDigits: 1)) \(unitPreference.distanceUnitLabel)"
+            },
+            axisValueFormatter: { value in
+                let convertedValue = UnitPreference.distanceValue(
+                    fromKilometers: value,
+                    useMiles: unitPreference.useMiles
+                )
+                return convertedValue.formattedDecimal(maxFractionDigits: 1)
+            },
             selectedPoint: $selectedDistancePoint
         )
         .screenPadding()
@@ -423,6 +436,7 @@ private struct StatsSkeletonChart: View {
                     .fill(Color.secondary.opacity(0.16))
                     .frame(maxWidth: .infinity)
                     .frame(height: 48 + (110 * ratio))
+                    .shimmer()
             }
         }
         .frame(height: 180, alignment: .bottom)
@@ -435,6 +449,7 @@ private struct StatsSkeletonHistoryRow: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(Color.secondary.opacity(0.16))
                 .frame(width: 114, height: 104)
+                .shimmer()
 
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 10) {
@@ -481,5 +496,6 @@ private struct StatsSkeletonBlock: View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)
             .fill(Color.secondary.opacity(0.16))
             .frame(width: width, height: height)
+            .shimmer()
     }
 }

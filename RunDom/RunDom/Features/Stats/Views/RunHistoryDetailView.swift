@@ -4,6 +4,27 @@ import MapKit
 struct RunHistoryDetailView: View {
     let run: RunSession
     @State private var isGalleryPresented = false
+    @State private var showReviewSheet = false
+    @State private var reviewBinding: RunReview?
+    @State private var rating: Int?
+    @State private var tags: [String]
+    @State private var note: String?
+
+    private let presetTagKeys: Set<String> = [
+        "tag.morning", "tag.evening", "tag.rainy", "tag.hot", "tag.tempo", "tag.long", "tag.race"
+    ]
+    private let firestoreService = FirestoreService()
+
+    init(run: RunSession) {
+        self.run = run
+        _rating = State(initialValue: run.rating)
+        _tags = State(initialValue: run.tags)
+        _note = State(initialValue: run.note)
+    }
+
+    private var hasReview: Bool {
+        rating != nil || !tags.isEmpty || !(note?.isEmpty ?? true)
+    }
 
     var body: some View {
         ScrollView {
@@ -89,6 +110,9 @@ struct RunHistoryDetailView: View {
                 }
                 .cardStyle()
                 .screenPadding()
+
+                reviewSection
+                    .screenPadding()
             }
             .padding(.vertical)
         }
@@ -104,6 +128,96 @@ struct RunHistoryDetailView: View {
         }
         .fullScreenCover(isPresented: $isGalleryPresented) {
             RunGalleryView(session: run)
+        }
+        .sheet(isPresented: $showReviewSheet) {
+            RunReviewSheet(review: $reviewBinding) { review in
+                applyReview(review)
+            }
+        }
+    }
+
+    // MARK: - Review Section
+
+    @ViewBuilder
+    private var reviewSection: some View {
+        if hasReview {
+            VStack(alignment: .leading, spacing: 12) {
+                if let rating {
+                    HStack(spacing: 4) {
+                        ForEach(1...5, id: \.self) { star in
+                            Image(systemName: rating >= star ? "star.fill" : "star")
+                                .foregroundStyle(rating >= star ? Color.yellow : Color.secondary.opacity(0.4))
+                                .font(.subheadline)
+                        }
+                    }
+                }
+
+                if !tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(tags, id: \.self) { tag in
+                                Text(displayText(for: tag))
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color.secondary.opacity(0.15))
+                                    )
+                            }
+                        }
+                    }
+                }
+
+                if let note, !note.isEmpty {
+                    Text(note)
+                        .font(.caption.italic())
+                        .foregroundStyle(.secondary)
+                }
+
+                Button {
+                    reviewBinding = currentReview
+                    showReviewSheet = true
+                } label: {
+                    Label("run.review.edit".localized, systemImage: "pencil")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.accentColor)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardStyle()
+        } else {
+            Button {
+                reviewBinding = currentReview
+                showReviewSheet = true
+            } label: {
+                Label("run.review.button".localized, systemImage: "star")
+            }
+            .buttonStyle(SecondaryButtonStyle())
+        }
+    }
+
+    private var currentReview: RunReview {
+        RunReview(rating: rating, tags: tags, note: note)
+    }
+
+    private func displayText(for tag: String) -> String {
+        presetTagKeys.contains(tag) ? tag.localized : tag
+    }
+
+    private func applyReview(_ review: RunReview) {
+        rating = review.rating
+        tags = review.tags
+        note = review.note
+
+        let runId = run.id
+        Task {
+            do {
+                try await firestoreService.updateRunReview(runId: runId, review: review)
+            } catch {
+                AppLogger.firebase.warning("Failed to update run review: \(error.localizedDescription)")
+            }
         }
     }
 

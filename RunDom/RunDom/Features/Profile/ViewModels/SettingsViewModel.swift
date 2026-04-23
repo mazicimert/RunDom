@@ -12,6 +12,15 @@ final class SettingsViewModel: ObservableObject {
     @Published var showDeleteAccountAlert = false
     @Published var isDeleting = false
     @Published var errorMessage: String?
+    @Published var isVoiceFeedbackEnabled: Bool {
+        didSet {
+            guard isVoiceFeedbackEnabled != oldValue else { return }
+            UserDefaults.standard.set(
+                isVoiceFeedbackEnabled,
+                forKey: AppConstants.UserDefaultsKeys.voiceFeedbackEnabled
+            )
+        }
+    }
 
     // MARK: - Services
 
@@ -32,6 +41,10 @@ final class SettingsViewModel: ObservableObject {
         self.firestoreService = firestoreService
         self.realtimeDBService = realtimeDBService
         self.offlineStorageService = offlineStorageService
+        let storedVoice = UserDefaults.standard.object(
+            forKey: AppConstants.UserDefaultsKeys.voiceFeedbackEnabled
+        ) as? Bool
+        self.isVoiceFeedbackEnabled = storedVoice ?? true
     }
 
     // MARK: - App Info

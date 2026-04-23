@@ -27,12 +27,9 @@ struct PauseRunView: View {
                 // Current stats
                 HStack(spacing: 32) {
                     VStack(spacing: 4) {
-                        Text(String(format: "%.2f", distance))
+                        Text(distance.formattedDistance)
                             .font(.title2.bold())
                             .foregroundStyle(.white)
-                        Text("km")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.7))
                     }
 
                     VStack(spacing: 4) {
