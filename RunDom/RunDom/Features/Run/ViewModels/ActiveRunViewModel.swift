@@ -13,6 +13,11 @@ final class ActiveRunViewModel: ObservableObject {
         case finished
     }
 
+    enum RivalTerritoryState: Equatable {
+        case outside
+        case inside(territory: Territory)
+    }
+
     // MARK: - Published State
 
     @Published var runState: RunState = .running
@@ -29,6 +34,10 @@ final class ActiveRunViewModel: ObservableObject {
     @Published var isBoostActive: Bool = true
     @Published var gpsSignalLost = false
     @Published var currentH3Index: String?
+    @Published var isRivalOverlayEnabled = false
+    @Published private(set) var nearbyRivalTerritories: [Territory] = []
+    @Published private(set) var currentRivalTerritoryState: RivalTerritoryState = .outside
+    @Published var rivalTerritoryEntryTrigger: Int = 0
 
     // MARK: - Configuration
 
@@ -46,6 +55,7 @@ final class ActiveRunViewModel: ObservableObject {
     private let territoryLossService: TerritoryLossService
     private let antiCheatService: AntiCheatService
     private let seasonService: SeasonService
+    private let realtimeDB: RealtimeDBService
 
     // MARK: - Timer
 
@@ -62,6 +72,10 @@ final class ActiveRunViewModel: ObservableObject {
     private var currentSeasonId: String?
     private var lastMilestoneKm: Int = 0
     private var lastMilestoneElapsedTime: TimeInterval = 0
+    private var rivalTerritoryObserverId: String?
+    private var rivalTerritoryObserverSeasonId: String?
+    private var observedSeasonTerritories: [Territory] = []
+    private var lastAnnouncedRivalTerritoryId: String?
 
     // MARK: - Init
 
@@ -76,7 +90,8 @@ final class ActiveRunViewModel: ObservableObject {
         territoryService: TerritoryService = TerritoryService(),
         territoryLossService: TerritoryLossService = TerritoryLossService(),
         antiCheatService: AntiCheatService = AntiCheatService(),
-        seasonService: SeasonService = SeasonService()
+        seasonService: SeasonService = SeasonService(),
+        realtimeDB: RealtimeDBService = RealtimeDBService()
     ) {
         self.mode = mode
         self.userId = userId
@@ -89,6 +104,7 @@ final class ActiveRunViewModel: ObservableObject {
         self.territoryLossService = territoryLossService
         self.antiCheatService = antiCheatService
         self.seasonService = seasonService
+        self.realtimeDB = realtimeDB
         self.startDate = Date()
         self.isBoostActive = mode == .boost
     }
@@ -111,6 +127,7 @@ final class ActiveRunViewModel: ObservableObject {
             do {
                 let season = try await seasonService.getOrCreateCurrentSeason()
                 currentSeasonId = season.id
+                startRivalTerritoryObservationIfNeeded()
             } catch {
                 AppLogger.run.error("Failed to load season: \(error.localizedDescription)")
             }
@@ -180,9 +197,14 @@ final class ActiveRunViewModel: ObservableObject {
         previousRoutePoint = point
 
         // H3 zone tracking
+        let previousH3Index = currentH3Index
         let h3Index = h3Service.h3Index(for: point.coordinate)
         currentH3Index = h3Index
         visitedZones.append(h3Index)
+
+        if h3Index != previousH3Index {
+            refreshNearbyRivalTerritories()
+        }
 
         let isNewZone = !uniqueZones.contains(h3Index)
         uniqueZones.insert(h3Index)
@@ -246,6 +268,7 @@ final class ActiveRunViewModel: ObservableObject {
 
                 if conqueredFromOpponent {
                     territoryConquestAnimationTrigger += 1
+                    syncObservedTerritoryAfterCapture(h3Index: h3Index)
 
                     if let previousOwnerId = captured.previousOwnerId {
                         try? await territoryLossService.recordLossEvent(
@@ -299,6 +322,7 @@ final class ActiveRunViewModel: ObservableObject {
         cancellables.removeAll()
         lastMilestoneKm = 0
         lastMilestoneElapsedTime = 0
+        stopRivalTerritoryObservation(clearToggleState: false)
         RunAudioService.shared.stopSpeaking()
 
         // Build session
@@ -359,9 +383,114 @@ final class ActiveRunViewModel: ObservableObject {
         case safe, approaching, below
     }
 
+    // MARK: - Rival Territory Overlay
+
+    func toggleRivalOverlay() {
+        setRivalOverlayEnabled(!isRivalOverlayEnabled)
+    }
+
+    func setRivalOverlayEnabled(_ enabled: Bool) {
+        guard enabled != isRivalOverlayEnabled else { return }
+
+        isRivalOverlayEnabled = enabled
+
+        if enabled {
+            startRivalTerritoryObservationIfNeeded()
+            refreshNearbyRivalTerritories()
+        } else {
+            stopRivalTerritoryObservation(clearToggleState: false)
+        }
+    }
+
+    private func startRivalTerritoryObservationIfNeeded() {
+        guard isRivalOverlayEnabled, let seasonId = currentSeasonId else { return }
+
+        if rivalTerritoryObserverId != nil, rivalTerritoryObserverSeasonId == seasonId {
+            refreshNearbyRivalTerritories()
+            return
+        }
+
+        stopRivalTerritoryObservation(clearToggleState: false)
+
+        rivalTerritoryObserverSeasonId = seasonId
+        rivalTerritoryObserverId = realtimeDB.observeTerritories(seasonId: seasonId) { [weak self] territories in
+            Task { @MainActor in
+                guard let self else { return }
+                self.observedSeasonTerritories = territories
+                self.refreshNearbyRivalTerritories()
+            }
+        }
+    }
+
+    private func stopRivalTerritoryObservation(clearToggleState: Bool) {
+        if let observerId = rivalTerritoryObserverId,
+           let seasonId = rivalTerritoryObserverSeasonId {
+            realtimeDB.removeObserver(id: observerId, seasonId: seasonId)
+        }
+
+        rivalTerritoryObserverId = nil
+        rivalTerritoryObserverSeasonId = nil
+        observedSeasonTerritories = []
+        nearbyRivalTerritories = []
+        currentRivalTerritoryState = .outside
+        lastAnnouncedRivalTerritoryId = nil
+
+        if clearToggleState {
+            isRivalOverlayEnabled = false
+        }
+    }
+
+    private func refreshNearbyRivalTerritories() {
+        guard isRivalOverlayEnabled, let currentH3Index else {
+            nearbyRivalTerritories = []
+            currentRivalTerritoryState = .outside
+            lastAnnouncedRivalTerritoryId = nil
+            return
+        }
+
+        let nearbyIndices = h3Service.kRingIndices(
+            forIndex: currentH3Index,
+            ring: AppConstants.Location.rivalOverlayRing
+        )
+
+        let rivals = observedSeasonTerritories
+            .filter { nearbyIndices.contains($0.h3Index) && $0.ownerId != userId }
+            .sorted { $0.h3Index < $1.h3Index }
+
+        nearbyRivalTerritories = rivals
+        updateCurrentRivalTerritoryState(using: rivals, currentH3Index: currentH3Index)
+    }
+
+    private func updateCurrentRivalTerritoryState(using territories: [Territory], currentH3Index: String) {
+        guard let territory = territories.first(where: { $0.h3Index == currentH3Index }) else {
+            currentRivalTerritoryState = .outside
+            lastAnnouncedRivalTerritoryId = nil
+            return
+        }
+
+        currentRivalTerritoryState = .inside(territory: territory)
+
+        if lastAnnouncedRivalTerritoryId != territory.h3Index {
+            lastAnnouncedRivalTerritoryId = territory.h3Index
+            rivalTerritoryEntryTrigger += 1
+        }
+    }
+
+    private func syncObservedTerritoryAfterCapture(h3Index: String) {
+        guard let index = observedSeasonTerritories.firstIndex(where: { $0.h3Index == h3Index }) else { return }
+        observedSeasonTerritories[index].ownerId = userId
+        observedSeasonTerritories[index].ownerColor = userColor
+        observedSeasonTerritories[index].lastRunDate = Date()
+        refreshNearbyRivalTerritories()
+    }
+
     // MARK: - Cleanup
 
     deinit {
         timer?.invalidate()
+        if let observerId = rivalTerritoryObserverId,
+           let seasonId = rivalTerritoryObserverSeasonId {
+            realtimeDB.removeObserver(id: observerId, seasonId: seasonId)
+        }
     }
 }

@@ -14,6 +14,7 @@
 "common.next" = "Next";
 "common.skip" = "Skip";
 "common.continue" = "Continue";
+"common.dismiss" = "Dismiss";
 
 // MARK: - Tab Bar
 "tab.map" = "Map";
@@ -193,6 +194,10 @@
 "run.time" = "Time";
 "run.zones" = "Zones";
 "run.gpsLost" = "GPS signal lost";
+"run.rivalOverlay.toggle" = "Rival Areas";
+"run.rivalOverlay.accessibility.on" = "Rival areas visible";
+"run.rivalOverlay.accessibility.off" = "Rival areas hidden";
+"run.rivalOverlay.entered" = "You entered rival territory";
 "run.boostSafe" = "Boost safe";
 "run.boostApproaching" = "Approaching threshold";
 "run.boostRequired" = "required";
@@ -303,6 +308,16 @@
 "map.style.standard" = "Standard";
 "map.style.hybrid" = "Hybrid";
 "map.style.satellite" = "Satellite";
+"map.heatmap.loading" = "Loading heatmap...";
+"map.inspector.owner.empty" = "Empty cell";
+"map.inspector.owner.mine" = "Your territory";
+"map.inspector.owner.rival" = "%@'s territory";
+"map.inspector.owner.rival.generic" = "Rival territory";
+"map.inspector.meta.full" = "%@ · ~%@";
+"map.inspector.meta.distanceOnly" = "%@ away";
+"map.inspector.meta.noLocation" = "Location access needed";
+"map.inspector.duration.minutes" = "%d min";
+"map.inspector.details" = "Details";
 
 // MARK: - Profile
 "profile.totalTrail" = "Total Points";
@@ -371,6 +386,16 @@
 "stats.net" = "Net";
 "stats.rankings" = "Rankings";
 "stats.longestRun" = "Longest Run";
+"stats.heatmap.title" = "Last 12 Weeks";
+"stats.heatmap.legend.low" = "Less";
+"stats.heatmap.legend.high" = "More";
+"stats.heatmap.runCount.single" = "%d run";
+"stats.heatmap.runCount.multiple" = "%d runs";
+"stats.heatmap.noRun" = "No run";
+"stats.heatmap.weekday.mon" = "Mon";
+"stats.heatmap.weekday.wed" = "Wed";
+"stats.heatmap.weekday.fri" = "Fri";
+"accessibility.heatmap.day" = "%@, %@";
 
 // MARK: - Dropzone
 "dropzone.active" = "Dropzone Active!";
@@ -465,11 +490,14 @@
 "accessibility.selected" = "Selected";
 "accessibility.notSelected" = "Not selected";
 "accessibility.run.startHint" = "Double tap to start your run";
+"accessibility.run.recenter" = "Recenter map on my location";
 "accessibility.map.centerOnUser" = "Center map on my location";
 "accessibility.map.style" = "Change map style";
 "accessibility.map.territoryCount" = "%d territories conquered";
 "accessibility.map.zoomIn" = "Zoom in";
 "accessibility.map.zoomOut" = "Zoom out";
+"accessibility.map.heatmap" = "Toggle heatmap layer";
+"accessibility.map.longPressHint" = "Long press a cell for details";
 "accessibility.badge.locked" = "Locked badge";
 "accessibility.badge.unlocked" = "Unlocked badge";
 "accessibility.leaderboard.rank" = "Rank %d";

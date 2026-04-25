@@ -14,6 +14,7 @@
 "common.next" = "İleri";
 "common.skip" = "Atla";
 "common.continue" = "Devam";
+"common.dismiss" = "Kapat";
 
 // MARK: - Tab Bar
 "tab.map" = "Harita";
@@ -193,6 +194,10 @@
 "run.time" = "Süre";
 "run.zones" = "Bölge";
 "run.gpsLost" = "GPS sinyali kayboldu";
+"run.rivalOverlay.toggle" = "Rakip Alanlar";
+"run.rivalOverlay.accessibility.on" = "Rakip alanlar görünür";
+"run.rivalOverlay.accessibility.off" = "Rakip alanlar gizli";
+"run.rivalOverlay.entered" = "Rakip bölgeye girdin";
 "run.boostSafe" = "Boost güvende";
 "run.boostApproaching" = "Eşiğe yaklaşıyor";
 "run.boostRequired" = "gerekli";
@@ -303,6 +308,16 @@
 "map.style.standard" = "Standart";
 "map.style.hybrid" = "Hibrit";
 "map.style.satellite" = "Uydu";
+"map.heatmap.loading" = "Isı haritası yükleniyor...";
+"map.inspector.owner.empty" = "Sahipsiz bölge";
+"map.inspector.owner.mine" = "Senin bölgen";
+"map.inspector.owner.rival" = "%@ bölgesi";
+"map.inspector.owner.rival.generic" = "Rakip bölge";
+"map.inspector.meta.full" = "%@ · ~%@";
+"map.inspector.meta.distanceOnly" = "%@ uzaklıkta";
+"map.inspector.meta.noLocation" = "Konum izni gerekli";
+"map.inspector.duration.minutes" = "%d dk";
+"map.inspector.details" = "Detaylar";
 
 // MARK: - Profile
 "profile.totalTrail" = "Toplam Puan";
@@ -371,6 +386,16 @@
 "stats.net" = "Net";
 "stats.rankings" = "Sıralama";
 "stats.longestRun" = "En Uzun Koşu";
+"stats.heatmap.title" = "Son 12 Hafta";
+"stats.heatmap.legend.low" = "Az";
+"stats.heatmap.legend.high" = "Çok";
+"stats.heatmap.runCount.single" = "%d koşu";
+"stats.heatmap.runCount.multiple" = "%d koşu";
+"stats.heatmap.noRun" = "Koşu yok";
+"stats.heatmap.weekday.mon" = "Pzt";
+"stats.heatmap.weekday.wed" = "Çrş";
+"stats.heatmap.weekday.fri" = "Cum";
+"accessibility.heatmap.day" = "%@, %@";
 
 // MARK: - Dropzone
 "dropzone.active" = "Dropzone Aktif!";
@@ -465,11 +490,14 @@
 "accessibility.selected" = "Seçili";
 "accessibility.notSelected" = "Seçili değil";
 "accessibility.run.startHint" = "Koşuyu başlatmak için çift dokunun";
+"accessibility.run.recenter" = "Haritayı konumuma geri ortala";
 "accessibility.map.centerOnUser" = "Haritayı konumuma ortala";
 "accessibility.map.style" = "Harita türünü değiştir";
 "accessibility.map.territoryCount" = "%d bölge fethedildi";
 "accessibility.map.zoomIn" = "Yakınlaştır";
 "accessibility.map.zoomOut" = "Uzaklaştır";
+"accessibility.map.heatmap" = "Isı haritasını aç/kapat";
+"accessibility.map.longPressHint" = "Detay için hücreye uzun bas";
 "accessibility.badge.locked" = "Kilitli rozet";
 "accessibility.badge.unlocked" = "Açılmış rozet";
 "accessibility.leaderboard.rank" = "%d. sıra";

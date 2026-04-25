@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		8418212F2F5D8F4200C80C56 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8418212E2F5D8F4200C80C56 /* GoogleSignIn */; };
 		841821312F5D8F4200C80C56 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 841821302F5D8F4200C80C56 /* GoogleSignInSwift */; };
+		841F61452F9CEDB200D666A9 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841F61442F9CEDB200D666A9 /* WidgetKit.framework */; };
+		841F61472F9CEDB200D666A9 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841F61462F9CEDB200D666A9 /* SwiftUI.framework */; };
+		841F61522F9CEDB400D666A9 /* RunDomWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 841F61422F9CEDB200D666A9 /* RunDomWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		84B499EE2F54961C007F0B30 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 84B499ED2F54961C007F0B30 /* FirebaseAnalytics */; };
 		84B499F02F54961C007F0B30 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 84B499EF2F54961C007F0B30 /* FirebaseAuth */; };
 		84B499F22F54961C007F0B30 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 84B499F12F54961C007F0B30 /* FirebaseCrashlytics */; };
@@ -21,11 +24,54 @@
 		84B49A022F560C7D007F0B30 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 84B49A012F560C7D007F0B30 /* Lottie */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		841F61502F9CEDB400D666A9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84B499D42F54746F007F0B30 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 841F61412F9CEDB200D666A9;
+			remoteInfo = RunDomWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		841F61572F9CEDB400D666A9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				841F61522F9CEDB400D666A9 /* RunDomWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		841F61422F9CEDB200D666A9 /* RunDomWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RunDomWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		841F61442F9CEDB200D666A9 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		841F61462F9CEDB200D666A9 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		841F61582F9CEE7900D666A9 /* RunDomWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunDomWidgetExtension.entitlements; sourceTree = "<group>"; };
 		84B499DC2F54746F007F0B30 /* RunDom.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RunDom.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		841F61562F9CEDB400D666A9 /* Exceptions for "RunDomWidget" folder in "RunDomWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */;
+		};
+		841F615A2F9CEF6300D666A9 /* Exceptions for "RunDom" folder in "RunDomWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"/Localized: Localization/Localizable.strings",
+				Assets.xcassets,
+			);
+			target = 841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */;
+		};
 		84B49A072F561296007F0B30 /* Exceptions for "RunDom" folder in "RunDom" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -36,10 +82,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		841F61482F9CEDB200D666A9 /* RunDomWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				841F61562F9CEDB400D666A9 /* Exceptions for "RunDomWidget" folder in "RunDomWidgetExtension" target */,
+			);
+			path = RunDomWidget;
+			sourceTree = "<group>";
+		};
 		84B499DE2F54746F007F0B30 /* RunDom */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				84B49A072F561296007F0B30 /* Exceptions for "RunDom" folder in "RunDom" target */,
+				841F615A2F9CEF6300D666A9 /* Exceptions for "RunDom" folder in "RunDomWidgetExtension" target */,
 			);
 			path = RunDom;
 			sourceTree = "<group>";
@@ -47,6 +102,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		841F613F2F9CEDB200D666A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				841F61472F9CEDB200D666A9 /* SwiftUI.framework in Frameworks */,
+				841F61452F9CEDB200D666A9 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84B499D92F54746F007F0B30 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -69,10 +133,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		841F61432F9CEDB200D666A9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				841F61442F9CEDB200D666A9 /* WidgetKit.framework */,
+				841F61462F9CEDB200D666A9 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		84B499D32F54746F007F0B30 = {
 			isa = PBXGroup;
 			children = (
+				841F61582F9CEE7900D666A9 /* RunDomWidgetExtension.entitlements */,
 				84B499DE2F54746F007F0B30 /* RunDom */,
+				841F61482F9CEDB200D666A9 /* RunDomWidget */,
+				841F61432F9CEDB200D666A9 /* Frameworks */,
 				84B499DD2F54746F007F0B30 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -81,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				84B499DC2F54746F007F0B30 /* RunDom.app */,
+				841F61422F9CEDB200D666A9 /* RunDomWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -88,6 +165,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 841F61532F9CEDB400D666A9 /* Build configuration list for PBXNativeTarget "RunDomWidgetExtension" */;
+			buildPhases = (
+				841F613E2F9CEDB200D666A9 /* Sources */,
+				841F613F2F9CEDB200D666A9 /* Frameworks */,
+				841F61402F9CEDB200D666A9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				841F61482F9CEDB200D666A9 /* RunDomWidget */,
+			);
+			name = RunDomWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = RunDomWidgetExtension;
+			productReference = 841F61422F9CEDB200D666A9 /* RunDomWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		84B499DB2F54746F007F0B30 /* RunDom */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 84B499E72F547470007F0B30 /* Build configuration list for PBXNativeTarget "RunDom" */;
@@ -95,10 +194,12 @@
 				84B499D82F54746F007F0B30 /* Sources */,
 				84B499D92F54746F007F0B30 /* Frameworks */,
 				84B499DA2F54746F007F0B30 /* Resources */,
+				841F61572F9CEDB400D666A9 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				841F61512F9CEDB400D666A9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				84B499DE2F54746F007F0B30 /* RunDom */,
@@ -132,6 +233,9 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					841F61412F9CEDB200D666A9 = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					84B499DB2F54746F007F0B30 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -159,11 +263,19 @@
 			projectRoot = "";
 			targets = (
 				84B499DB2F54746F007F0B30 /* RunDom */,
+				841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		841F61402F9CEDB200D666A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84B499DA2F54746F007F0B30 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -174,6 +286,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		841F613E2F9CEDB200D666A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84B499D82F54746F007F0B30 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -183,7 +302,73 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		841F61512F9CEDB400D666A9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */;
+			targetProxy = 841F61502F9CEDB400D666A9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		841F61542F9CEDB400D666A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = RunDomWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DDAHQ489DT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RunDomWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RunDomWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom.RunDomWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		841F61552F9CEDB400D666A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = RunDomWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DDAHQ489DT;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RunDomWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RunDomWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom.RunDomWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		84B499E52F547470007F0B30 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -374,6 +559,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		841F61532F9CEDB400D666A9 /* Build configuration list for PBXNativeTarget "RunDomWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				841F61542F9CEDB400D666A9 /* Debug */,
+				841F61552F9CEDB400D666A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		84B499D72F54746F007F0B30 /* Build configuration list for PBXProject "RunDom" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

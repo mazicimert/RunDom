@@ -6,6 +6,7 @@ struct StatsTabView: View {
     @StateObject private var statsVM = StatsViewModel()
     @StateObject private var historyVM = RunHistoryViewModel()
     @StateObject private var reportVM = WeeklyReportViewModel()
+    @StateObject private var heatmapViewModel = CalendarHeatmapViewModel()
 
     @State private var selectedRun: RunSession?
     @State private var pendingDeleteRun: RunSession?
@@ -22,6 +23,10 @@ struct StatsTabView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 24) {
+                        RunCalendarHeatmapView(viewModel: heatmapViewModel)
+                            .padding(.horizontal, AppConstants.UI.screenPadding)
+                            .padding(.vertical, 12)
+
                         // Period Picker
                         Picker("", selection: $statsVM.period) {
                             ForEach(StatsPeriod.allCases, id: \.self) { period in
@@ -79,6 +84,15 @@ struct StatsTabView: View {
         .onChange(of: statsVM.period) { _ in
             selectedTrailPoint = nil
             selectedDistancePoint = nil
+        }
+        .onChange(of: statsVM.runs) { _ in
+            rebuildHeatmap()
+        }
+        .onChange(of: unitPreference.useMiles) { _ in
+            rebuildHeatmap()
+        }
+        .onAppear {
+            rebuildHeatmap()
         }
         .confirmationDialog(
             "run.delete.confirmTitle".localized,
@@ -372,6 +386,13 @@ struct StatsTabView: View {
         async let history: () = historyVM.loadRuns(userId: userId)
         async let reports: () = reportVM.loadReports(userId: userId)
         _ = await (stats, history, reports)
+    }
+
+    private func rebuildHeatmap() {
+        heatmapViewModel.buildHeatmap(
+            from: statsVM.allRuns,
+            streakDays: statsVM.currentStreakDays
+        )
     }
 }
 

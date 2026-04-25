@@ -21,6 +21,21 @@ enum TerritoryFilter: CaseIterable, Identifiable {
     }
 }
 
+enum CellOwnerState {
+    case empty
+    case mine
+    case rival(territory: Territory)
+}
+
+struct CellInspection: Identifiable {
+    let id: String
+    let h3Index: String
+    let coordinate: CLLocationCoordinate2D
+    let distanceMeters: Double?
+    let estimatedSeconds: Double?
+    let ownerState: CellOwnerState
+}
+
 enum MapStyleOption: String, CaseIterable, Identifiable {
     case standard
     case hybrid
@@ -80,6 +95,18 @@ final class MapViewModel: ObservableObject {
         }
     }
     @Published private(set) var selectedOwnerProfile: User?
+    @Published var isHeatmapEnabled: Bool = false {
+        didSet {
+            guard isHeatmapEnabled != oldValue else { return }
+            if isHeatmapEnabled {
+                Task { await loadHeatmapIfNeeded() }
+            }
+        }
+    }
+    @Published private(set) var heatmapCells: [String: Int] = [:]
+    @Published private(set) var isHeatmapLoading = false
+    @Published var inspectedCell: CellInspection?
+    @Published private(set) var inspectedOwnerDisplayName: String?
 
     // MARK: - Services
 
@@ -95,6 +122,7 @@ final class MapViewModel: ObservableObject {
     private var currentUserId: String?
     private var cancellables = Set<AnyCancellable>()
     private var ownerProfilesById: [String: User] = [:]
+    private var heatmapLoaded = false
 
     // MARK: - Init
 
@@ -280,6 +308,93 @@ final class MapViewModel: ObservableObject {
         presentedTerritory = selectedTerritory
     }
 
+    // MARK: - Cell Inspection
+
+    func inspectCell(at coordinate: CLLocationCoordinate2D, currentUser: User?) {
+        let resolution = AppConstants.Location.h3Resolution
+        let h3Index = coordinate.h3Index(resolution: resolution)
+        let cellCoord = h3Service.coordinate(fromIndex: h3Index) ?? coordinate
+
+        let userLocation = locationManager.currentLocation
+        let distance: Double? = userLocation.map { loc in
+            CLLocation(latitude: cellCoord.latitude, longitude: cellCoord.longitude)
+                .distance(from: loc)
+        }
+
+        let paceSecondsPerKm = 3600.0 / 6.0
+        let estimatedSeconds: Double? = distance.map { $0 / 1000.0 * paceSecondsPerKm }
+
+        let ownerState: CellOwnerState
+        if let territory = territories.first(where: { $0.h3Index == h3Index }) {
+            if territory.ownerId == currentUser?.id {
+                ownerState = .mine
+            } else {
+                ownerState = .rival(territory: territory)
+            }
+        } else {
+            ownerState = .empty
+        }
+
+        inspectedCell = CellInspection(
+            id: h3Index,
+            h3Index: h3Index,
+            coordinate: cellCoord,
+            distanceMeters: distance,
+            estimatedSeconds: estimatedSeconds,
+            ownerState: ownerState
+        )
+
+        resolveInspectedOwnerName()
+    }
+
+    func dismissInspection() {
+        inspectedCell = nil
+        inspectedOwnerDisplayName = nil
+    }
+
+    private func resolveInspectedOwnerName() {
+        guard let inspected = inspectedCell,
+              case .rival(let territory) = inspected.ownerState else {
+            inspectedOwnerDisplayName = nil
+            return
+        }
+
+        if let cached = ownerProfilesById[territory.ownerId]?.displayName {
+            inspectedOwnerDisplayName = cached
+            return
+        }
+
+        inspectedOwnerDisplayName = nil
+        Task { await fetchInspectedOwner(userId: territory.ownerId, h3Index: inspected.h3Index) }
+    }
+
+    private func fetchInspectedOwner(userId: String, h3Index: String) async {
+        do {
+            guard let user = try await firestoreService.getUser(id: userId) else { return }
+            ownerProfilesById[userId] = user
+            if inspectedCell?.h3Index == h3Index {
+                inspectedOwnerDisplayName = user.displayName
+            }
+        } catch {
+            AppLogger.firebase.error("Failed to load inspected owner: \(error.localizedDescription)")
+        }
+    }
+
+    func openInspectedTerritoryDetails() {
+        guard let inspected = inspectedCell else { return }
+
+        switch inspected.ownerState {
+        case .empty:
+            return
+        case .rival(let territory):
+            presentedTerritory = territory
+        case .mine:
+            if let territory = territories.first(where: { $0.h3Index == inspected.h3Index }) {
+                presentedTerritory = territory
+            }
+        }
+    }
+
     func setTerritoryFilter(_ filter: TerritoryFilter) {
         territoryFilter = filter
 
@@ -313,6 +428,12 @@ final class MapViewModel: ObservableObject {
     var visibleTerritories: [Territory] {
         let visibleIndices = Set(h3Service.cellIndices(in: region))
         return filteredTerritories.filter { visibleIndices.contains($0.h3Index) }
+    }
+
+    var visibleHeatmapCells: [String: Int] {
+        guard !heatmapCells.isEmpty else { return [:] }
+        let visibleIndices = Set(h3Service.cellIndices(in: region))
+        return heatmapCells.filter { visibleIndices.contains($0.key) }
     }
 
     var shouldRenderOverlays: Bool {
@@ -368,6 +489,40 @@ final class MapViewModel: ObservableObject {
             return "map.myTerritory".localized
         }
         return territory.ownerId
+    }
+
+    // MARK: - Heatmap
+
+    func invalidateHeatmapCache() {
+        heatmapLoaded = false
+        heatmapCells = [:]
+        if isHeatmapEnabled {
+            Task { await loadHeatmapIfNeeded() }
+        }
+    }
+
+    private func loadHeatmapIfNeeded() async {
+        guard !heatmapLoaded else { return }
+        guard let userId = currentUserId else { return }
+
+        isHeatmapLoading = true
+        defer { isHeatmapLoading = false }
+
+        do {
+            let sessions = try await firestoreService.getRunSessions(userId: userId, limit: 20)
+            let resolution = h3Service.defaultResolution
+            var counts: [String: Int] = [:]
+            for session in sessions {
+                for point in session.route {
+                    let index = point.coordinate.h3Index(resolution: resolution)
+                    counts[index, default: 0] += 1
+                }
+            }
+            heatmapCells = counts
+            heatmapLoaded = true
+        } catch {
+            AppLogger.firebase.error("Failed to load heatmap: \(error.localizedDescription)")
+        }
     }
 
     private func loadOwnerProfile(for userId: String) async {

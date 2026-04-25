@@ -63,6 +63,14 @@ final class StatsViewModel: ObservableObject {
         filteredRuns.reduce(0) { $0 + $1.distance }
     }
 
+    var allRuns: [RunSession] {
+        runs
+    }
+
+    var currentStreakDays: Set<Date> {
+        CalendarHeatmapViewModel.currentStreakDays(from: runs)
+    }
+
     var totalDistanceKm: Double {
         totalDistanceMeters / 1000.0
     }

@@ -52,6 +52,25 @@ final class H3GridService {
         return coordinate.h3Neighbors(resolution: resolution(fromIndex: index))
     }
 
+    /// Returns the cell itself and all neighbors within the given ring distance.
+    func kRingIndices(forIndex index: String, ring: Int) -> Set<String> {
+        guard ring > 0 else { return [index] }
+
+        var visited: Set<String> = [index]
+        var frontier: Set<String> = [index]
+
+        for _ in 0..<ring {
+            let nextFrontier = Set(frontier.flatMap(neighbors(forIndex:)))
+                .subtracting(visited)
+
+            guard !nextFrontier.isEmpty else { break }
+            visited.formUnion(nextFrontier)
+            frontier = nextFrontier
+        }
+
+        return visited
+    }
+
     // MARK: - Visible Region Cells
 
     /// Returns all H3 cell indices that fall within the given map region.

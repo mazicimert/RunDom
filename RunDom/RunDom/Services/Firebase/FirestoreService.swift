@@ -227,6 +227,15 @@ final class FirestoreService {
         return try snapshot.documents.compactMap { try $0.data(as: RunSession.self) }
     }
 
+    func getRunSessions(userId: String, limit: Int) async throws -> [RunSession] {
+        let snapshot = try await runsCollection
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "startDate", descending: true)
+            .limit(to: limit)
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: RunSession.self) }
+    }
+
     func getRuns(userId: String, from startDate: Date, to endDate: Date) async throws -> [RunSession] {
         let snapshot = try await runsCollection
             .whereField("userId", isEqualTo: userId)

@@ -59,6 +59,7 @@ enum AppConstants {
     enum Location {
         static let gpsGapThresholdSeconds: TimeInterval = 60
         static let h3Resolution: Int = 9
+        static let rivalOverlayRing: Int = 2
     }
 
     // MARK: - UserDefaults Keys

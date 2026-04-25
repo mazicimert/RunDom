@@ -17,14 +17,31 @@ struct MapTabView: View {
             // Map
             TerritoryMapView(
                 region: $viewModel.region,
-                territories: viewModel.shouldRenderOverlays ? viewModel.visibleTerritories : [],
+                territories: viewModel.isHeatmapEnabled
+                    ? []
+                    : (viewModel.shouldRenderOverlays ? viewModel.visibleTerritories : []),
                 selectedTerritoryId: viewModel.selectedTerritory?.h3Index,
                 currentUserId: appState.currentUser?.id,
                 dropzones: [],
                 mapType: viewModel.mapStyle.mkMapType,
-                onTerritoryTapped: { viewModel.selectTerritory($0) },
-                onMapBackgroundTapped: { viewModel.clearSelection() },
-                onDropzoneTapped: nil
+                heatmapCells: (viewModel.isHeatmapEnabled && viewModel.shouldRenderOverlays)
+                    ? viewModel.visibleHeatmapCells
+                    : [:],
+                userColor: appState.currentUser?.color ?? "#4ECDC4",
+                inspectedH3Index: viewModel.inspectedCell?.h3Index,
+                onTerritoryTapped: {
+                    viewModel.dismissInspection()
+                    viewModel.selectTerritory($0)
+                },
+                onMapBackgroundTapped: {
+                    viewModel.dismissInspection()
+                    viewModel.clearSelection()
+                },
+                onDropzoneTapped: nil,
+                onLongPress: { coord in
+                    Haptics.impact(.medium)
+                    viewModel.inspectCell(at: coord, currentUser: appState.currentUser)
+                }
             )
             .ignoresSafeArea(edges: .top)
 
@@ -42,6 +59,7 @@ struct MapTabView: View {
                     Spacer()
 
                     VStack(spacing: 12) {
+                        heatmapToggleButton
                         zoomInButton
                         zoomOutButton
                         centerButton
@@ -58,6 +76,23 @@ struct MapTabView: View {
         }
         .navigationTitle("tab.map".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .overlay(alignment: .bottom) {
+            if let inspection = viewModel.inspectedCell {
+                CellInspectorBar(
+                    inspection: inspection,
+                    ownerDisplayName: viewModel.inspectedOwnerDisplayName,
+                    onDismiss: { viewModel.dismissInspection() },
+                    onOpenDetails: {
+                        viewModel.openInspectedTerritoryDetails()
+                        viewModel.dismissInspection()
+                    }
+                )
+                .padding(.horizontal, AppConstants.UI.screenPadding)
+                .padding(.bottom, 16)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.inspectedCell?.h3Index)
         .sheet(item: $viewModel.presentedTerritory) { territory in
             TerritoryDetailSheet(
                 territory: territory,
@@ -75,6 +110,19 @@ struct MapTabView: View {
                 viewModel.updateUserTerritoryCount(userId: userId)
             }
             viewModel.refreshSelection()
+        }
+        .onChange(of: appState.currentUser?.totalRuns) {
+            viewModel.invalidateHeatmapCache()
+        }
+        .onChange(of: viewModel.region.center.latitude) {
+            if viewModel.inspectedCell != nil {
+                viewModel.dismissInspection()
+            }
+        }
+        .onChange(of: viewModel.region.center.longitude) {
+            if viewModel.inspectedCell != nil {
+                viewModel.dismissInspection()
+            }
         }
         .onReceive(router.$mapFocusRequest.compactMap { $0 }) { request in
             viewModel.focusTerritoryLoss(h3Index: request.h3Index)
@@ -266,6 +314,33 @@ struct MapTabView: View {
 
     // MARK: - Zoom & Center Buttons
 
+    private var heatmapToggleButton: some View {
+        Button {
+            Haptics.selection()
+            viewModel.isHeatmapEnabled.toggle()
+        } label: {
+            ZStack {
+                Image(systemName: viewModel.isHeatmapEnabled ? "flame.fill" : "flame")
+                    .font(.body.bold())
+                    .foregroundStyle(viewModel.isHeatmapEnabled ? Color.boostGreen : mapControlForegroundColor)
+                    .frame(width: 44, height: 44)
+                    .background(mapControlBackgroundColor, in: Circle())
+                    .overlay(Circle().stroke(
+                        viewModel.isHeatmapEnabled ? Color.boostGreen : mapControlBorderColor,
+                        lineWidth: 1
+                    ))
+                    .shadow(color: mapControlShadowColor, radius: 8, x: 0, y: 4)
+
+                if viewModel.isHeatmapLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .scaleEffect(0.7)
+                }
+            }
+        }
+        .accessibilityLabel("accessibility.map.heatmap".localized)
+    }
+
     private var zoomInButton: some View {
         Button {
             Haptics.selection()
@@ -337,6 +412,9 @@ struct MapTabView: View {
 
 // MARK: - UIKit Map View (UIViewRepresentable)
 
+final class HeatmapPolygon: MKPolygon {}
+final class InspectionPolygon: MKPolygon {}
+
 struct TerritoryMapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
     let territories: [Territory]
@@ -344,9 +422,13 @@ struct TerritoryMapView: UIViewRepresentable {
     let currentUserId: String?
     let dropzones: [Dropzone]
     var mapType: MKMapType = .standard
+    var heatmapCells: [String: Int] = [:]
+    var userColor: String = "#4ECDC4"
+    var inspectedH3Index: String?
     var onTerritoryTapped: ((Territory) -> Void)?
     var onMapBackgroundTapped: (() -> Void)?
     var onDropzoneTapped: ((Dropzone) -> Void)?
+    var onLongPress: ((CLLocationCoordinate2D) -> Void)?
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -363,6 +445,13 @@ struct TerritoryMapView: UIViewRepresentable {
         )
         mapView.addGestureRecognizer(tapGesture)
 
+        let longPress = UILongPressGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handleLongPress(_:))
+        )
+        longPress.minimumPressDuration = 0.5
+        mapView.addGestureRecognizer(longPress)
+
         return mapView
     }
 
@@ -371,9 +460,13 @@ struct TerritoryMapView: UIViewRepresentable {
         context.coordinator.selectedTerritoryId = selectedTerritoryId
         context.coordinator.currentUserId = currentUserId
         context.coordinator.dropzones = dropzones
+        context.coordinator.heatmapCells = heatmapCells
+        context.coordinator.userColor = userColor
+        context.coordinator.inspectedH3Index = inspectedH3Index
         context.coordinator.onTerritoryTapped = onTerritoryTapped
         context.coordinator.onMapBackgroundTapped = onMapBackgroundTapped
         context.coordinator.onDropzoneTapped = onDropzoneTapped
+        context.coordinator.onLongPress = onLongPress
 
         if mapView.mapType != mapType {
             mapView.mapType = mapType
@@ -403,6 +496,8 @@ struct TerritoryMapView: UIViewRepresentable {
         }
 
         updateOverlays(mapView)
+        updateHeatmapOverlays(mapView)
+        updateInspectionOverlay(mapView)
         context.coordinator.refreshOverlayStylesIfNeeded(on: mapView)
         updateAnnotations(mapView)
     }
@@ -416,6 +511,8 @@ struct TerritoryMapView: UIViewRepresentable {
     private func updateOverlays(_ mapView: MKMapView) {
         let existingOverlays = mapView.overlays.compactMap { overlay -> (String, MKPolygon)? in
             guard let polygon = overlay as? MKPolygon,
+                  !(polygon is HeatmapPolygon),
+                  !(polygon is InspectionPolygon),
                   let h3Index = polygon.title else {
                 return nil
             }
@@ -444,6 +541,65 @@ struct TerritoryMapView: UIViewRepresentable {
         }
     }
 
+    private func updateHeatmapOverlays(_ mapView: MKMapView) {
+        let existingHeatmap = mapView.overlays.compactMap { overlay -> (String, HeatmapPolygon)? in
+            guard let polygon = overlay as? HeatmapPolygon,
+                  let h3Index = polygon.title else {
+                return nil
+            }
+            return (h3Index, polygon)
+        }
+        let existingById = Dictionary(uniqueKeysWithValues: existingHeatmap)
+
+        let targetIds = Set(heatmapCells.keys)
+        let existingIds = Set(existingById.keys)
+
+        let idsToRemove = existingIds.subtracting(targetIds)
+        if !idsToRemove.isEmpty {
+            let overlaysToRemove = idsToRemove.compactMap { existingById[$0] }
+            mapView.removeOverlays(overlaysToRemove)
+        }
+
+        let idsToAdd = targetIds.subtracting(existingIds)
+        if !idsToAdd.isEmpty {
+            let overlaysToAdd = idsToAdd.compactMap { h3Index -> HeatmapPolygon? in
+                guard let coordinate = H3GridService.shared.coordinate(fromIndex: h3Index) else { return nil }
+                let resolution = H3GridService.shared.resolution(fromIndex: h3Index)
+                let boundary = coordinate.h3HexBoundary(resolution: resolution)
+                let polygon = HeatmapPolygon(coordinates: boundary, count: boundary.count)
+                polygon.title = h3Index
+                return polygon
+            }
+            mapView.addOverlays(overlaysToAdd)
+        }
+    }
+
+    private func updateInspectionOverlay(_ mapView: MKMapView) {
+        let existing = mapView.overlays.compactMap { $0 as? InspectionPolygon }
+
+        guard let targetIndex = inspectedH3Index else {
+            if !existing.isEmpty {
+                mapView.removeOverlays(existing)
+            }
+            return
+        }
+
+        if existing.count == 1, existing.first?.title == targetIndex {
+            return
+        }
+
+        if !existing.isEmpty {
+            mapView.removeOverlays(existing)
+        }
+
+        guard let centerCoord = H3GridService.shared.coordinate(fromIndex: targetIndex) else { return }
+        let resolution = H3GridService.shared.resolution(fromIndex: targetIndex)
+        let boundary = centerCoord.h3HexBoundary(resolution: resolution)
+        let polygon = InspectionPolygon(coordinates: boundary, count: boundary.count)
+        polygon.title = targetIndex
+        mapView.addOverlay(polygon, level: .aboveLabels)
+    }
+
     // MARK: - Update Annotations
 
     private func updateAnnotations(_ mapView: MKMapView) {
@@ -465,9 +621,13 @@ struct TerritoryMapView: UIViewRepresentable {
         var selectedTerritoryId: String?
         var currentUserId: String?
         var dropzones: [Dropzone] = []
+        var heatmapCells: [String: Int] = [:]
+        var userColor: String = "#4ECDC4"
+        var inspectedH3Index: String?
         var onTerritoryTapped: ((Territory) -> Void)?
         var onMapBackgroundTapped: (() -> Void)?
         var onDropzoneTapped: ((Dropzone) -> Void)?
+        var onLongPress: ((CLLocationCoordinate2D) -> Void)?
         var isUpdatingRegion = false
         private var overlayStyleCache: [String: OverlayStyle] = [:]
 
@@ -478,6 +638,29 @@ struct TerritoryMapView: UIViewRepresentable {
         // MARK: - Overlay Rendering
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let inspectionPolygon = overlay as? InspectionPolygon {
+                let renderer = MKPolygonRenderer(polygon: inspectionPolygon)
+                renderer.fillColor = UIColor.white.withAlphaComponent(0.08)
+                renderer.strokeColor = UIColor.white.withAlphaComponent(0.95)
+                renderer.lineWidth = 3.5
+                renderer.lineJoin = .round
+                renderer.lineCap = .round
+                return renderer
+            }
+
+            if let heatmapPolygon = overlay as? HeatmapPolygon,
+               let h3Index = heatmapPolygon.title,
+               let count = heatmapCells[h3Index] {
+                let base = UIColor(Color(hex: userColor) ?? .blue)
+                let normalized = min(Double(count), 10.0) / 10.0
+                let alpha = 0.10 + normalized * (0.75 - 0.10)
+                let renderer = MKPolygonRenderer(polygon: heatmapPolygon)
+                renderer.fillColor = base.withAlphaComponent(CGFloat(alpha))
+                renderer.strokeColor = .clear
+                renderer.lineWidth = 0
+                return renderer
+            }
+
             guard let polygon = overlay as? MKPolygon,
                 let h3Index = polygon.title,
                 let territory = territories.first(where: { $0.h3Index == h3Index })
@@ -543,6 +726,8 @@ struct TerritoryMapView: UIViewRepresentable {
         func refreshOverlayStylesIfNeeded(on mapView: MKMapView) {
             for overlay in mapView.overlays {
                 guard let polygon = overlay as? MKPolygon,
+                      !(polygon is HeatmapPolygon),
+                      !(polygon is InspectionPolygon),
                       let h3Index = polygon.title,
                       let territory = territories.first(where: { $0.h3Index == h3Index }),
                       let renderer = mapView.renderer(for: polygon) as? TerritoryOverlayRenderer else {
@@ -572,6 +757,14 @@ struct TerritoryMapView: UIViewRepresentable {
         }
 
         // MARK: - Tap Handling
+
+        @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+            guard gesture.state == .began,
+                  let mapView = gesture.view as? MKMapView else { return }
+            let point = gesture.location(in: mapView)
+            let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+            onLongPress?(coordinate)
+        }
 
         @objc func handleMapTap(_ gesture: UITapGestureRecognizer) {
             guard let mapView = gesture.view as? MKMapView else { return }
