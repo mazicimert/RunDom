@@ -8,26 +8,43 @@ struct ProfileTabView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header: Avatar + Name
-                profileHeader
-
-                // Stats Cards
-                statsSection
-
-                // Streak Info
-                if let user = resolvedUser, user.streakDays > 0 {
-                    streakSection(user: user)
+                if let errorMessage = viewModel.errorMessage {
+                    ErrorBannerView(
+                        message: errorMessage,
+                        onDismiss: {
+                            withAnimation {
+                                viewModel.errorMessage = nil
+                            }
+                        },
+                        onRetry: retryLoadProfile
+                    )
                 }
 
-                // Badges
-                badgesSection
+                profileHeader
 
-                // Action Buttons
-                actionButtons
+                statsSection
+
+                if let user = resolvedUser, user.streakDays > 0 {
+                    streakSection(user: user)
+                } else if resolvedUser != nil {
+                    streakMotivationSection
+                }
+
+                badgesSection
             }
             .padding(.vertical)
         }
         .navigationTitle("tab.profile".localized)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.presentedSheet = .settings
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("profile.settings".localized)
+            }
+        }
         .refreshable {
             if let userId = appState.currentUser?.id {
                 await viewModel.loadProfile(userId: userId)
@@ -59,26 +76,43 @@ struct ProfileTabView: View {
     // MARK: - Profile Header
 
     private var profileHeader: some View {
-        VStack(spacing: 12) {
-            if let user = resolvedUser {
-                AvatarView(
-                    photoURL: user.photoURL,
-                    userColor: user.color,
-                    size: 100
-                )
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 12) {
+                if let user = resolvedUser {
+                    AvatarView(
+                        photoURL: user.photoURL,
+                        userColor: user.color,
+                        size: 100
+                    )
 
-                Text(user.displayName)
-                    .font(.title2.bold())
+                    Text(user.displayName)
+                        .font(.title2.bold())
 
-                if let neighborhood = user.neighborhood {
-                    Label(neighborhood, systemImage: "mappin.circle.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    if let neighborhood = user.neighborhood {
+                        Label(neighborhood, systemImage: "mappin.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    ProfileSkeletonAvatar()
+                    ProfileSkeletonBlock(width: 132, height: 22)
+                    ProfileSkeletonBlock(width: 96, height: 14)
                 }
-            } else {
-                ProfileSkeletonAvatar()
-                ProfileSkeletonBlock(width: 132, height: 22)
-                ProfileSkeletonBlock(width: 96, height: 14)
+            }
+            .frame(maxWidth: .infinity)
+
+            if resolvedUser != nil {
+                Button {
+                    router.presentedSheet = .editProfile
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .frame(width: 44, height: 44)
+                        .background(Color.cardBackground, in: Circle())
+                        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+                }
+                .accessibilityLabel("profile.editProfile".localized)
             }
         }
         .screenPadding()
@@ -139,6 +173,28 @@ struct ProfileTabView: View {
         .screenPadding()
     }
 
+    private var streakMotivationSection: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "bolt.circle.fill")
+                .font(.title2)
+                .foregroundStyle(.orange)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("profile.streakStart.title".localized)
+                    .font(.headline)
+
+                Text("profile.streakStart.subtitle".localized)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+        }
+        .cardStyle()
+        .screenPadding()
+    }
+
     // MARK: - Badges Section
 
     private var badgesSection: some View {
@@ -167,27 +223,11 @@ struct ProfileTabView: View {
         .screenPadding()
     }
 
-    // MARK: - Action Buttons
-
-    private var actionButtons: some View {
-        VStack(spacing: 12) {
-            Button {
-                router.presentedSheet = .editProfile
-            } label: {
-                Label("profile.editProfile".localized, systemImage: "pencil")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(SecondaryButtonStyle())
-
-            Button {
-                router.presentedSheet = .settings
-            } label: {
-                Label("profile.settings".localized, systemImage: "gearshape")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(SecondaryButtonStyle())
+    private func retryLoadProfile() {
+        guard let userId = appState.currentUser?.id else { return }
+        Task {
+            await viewModel.loadProfile(userId: userId)
         }
-        .screenPadding()
     }
 
 }

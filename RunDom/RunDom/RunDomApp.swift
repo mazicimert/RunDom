@@ -17,8 +17,16 @@ struct RunDomApp: App {
                 .environmentObject(localizationManager)
                 .environmentObject(unitPreference)
                 .environment(\.locale, localizationManager.locale)
-                .id(localizationManager.selectedLanguageCode)
+                .task {
+                    WidgetDataService.shared.writeDiagnosticPing()
+                }
                 .onOpenURL { url in
+                    if url.scheme == "rundom" {
+                        if url.host == "stats" {
+                            router.selectedTab = .stats
+                        }
+                        return
+                    }
                     GIDSignIn.sharedInstance.handle(url)
                 }
         }

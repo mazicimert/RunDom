@@ -326,6 +326,8 @@
 "profile.streak" = "Seri";
 "profile.streakDays" = "%d günlük seri";
 "profile.streakMultiplier" = "Seri bonusu: %@";
+"profile.streakStart.title" = "Serini başlat";
+"profile.streakStart.subtitle" = "Bugün kısa bir koşu bile serini başlatır ve bonuslarını büyütür.";
 "profile.badges" = "Rozetler";
 "profile.noBadges" = "Henüz rozet yok";
 "profile.noBadges.subtitle" = "Rozet kazanmak için koşu tamamla ve görevleri yerine getir.";
@@ -504,3 +506,15 @@
 "accessibility.stat.trail" = "%@ puan";
 "accessibility.stat.distance" = "%@ mesafe";
 "accessibility.stat.runs" = "%d koşu";
+
+// MARK: - Widget
+"widget.displayName" = "Haftalık Özet";
+"widget.description" = "Haftalık koşu istatistiklerin";
+"widget.thisWeek" = "Bu Hafta";
+"widget.points" = "Puan";
+"widget.distance" = "km";
+"widget.runCount.single" = "koşu";
+"widget.runCount.multiple" = "koşu";
+"widget.streak" = "gün seri";
+"widget.heatmap.displayName" = "Aktivite Takvimi";
+"widget.heatmap.description" = "Son 12 haftalık koşu aktiviten";

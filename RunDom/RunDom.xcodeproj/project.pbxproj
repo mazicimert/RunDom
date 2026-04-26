@@ -69,6 +69,10 @@
 			membershipExceptions = (
 				"/Localized: Localization/Localizable.strings",
 				Assets.xcassets,
+				"Extensions/Color+Hex.swift",
+				Models/WeeklySummary.swift,
+				Models/HeatmapWidgetData.swift,
+				Utilities/AppGroup.swift,
 			);
 			target = 841F61412F9CEDB200D666A9 /* RunDomWidgetExtension */;
 		};
@@ -324,7 +328,7 @@
 				INFOPLIST_FILE = RunDomWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RunDomWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -353,7 +357,7 @@
 				INFOPLIST_FILE = RunDomWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RunDomWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

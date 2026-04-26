@@ -326,6 +326,8 @@
 "profile.streak" = "Streak";
 "profile.streakDays" = "%d day streak";
 "profile.streakMultiplier" = "Streak bonus: %@";
+"profile.streakStart.title" = "Start your streak";
+"profile.streakStart.subtitle" = "Even a short run today starts your streak and grows your bonuses.";
 "profile.badges" = "Badges";
 "profile.noBadges" = "No badges yet";
 "profile.noBadges.subtitle" = "Complete runs and challenges to earn badges.";
@@ -504,3 +506,15 @@
 "accessibility.stat.trail" = "%@ points";
 "accessibility.stat.distance" = "%@ distance";
 "accessibility.stat.runs" = "%d runs";
+
+// MARK: - Widget
+"widget.displayName" = "Weekly Summary";
+"widget.description" = "Your weekly running stats";
+"widget.thisWeek" = "This Week";
+"widget.points" = "Points";
+"widget.distance" = "km";
+"widget.runCount.single" = "run";
+"widget.runCount.multiple" = "runs";
+"widget.streak" = "day streak";
+"widget.heatmap.displayName" = "Activity Calendar";
+"widget.heatmap.description" = "Last 12 weeks of running activity";

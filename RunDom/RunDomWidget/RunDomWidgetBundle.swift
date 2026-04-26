@@ -12,5 +12,6 @@ import SwiftUI
 struct RunDomWidgetBundle: WidgetBundle {
     var body: some Widget {
         RunDomWidget()
+        ActivityHeatmapWidget()
     }
 }

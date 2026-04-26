@@ -16,6 +16,16 @@
 				<string>com.googleusercontent.apps.880324401621-58v4bo4ceg7dt861gcs30gq230p2vg8v</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.mertmazici.RunDom.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>rundom</string>
+			</array>
+		</dict>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

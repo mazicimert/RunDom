@@ -1,0 +1,12 @@
+version: "Apple Swift version 6.1 (swiftlang-6.1.0.110.21 clang-1700.0.13.3)"
+options: "8f16fdd2c5d6165fb0f0b7670bf9453d7545b20e8bf0da70fbf773a59795bf6b"
+build_start_time: [1777137830, 975043000]
+build_end_time: [1777137839, 176074000]
+inputs:
+  "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Extensions/Color+Hex.swift": !dirty [1777136271, 972326825]
+  "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Models/WeeklySummary.swift": !dirty [1777136242, 669285126]
+  "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Utilities/AppGroup.swift": !dirty [1777136451, 270488798]
+  "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDomWidget/RunDomWidget.swift": !dirty [1777136362, 551488596]
+  "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDomWidget/RunDomWidgetBundle.swift": !dirty [1777120818, 520423306]
+  ? "/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/build/RunDom.build/Release-iphonesimulator/RunDomWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift"
+  : !dirty [1777137830, 242261062]

@@ -128,6 +128,7 @@ final class AppState: ObservableObject {
             }
 
             Task { await persistFCMTokenAndLanguage(userId: firebaseUser.uid) }
+            Task { await refreshWeeklyWidget(userId: firebaseUser.uid) }
         } catch {
             AppLogger.firebase.error("Failed to load user: \(error.localizedDescription)")
         }
@@ -183,5 +184,14 @@ final class AppState: ObservableObject {
 
     private static func randomUserColor() -> String {
         AppConstants.UserColors.all.randomElement() ?? "#4ECDC4"
+    }
+
+    private func refreshWeeklyWidget(userId: String) async {
+        do {
+            let runs = try await firestoreService.getRunSessions(userId: userId, limit: 50)
+            WidgetDataService.shared.buildAndSaveSummary(from: runs, currentUser: currentUser)
+        } catch {
+            AppLogger.firebase.warning("Failed to refresh widget on auth: \(error.localizedDescription)")
+        }
     }
 }

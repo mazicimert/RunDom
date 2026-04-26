@@ -125,6 +125,8 @@ final class PostRunViewModel: ObservableObject {
 
             isSaved = true
             AppLogger.run.info("Run saved: \(self.session.id), trail=\(result.totalTrail)")
+
+            await refreshWeeklyWidget(userId: user.id)
         } catch {
             errorMessage = "run.saveFailed".localized
             AppLogger.run.error("Failed to save run: \(error.localizedDescription)")
@@ -148,6 +150,16 @@ final class PostRunViewModel: ObservableObject {
             } catch {
                 AppLogger.firebase.warning("Failed to update run review: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func refreshWeeklyWidget(userId: String) async {
+        do {
+            let runs = try await firestoreService.getRunSessions(userId: userId, limit: 50)
+            let user = try? await firestoreService.getUser(id: userId)
+            WidgetDataService.shared.buildAndSaveSummary(from: runs, currentUser: user)
+        } catch {
+            AppLogger.firebase.warning("Failed to refresh widget after run: \(error.localizedDescription)")
         }
     }
 

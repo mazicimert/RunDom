@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>colors</key>
+	<array>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameBoostGreen</string>
+			<key>relativePath</key>
+			<string>./Colors/BoostGreen.colorset</string>
+			<key>swiftSymbol</key>
+			<string>boostGreen</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameBoostRed</string>
+			<key>relativePath</key>
+			<string>./Colors/BoostRed.colorset</string>
+			<key>swiftSymbol</key>
+			<string>boostRed</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameBoostYellow</string>
+			<key>relativePath</key>
+			<string>./Colors/BoostYellow.colorset</string>
+			<key>swiftSymbol</key>
+			<string>boostYellow</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameCardBackground</string>
+			<key>relativePath</key>
+			<string>./Colors/CardBackground.colorset</string>
+			<key>swiftSymbol</key>
+			<string>cardBackground</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameSurfacePrimary</string>
+			<key>relativePath</key>
+			<string>./Colors/SurfacePrimary.colorset</string>
+			<key>swiftSymbol</key>
+			<string>surfacePrimary</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameTerritoryBlue</string>
+			<key>relativePath</key>
+			<string>./Colors/TerritoryBlue.colorset</string>
+			<key>swiftSymbol</key>
+			<string>territoryBlue</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACColorNameTerritoryRed</string>
+			<key>relativePath</key>
+			<string>./Colors/TerritoryRed.colorset</string>
+			<key>swiftSymbol</key>
+			<string>territoryRed</string>
+		</dict>
+	</array>
+	<key>images</key>
+	<array>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameGoogleLogo</string>
+			<key>relativePath</key>
+			<string>./Images/google_logo.imageset</string>
+			<key>swiftSymbol</key>
+			<string>googleLogo</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/mertmazici/Mobile-Projects/RunDom App/iOS/RunDom/RunDom/RunDom/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameWelcomeCharacter</string>
+			<key>relativePath</key>
+			<string>./Images/welcome_character.imageset</string>
+			<key>swiftSymbol</key>
+			<string>welcomeCharacter</string>
+		</dict>
+	</array>
+	<key>symbols</key>
+	<array/>
+</dict>
+</plist>
