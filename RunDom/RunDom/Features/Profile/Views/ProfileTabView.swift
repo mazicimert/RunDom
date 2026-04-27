@@ -24,6 +24,8 @@ struct ProfileTabView: View {
 
                 statsSection
 
+                latestRunSection
+
                 if let user = resolvedUser, user.streakDays > 0 {
                     streakSection(user: user)
                 } else if resolvedUser != nil {
@@ -57,10 +59,14 @@ struct ProfileTabView: View {
         }
         .onChange(of: appState.currentUser) { _, newUser in
             if let newUser {
+                if viewModel.user?.id != newUser.id {
+                    viewModel.latestRun = nil
+                }
                 viewModel.user = newUser
             } else {
                 viewModel.user = nil
                 viewModel.badges = []
+                viewModel.latestRun = nil
             }
         }
     }
@@ -93,6 +99,8 @@ struct ProfileTabView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
+
+                    levelPill(for: user)
                 } else {
                     ProfileSkeletonAvatar()
                     ProfileSkeletonBlock(width: 132, height: 22)
@@ -116,6 +124,55 @@ struct ProfileTabView: View {
             }
         }
         .screenPadding()
+    }
+
+    private func levelPill(for user: User) -> some View {
+        let progress = PlayerLevel(totalTrail: user.totalTrail)
+        let remainingPointsText = "trail.points".localized(with: progress.remaining.formattedTrail)
+
+        return Button {
+            Haptics.selection()
+            router.presentedSheet = .levelBreakdown(totalTrail: user.totalTrail)
+        } label: {
+            VStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.caption.weight(.bold))
+
+                    Text("profile.level.title".localized(with: progress.level))
+                        .font(.caption.weight(.semibold))
+
+                    Text("•")
+                        .foregroundStyle(.secondary)
+
+                    Text("profile.level.remaining".localized(with: remainingPointsText))
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(Color.accentColor)
+
+                ProgressView(value: progress.fraction)
+                    .progressViewStyle(.linear)
+                    .tint(Color.accentColor)
+                    .frame(maxWidth: 220)
+                    .accessibilityValue(Text("\(Int((progress.fraction * 100).rounded()))%"))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color.accentColor.opacity(0.12))
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("profile.level.sheet.accessibilityHint".localized)
     }
 
     // MARK: - Stats Section
@@ -148,6 +205,77 @@ struct ProfileTabView: View {
             }
         }
         .screenPadding()
+    }
+
+    // MARK: - Latest Run Section
+
+    @ViewBuilder
+    private var latestRunSection: some View {
+        if let latestRun = viewModel.latestRun {
+            latestRunCard(latestRun)
+        }
+    }
+
+    private func latestRunCard(_ run: RunSession) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.14))
+                    .frame(width: 42, height: 42)
+
+                Image(systemName: "figure.run.circle.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.blue)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("profile.latestRun.title".localized)
+                        .font(.headline)
+
+                    Spacer()
+
+                    Text(run.startDate.relativeFormatted())
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    latestRunMetric(
+                        icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
+                        text: run.distance.formattedDistanceFromMeters,
+                        color: .green
+                    )
+
+                    latestRunMetric(
+                        icon: "flame.fill",
+                        text: "trail.points".localized(with: run.trail.formattedTrail),
+                        color: .orange
+                    )
+                }
+            }
+        }
+        .cardStyle()
+        .screenPadding()
+    }
+
+    private func latestRunMetric(icon: String, text: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(color)
+
+            Text(text)
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 6)
+        .background(
+            Capsule(style: .continuous)
+                .fill(color.opacity(0.12))
+        )
     }
 
     // MARK: - Streak Section
@@ -300,3 +428,4 @@ private struct ProfileSkeletonBlock: View {
             .shimmer()
     }
 }
+

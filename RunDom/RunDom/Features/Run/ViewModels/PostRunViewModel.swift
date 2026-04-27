@@ -13,6 +13,8 @@ final class PostRunViewModel: ObservableObject {
     @Published var newStreakDays: Int?
     @Published var dailyChallengeReward: DailyChallengeReward?
     @Published var review: RunReview?
+    @Published var didLevelUp = false
+    @Published var newLevel: Int?
 
     // MARK: - Properties
 
@@ -56,8 +58,11 @@ final class PostRunViewModel: ObservableObject {
         didExtendStreak = false
         newStreakDays = nil
         dailyChallengeReward = nil
+        didLevelUp = false
+        newLevel = nil
 
         let latestUser = (try? await firestoreService.getUser(id: user.id)) ?? user
+        let previousLevel = PlayerLevel(totalTrail: latestUser.totalTrail).level
 
         // 1. Anti-cheat validation
         let validation = antiCheatService.validateRoute(
@@ -114,6 +119,11 @@ final class PostRunViewModel: ObservableObject {
                 run: session
             )
             dailyChallengeReward = dailyChallengeResult.reward
+
+            let newTotalTrail = latestUser.totalTrail + result.totalTrail + (dailyChallengeResult.reward?.bonusTrail ?? 0)
+            let updatedLevel = PlayerLevel(totalTrail: newTotalTrail).level
+            self.newLevel = updatedLevel
+            self.didLevelUp = updatedLevel > previousLevel
 
             Task {
                 do {

@@ -8,6 +8,7 @@ struct PostRunSummaryView: View {
     @StateObject private var viewModel: PostRunViewModel
     @State private var showConfetti = false
     @State private var showStreakFire = false
+    @State private var showLevelUp = false
     @State private var isGalleryPresented = false
     @State private var showReviewSheet = false
     @State private var reviewBinding: RunReview?
@@ -97,7 +98,9 @@ struct PostRunSummaryView: View {
                 if saved {
                     Task { await appState.loadCurrentUser() }
                     Haptics.notification(.success)
-                    if viewModel.didExtendStreak {
+                    if viewModel.didLevelUp {
+                        showLevelUp = true
+                    } else if viewModel.didExtendStreak {
                         showStreakFire = true
                     } else {
                         showConfetti = true
@@ -147,7 +150,42 @@ struct PostRunSummaryView: View {
                     .padding(.top, 32)
                     .allowsHitTesting(false)
                 }
+
+                if showLevelUp {
+                    VStack(spacing: 12) {
+                        LottieView(
+                            animationName: "level_up",
+                            loopMode: .playOnce,
+                            onCompletion: {
+                                showLevelUp = false
+                            }
+                        )
+                        .frame(width: 260, height: 260)
+
+                        VStack(spacing: 4) {
+                            Text("run.summary.levelUp.title".localized)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(.white)
+
+                            if let level = viewModel.newLevel {
+                                Text("profile.level.title".localized(with: level))
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(Color.black.opacity(0.55))
+                        )
+                    }
+                    .padding(.top, 24)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .allowsHitTesting(false)
+                }
             }
+            .animation(.easeInOut(duration: 0.25), value: showLevelUp)
         }
     }
 

@@ -141,6 +141,7 @@
 "run.summary.achievements" = "Başarılar";
 "run.summary.achievement.streak" = "Seri Uzadı";
 "run.summary.achievement.daily" = "Günlük Görev Ödülü";
+"run.summary.levelUp.title" = "Seviye atladın!";
 "run.summary.breakdown.subtitle" = "Bu ödülü etkileyen tüm çarpanlar.";
 "run.summary.heroSubtitle" = "%@ mesafeyi %@ içinde tamamladın";
 "run.summary.performance.captured.single" = "%d bölge ele geçirildi";
@@ -323,6 +324,15 @@
 "profile.totalTrail" = "Toplam Puan";
 "profile.totalRuns" = "Koşu";
 "profile.totalDistance" = "Mesafe";
+"profile.level.title" = "Seviye %d Koşucu";
+"profile.level.remaining" = "%@ kaldı";
+"profile.level.sheet.title" = "Seviye İlerlemen";
+"profile.level.sheet.allLevelsSection" = "Tüm Seviyeler";
+"profile.level.sheet.currentMarker" = "Şu an";
+"profile.level.sheet.requirement" = "Gereken: %@";
+"profile.level.sheet.startingLevel" = "Başlangıç seviyesi";
+"profile.level.sheet.accessibilityHint" = "Seviye ilerlemesini gösterir";
+"profile.latestRun.title" = "Son Koşu";
 "profile.streak" = "Seri";
 "profile.streakDays" = "%d günlük seri";
 "profile.streakMultiplier" = "Seri bonusu: %@";

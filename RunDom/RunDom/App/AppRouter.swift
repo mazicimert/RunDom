@@ -61,6 +61,7 @@ final class AppRouter: ObservableObject {
         case badgeDetail(badge: Badge)
         case editProfile
         case settings
+        case levelBreakdown(totalTrail: Double)
 
         var id: String {
             switch self {
@@ -71,6 +72,7 @@ final class AppRouter: ObservableObject {
             case .badgeDetail(let badge): return "badgeDetail-\(badge.id)"
             case .editProfile: return "editProfile"
             case .settings: return "settings"
+            case .levelBreakdown: return "levelBreakdown"
             }
         }
     }

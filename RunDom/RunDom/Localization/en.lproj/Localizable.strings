@@ -141,6 +141,7 @@
 "run.summary.achievements" = "Achievements";
 "run.summary.achievement.streak" = "Streak Extended";
 "run.summary.achievement.daily" = "Daily Challenge Reward";
+"run.summary.levelUp.title" = "Level Up!";
 "run.summary.breakdown.subtitle" = "Every multiplier that shaped this reward.";
 "run.summary.heroSubtitle" = "You covered %@ in %@";
 "run.summary.performance.captured.single" = "%d territory captured";
@@ -323,6 +324,15 @@
 "profile.totalTrail" = "Total Points";
 "profile.totalRuns" = "Runs";
 "profile.totalDistance" = "Distance";
+"profile.level.title" = "Level %d Runner";
+"profile.level.remaining" = "%@ to go";
+"profile.level.sheet.title" = "Level Progress";
+"profile.level.sheet.allLevelsSection" = "All Levels";
+"profile.level.sheet.currentMarker" = "Current";
+"profile.level.sheet.requirement" = "Requires %@";
+"profile.level.sheet.startingLevel" = "Starting level";
+"profile.level.sheet.accessibilityHint" = "Opens level progression details";
+"profile.latestRun.title" = "Latest Run";
 "profile.streak" = "Streak";
 "profile.streakDays" = "%d day streak";
 "profile.streakMultiplier" = "Streak bonus: %@";

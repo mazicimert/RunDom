@@ -299,6 +299,10 @@ struct MainTabView: View {
         case .settings:
             SettingsView(authService: appState.authService)
                 .environmentObject(appState)
+        case .levelBreakdown(let totalTrail):
+            LevelBreakdownView(totalTrail: totalTrail)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
 }

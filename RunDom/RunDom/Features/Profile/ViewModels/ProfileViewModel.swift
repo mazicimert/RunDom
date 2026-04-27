@@ -7,6 +7,7 @@ final class ProfileViewModel: ObservableObject {
 
     @Published var user: User?
     @Published var badges: [Badge] = []
+    @Published var latestRun: RunSession?
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -52,10 +53,12 @@ final class ProfileViewModel: ObservableObject {
 
             async let userTask = firestoreService.getUser(id: userId)
             async let badgesTask = firestoreService.getBadges(userId: userId)
+            async let latestRunTask = firestoreService.getRuns(userId: userId, limit: 1)
 
-            let (fetchedUser, fetchedBadges) = try await (userTask, badgesTask)
+            let (fetchedUser, fetchedBadges, fetchedLatestRunResult) = try await (userTask, badgesTask, latestRunTask)
             user = fetchedUser
             badges = sortBadges(fetchedBadges)
+            latestRun = fetchedLatestRunResult.runs.first
         } catch {
             AppLogger.firebase.error("Failed to load profile: \(error.localizedDescription)")
             errorMessage = "error.generic".localized

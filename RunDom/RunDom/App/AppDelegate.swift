@@ -1,5 +1,6 @@
 import UIKit
 import FirebaseCore
+import FirebaseAppCheck
 import FirebaseMessaging
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -7,6 +8,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // App Check provider must be set BEFORE FirebaseApp.configure()
+        let providerFactory = RunDomAppCheckProviderFactory()
+        AppCheck.setAppCheckProviderFactory(providerFactory)
+
         FirebaseApp.configure()
 
         // FCM delegate
@@ -86,4 +91,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension Notification.Name {
     static let fcmTokenReceived = Notification.Name("fcmTokenReceived")
     static let notificationTapped = Notification.Name("notificationTapped")
+}
+
+// MARK: - App Check Provider Factory
+
+final class RunDomAppCheckProviderFactory: NSObject, AppCheckProviderFactory {
+    func createProvider(with app: FirebaseApp) -> AppCheckProvider? {
+        #if DEBUG
+        return AppCheckDebugProvider(app: app)
+        #else
+        return AppAttestProvider(app: app)
+        #endif
+    }
 }
