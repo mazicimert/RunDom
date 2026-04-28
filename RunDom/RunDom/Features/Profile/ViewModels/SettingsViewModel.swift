@@ -21,6 +21,15 @@ final class SettingsViewModel: ObservableObject {
             )
         }
     }
+    @Published var isAIAnalysisEnabled: Bool {
+        didSet {
+            guard isAIAnalysisEnabled != oldValue else { return }
+            UserDefaults.standard.set(
+                isAIAnalysisEnabled,
+                forKey: AppConstants.UserDefaultsKeys.aiAnalysisEnabled
+            )
+        }
+    }
 
     // MARK: - Services
 
@@ -45,6 +54,10 @@ final class SettingsViewModel: ObservableObject {
             forKey: AppConstants.UserDefaultsKeys.voiceFeedbackEnabled
         ) as? Bool
         self.isVoiceFeedbackEnabled = storedVoice ?? true
+        let storedAI = UserDefaults.standard.object(
+            forKey: AppConstants.UserDefaultsKeys.aiAnalysisEnabled
+        ) as? Bool
+        self.isAIAnalysisEnabled = storedAI ?? true
     }
 
     // MARK: - App Info

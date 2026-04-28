@@ -28,7 +28,7 @@ struct CompleteProfileView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("profile.complete.title".localized)
                                     .font(.title3.bold())
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.primary)
 
                                 Text("profile.complete.subtitle".localized)
                                     .font(.subheadline)
@@ -101,11 +101,14 @@ struct CompleteProfileView: View {
 
     private var profileBackground: some View {
         ZStack {
+            Color.surfacePrimary
+                .ignoresSafeArea()
+
             LinearGradient(
                 colors: [
-                    Color.black,
-                    Color.black.opacity(0.96),
-                    Color.accentColor.opacity(0.08)
+                    Color.accentColor.opacity(0.06),
+                    Color.clear,
+                    Color.accentColor.opacity(0.04)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -113,7 +116,7 @@ struct CompleteProfileView: View {
             .ignoresSafeArea()
 
             Circle()
-                .fill(Color.accentColor.opacity(0.12))
+                .fill(Color.accentColor.opacity(0.10))
                 .frame(width: 260, height: 260)
                 .blur(radius: 90)
                 .offset(x: 100, y: -220)
@@ -135,7 +138,7 @@ struct CompleteProfileView: View {
             VStack(spacing: 8) {
                 Text("Runpire")
                     .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
 
                 Text("profile.complete.subtitle".localized)
                     .font(.subheadline)
@@ -156,18 +159,13 @@ struct CompleteProfileView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.05), Color.white.opacity(0.03)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Color.cardBackground)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.06), radius: 18, y: 8)
     }
 
     private func profileNotice(message: String) -> some View {
@@ -177,7 +175,7 @@ struct CompleteProfileView: View {
 
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 14)
@@ -200,18 +198,18 @@ struct CompleteProfileView: View {
 
             HStack(spacing: 12) {
                 content()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 16)
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                    .fill(Color.white.opacity(0.06))
+                    .fill(Color.primary.opacity(0.04))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.12), lineWidth: 1)
             )
         }
     }

@@ -40,7 +40,7 @@ struct OnboardingContainerView: View {
                 HStack(spacing: 10) {
                     ForEach(0..<viewModel.totalPages, id: \.self) { index in
                         Capsule(style: .continuous)
-                            .fill(index == viewModel.currentPage ? Color.accentColor : Color.secondary.opacity(0.28))
+                            .fill(index == viewModel.currentPage ? Color.accentColor : Color.white.opacity(0.28))
                             .frame(width: index == viewModel.currentPage ? 22 : 8, height: 8)
                             .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.currentPage)
                     }

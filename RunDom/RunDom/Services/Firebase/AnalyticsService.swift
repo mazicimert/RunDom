@@ -70,6 +70,50 @@ enum AnalyticsService {
         ])
     }
 
+    // MARK: - AI Analysis Events
+
+    static func logAIRunAnalysisRequested(mode: RunMode) {
+        Analytics.logEvent("ai_run_analysis_requested", parameters: [
+            "mode": mode.rawValue
+        ])
+    }
+
+    static func logAIRunAnalysisLoaded(source: AIAnalysisSource) {
+        Analytics.logEvent("ai_run_analysis_loaded", parameters: [
+            "source": source.rawValue
+        ])
+    }
+
+    static func logAIRunAnalysisFailed(reason: String) {
+        Analytics.logEvent("ai_run_analysis_failed", parameters: [
+            "reason": reason
+        ])
+    }
+
+    static func logAIWeeklyAnalysisRequested() {
+        Analytics.logEvent("ai_weekly_analysis_requested", parameters: nil)
+    }
+
+    static func logAIWeeklyAnalysisLoaded(source: AIAnalysisSource) {
+        Analytics.logEvent("ai_weekly_analysis_loaded", parameters: [
+            "source": source.rawValue
+        ])
+    }
+
+    static func logAIWeeklyAnalysisFailed(reason: String) {
+        Analytics.logEvent("ai_weekly_analysis_failed", parameters: [
+            "reason": reason
+        ])
+    }
+
+    static func logAIDisclosureShown() {
+        Analytics.logEvent("ai_disclosure_shown", parameters: nil)
+    }
+
+    static func logAIDisclosureAccepted() {
+        Analytics.logEvent("ai_disclosure_accepted", parameters: nil)
+    }
+
     // MARK: - Auth Events
 
     static func logSignIn(method: String) {

@@ -109,6 +109,15 @@
 "auth.email.firstName.required" = "First name is required.";
 "auth.email.lastName" = "Last Name (Optional)";
 "auth.email.alreadyInUse" = "This email is already in use.";
+"auth.email.invalidCredentials" = "Email or password is incorrect. Please try again.";
+"auth.email.signInFailed" = "We couldn't sign you in. Please try again in a moment.";
+"auth.email.signUpFailed" = "We couldn't create your account. Please try again in a moment.";
+"auth.email.resetFailed" = "We couldn't send the reset email. Please try again in a moment.";
+"auth.error.network" = "No internet connection. Check your network and try again.";
+"auth.error.tooManyAttempts" = "Too many attempts. Please wait a moment before trying again.";
+"auth.error.userDisabled" = "This account has been disabled. Please contact support.";
+"auth.social.appleFailed" = "Apple Sign In didn't complete. Please try again.";
+"auth.social.googleFailed" = "Google Sign In didn't complete. Please try again.";
 
 // MARK: - Profile Completion
 "profile.complete.title" = "Complete Your Profile";
@@ -528,3 +537,85 @@
 "widget.streak" = "day streak";
 "widget.heatmap.displayName" = "Activity Calendar";
 "widget.heatmap.description" = "Last 12 weeks of running activity";
+
+// MARK: - AI Analysis
+"ai.run.title" = "Run Analysis";
+"ai.weekly.title" = "Weekly Analysis";
+"ai.run.loading" = "Analyzing your run...";
+"ai.weekly.loading" = "Analyzing your week...";
+"ai.loading.subtitle" = "Reviewing your strategy and multipliers.";
+"ai.run.cta.title" = "AI Run Analysis";
+"ai.run.cta.subtitle" = "A strategy coach reads your multipliers and route.";
+"ai.run.cta.button" = "Generate AI Analysis";
+"ai.weekly.cta.title" = "Weekly AI Analysis";
+"ai.weekly.cta.subtitle" = "An end-of-week look at your trend, top moment, and next focus.";
+"ai.weekly.cta.button" = "Generate Weekly Analysis";
+"ai.run.section.summary" = "Run Summary";
+"ai.run.section.highlights" = "Highlights";
+"ai.run.section.commentary" = "AI Commentary";
+"ai.run.section.next" = "Next Suggestion";
+"ai.weekly.section.trend" = "Week Trend";
+"ai.weekly.section.top" = "Top Achievement";
+"ai.weekly.section.weak" = "Weak Point";
+"ai.weekly.section.focus" = "Next Week's Focus";
+"ai.badge.gemini" = "Gemini AI";
+"ai.badge.template" = "Insight Template";
+"ai.disclaimer" = "Generated as a strategy hint. Game decisions are still yours.";
+"ai.error.minThresholds" = "Run must be at least 3 minutes and 300 m for AI analysis.";
+"ai.error.rateLimited" = "Daily AI analysis limit reached. Try again tomorrow.";
+"ai.error.unauthenticated" = "You need to be signed in to use AI analysis.";
+"ai.error.unavailable" = "AI service unavailable. Showing a template-based analysis.";
+"ai.error.invalidResponse" = "AI response could not be read. Showing a template-based analysis.";
+"ai.weekly.error.noRuns" = "No runs this week to analyze.";
+
+"ai.disclosure.title" = "Heads up before AI Analysis";
+"ai.disclosure.body" = "AI analysis sends an anonymized summary of your run to Google's Gemini API to generate the text.";
+"ai.disclosure.point.anonymized" = "Only game stats are sent: distance, time, multipliers, neighborhood name.";
+"ai.disclosure.point.noPII" = "Never sent: your name, email, photo, or raw GPS coordinates.";
+"ai.disclosure.point.toggle" = "You can turn AI analysis off any time in Settings.";
+"ai.disclosure.continue" = "Continue";
+
+"settings.aiAnalysis" = "AI Analysis";
+"settings.aiAnalysis.description" = "Send anonymized run data to generate AI commentary.";
+
+"ai.template.run.summary" = "You finished a %@ run in %@ and earned %@ %@.";
+"ai.template.run.highlight.normal" = "Normal mode kept your points safe end-to-end.";
+"ai.template.run.highlight.boostKept" = "Boost held — average %@ stayed above the threshold.";
+"ai.template.run.highlight.boostLost" = "Boost dropped to x1.0 because the average pace fell below 7 km/h.";
+"ai.template.run.highlight.newZones" = "%@ new H3 zones added — that's a real zone-multiplier boost.";
+"ai.template.run.highlight.antiFarmHigh" = "Anti-farm ratio at %@ keeps the multiplier at x1.0.";
+"ai.template.run.highlight.antiFarmMedium" = "Anti-farm ratio %@ pulls the multiplier to x0.7.";
+"ai.template.run.highlight.antiFarmLow" = "Anti-farm ratio %@ caps the multiplier at x0.4 — too much overlap.";
+"ai.template.run.highlight.streak" = "Streak holds at %@ days — keep the tier alive.";
+"ai.template.run.highlight.runCap" = "Per-run cap of 5,000 points was reached.";
+"ai.template.run.highlight.dailyCap" = "Today's 15,000-point cap stopped extra gains here.";
+"ai.template.run.highlight.fallback" = "You earned %@ %@ this run.";
+"ai.template.run.commentary.multipliers" = "Speed %@, duration %@, zone %@.";
+"ai.template.run.commentary.neighborhood" = "Run took place in %@.";
+"ai.template.run.commentary.trendUp" = "This was stronger than your recent runs.";
+"ai.template.run.commentary.trendDown" = "This sat below your recent average.";
+"ai.template.run.commentary.trendFlat" = "Roughly in line with your recent runs.";
+"ai.template.run.commentary.streakTier1" = "Your 3-day streak tier (x1.2) is active.";
+"ai.template.run.commentary.streakTier2" = "Your 7-day streak tier (x1.5) is active — protect it.";
+"ai.template.run.commentary.streakTier3" = "Your 14-day streak tier (x2.0) is active — biggest streak bonus.";
+"ai.template.run.next.exploreZones" = "Next run, head into fresh streets to lift your anti-farm ratio.";
+"ai.template.run.next.steadyPace" = "Next time pick Boost only if you can hold avg ≥ 7 km/h end-to-end.";
+"ai.template.run.next.tryBoost" = "Your speed is high enough to try Boost mode for a 2x reward.";
+"ai.template.run.next.longerRun" = "A run past ~30 min would unlock more of the duration multiplier.";
+"ai.template.run.next.keepStreak" = "Stack the next run within 24h to keep your streak tier safe.";
+
+"ai.template.week.trend.up" = "Total points climbed %@%% to %@ %@ — strong week.";
+"ai.template.week.trend.down" = "Total points dropped %@%% to %@ %@ vs last week.";
+"ai.template.week.trend.flat" = "Total points roughly flat at %@ %@ — steady week.";
+"ai.template.week.trend.firstWeek" = "%@ runs banked %@ %@ — your first reference week.";
+"ai.template.week.top.bestRun" = "Best single run earned %@ %@ over %@.";
+"ai.template.week.top.streak" = "%@-day streak survived another week.";
+"ai.template.week.top.fallback" = "%@ runs covering %@ this week.";
+"ai.template.week.weak.antiFarm" = "Average anti-farm ratio at %@%% pulled the multiplier down.";
+"ai.template.week.weak.boostLost" = "%@ of your %@ Boost runs cancelled mid-run.";
+"ai.template.week.weak.fewRuns" = "Only %@ runs this week — light volume hurts streak and momentum.";
+"ai.template.week.weak.fallback" = "Zone exploration could be wider for stronger compounding.";
+"ai.template.week.focus.streak" = "Build a 3-day streak to unlock the x1.2 multiplier.";
+"ai.template.week.focus.exploration" = "Aim for fresh H3 zones to push the anti-farm ratio above 70%%.";
+"ai.template.week.focus.distance" = "Add one slightly longer run next week to reverse the distance dip.";
+"ai.template.week.focus.consolidate" = "Hold this rhythm and aim for a higher single-run %@ peak.";

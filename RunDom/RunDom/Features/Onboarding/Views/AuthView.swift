@@ -5,6 +5,7 @@ struct AuthView: View {
     @ObservedObject var viewModel: AuthViewModel
     let onComplete: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isAnimating = false
     @State private var showPassword = false
     @State private var showConfirmPassword = false
@@ -45,11 +46,14 @@ struct AuthView: View {
 
     private var authBackground: some View {
         ZStack {
+            Color.surfacePrimary
+                .ignoresSafeArea()
+
             LinearGradient(
                 colors: [
-                    Color.black,
-                    Color.black.opacity(0.96),
-                    Color.accentColor.opacity(0.08)
+                    Color.accentColor.opacity(0.06),
+                    Color.clear,
+                    Color.accentColor.opacity(0.04)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -57,7 +61,7 @@ struct AuthView: View {
             .ignoresSafeArea()
 
             Circle()
-                .fill(Color.accentColor.opacity(0.12))
+                .fill(Color.accentColor.opacity(0.10))
                 .frame(width: 260, height: 260)
                 .blur(radius: 90)
                 .offset(x: 100, y: -220)
@@ -81,7 +85,7 @@ struct AuthView: View {
             VStack(spacing: 8) {
                 Text("Runpire")
                     .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
 
                 Text(headerSubtitle)
                     .font(.subheadline)
@@ -113,6 +117,7 @@ struct AuthView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("auth.hero.title".localized)
                         .font(.title3.bold())
+                        .foregroundStyle(.primary)
 
                     Text("auth.hero.body".localized)
                         .font(.subheadline)
@@ -126,7 +131,7 @@ struct AuthView: View {
                         } onCompletion: { result in
                             viewModel.handleAppleSignIn(result: result)
                         }
-                        .signInWithAppleButtonStyle(.white)
+                        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                         .frame(height: 56)
                         .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
 
@@ -150,7 +155,7 @@ struct AuthView: View {
 
                     HStack(spacing: 12) {
                         Rectangle()
-                            .fill(Color.white.opacity(0.08))
+                            .fill(Color.primary.opacity(0.12))
                             .frame(height: 1)
 
                         Text("auth.divider".localized)
@@ -158,7 +163,7 @@ struct AuthView: View {
                             .foregroundStyle(.secondary)
 
                         Rectangle()
-                            .fill(Color.white.opacity(0.08))
+                            .fill(Color.primary.opacity(0.12))
                             .frame(height: 1)
                     }
 
@@ -192,6 +197,7 @@ struct AuthView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(viewModel.isSignUpMode ? "auth.form.signup.title".localized : "auth.form.signin.title".localized)
                         .font(.title3.bold())
+                        .foregroundStyle(.primary)
 
                     Text(viewModel.isSignUpMode ? "auth.form.signup.body".localized : "auth.form.signin.body".localized)
                         .font(.subheadline)
@@ -378,18 +384,13 @@ struct AuthView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.05), Color.white.opacity(0.03)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(Color.cardBackground)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.06), radius: 18, y: 8)
     }
 
     private func authNotice(message: String, tone: AuthNoticeTone) -> some View {
@@ -399,7 +400,7 @@ struct AuthView: View {
 
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 14)
@@ -444,18 +445,18 @@ struct AuthView: View {
     ) -> some View {
         HStack(spacing: 12) {
             content()
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                .fill(Color.white.opacity(0.06))
+                .fill(Color.primary.opacity(0.04))
         )
         .overlay(
             RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                .stroke(hasError ? Color.red.opacity(0.45) : Color.white.opacity(0.10), lineWidth: 1)
+                .stroke(hasError ? Color.red.opacity(0.45) : Color.primary.opacity(0.12), lineWidth: 1)
         )
     }
 
@@ -487,15 +488,15 @@ private enum AuthNoticeTone {
 private struct AuthSecondaryActionStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .background(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
+                    .fill(Color.primary.opacity(0.06))
             )
             .clipShape(RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AppConstants.UI.cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color.primary.opacity(0.12), lineWidth: 1)
             )
             .scaleEffect(configuration.isPressed ? 0.99 : 1.0)
             .animation(.easeOut(duration: AppConstants.Animation.quick), value: configuration.isPressed)

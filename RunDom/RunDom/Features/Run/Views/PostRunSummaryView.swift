@@ -39,6 +39,12 @@ struct PostRunSummaryView: View {
                             multiplierBreakdown(result: result)
                         }
 
+                        AIRunAnalysisLauncher(
+                            session: viewModel.session,
+                            trailResult: viewModel.trailResult,
+                            neighborhood: appState.currentUser?.neighborhood
+                        )
+
                         if let error = viewModel.errorMessage {
                             Text(error)
                                 .font(.caption.weight(.semibold))
@@ -50,10 +56,10 @@ struct PostRunSummaryView: View {
                         if viewModel.isSaving {
                             HStack(spacing: 10) {
                                 ProgressView()
-                                    .tint(.white)
+                                    .tint(.primary)
                                 Text("run.saving".localized)
                                     .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(.white.opacity(0.78))
+                                    .foregroundStyle(.secondary)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .summarySurface(fill: summaryCardFill)
@@ -328,7 +334,7 @@ struct PostRunSummaryView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     Text("run.summary.route".localized)
                         .font(.headline.weight(.bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
 
                     ZStack(alignment: .topLeading) {
                         PostRunMapView(routePoints: viewModel.session.route)
@@ -352,7 +358,7 @@ struct PostRunSummaryView: View {
                     HStack(spacing: 12) {
                         Text(viewModel.heroSubtitleText)
                             .font(.caption)
-                            .foregroundStyle(.white.opacity(0.62))
+                            .foregroundStyle(.secondary)
                         Spacer()
                     }
                 }
@@ -398,7 +404,7 @@ struct PostRunSummaryView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("run.summary.achievements".localized)
                 .font(.headline.weight(.bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             VStack(spacing: 12) {
                 if viewModel.didExtendStreak, let streakText = viewModel.streakExtendedText {
@@ -430,11 +436,11 @@ struct PostRunSummaryView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("run.breakdown".localized)
                 .font(.headline.weight(.bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             Text("run.summary.breakdown.subtitle".localized)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.64))
+                .foregroundStyle(.secondary)
 
             VStack(spacing: 12) {
                 breakdownRow(
@@ -647,10 +653,10 @@ struct PostRunSummaryView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.64))
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
 
@@ -678,7 +684,7 @@ struct PostRunSummaryView: View {
             HStack(spacing: 12) {
                 Text(label)
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.secondary)
 
                 Spacer()
 
@@ -696,7 +702,7 @@ struct PostRunSummaryView: View {
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Color.primary.opacity(0.08))
                     Capsule()
                         .fill(
                             LinearGradient(
@@ -842,13 +848,13 @@ private struct PostRunCompactStatCard: View {
 
             Text(value)
                 .font(.title2.weight(.bold).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
 
             Text(label)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, minHeight: 136, alignment: .leading)
         .summarySurface(
@@ -872,7 +878,7 @@ private extension View {
                     .fill(fill)
                     .overlay(
                         RoundedRectangle(cornerRadius: 26, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.05), lineWidth: 1)
+                            .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
                     )
             )
             .shadow(color: .black.opacity(0.1), radius: 10, y: 4)

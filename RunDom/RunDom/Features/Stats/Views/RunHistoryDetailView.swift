@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 
 struct RunHistoryDetailView: View {
+    @EnvironmentObject private var appState: AppState
     let run: RunSession
     @State private var isGalleryPresented = false
     @State private var showReviewSheet = false
@@ -24,6 +25,35 @@ struct RunHistoryDetailView: View {
 
     private var hasReview: Bool {
         rating != nil || !tags.isEmpty || !(note?.isEmpty ?? true)
+    }
+
+    /// Reconstructs the multiplier breakdown for an already-saved run so the AI launcher
+    /// has something to show. Streak / dropzone / daily-cap context is not persisted, so
+    /// we treat them as unknown and derive only from RunSession fields.
+    private var derivedTrailResult: TrailCalculator.TrailResult {
+        let calculator = TrailCalculator()
+        let distanceKm = run.distance / 1000.0
+        let durationMinutes = run.duration / 60.0
+        let base = calculator.basePoints(distanceKm: distanceKm)
+        let speed = calculator.speedMultiplier(avgSpeedKmh: run.avgSpeed)
+        let duration = calculator.durationMultiplier(minutes: durationMinutes)
+        let zone = calculator.zoneMultiplier(newZones: run.uniqueZonesVisited)
+        let mode = calculator.modeMultiplier(mode: run.mode, isBoostActive: run.isBoostActive)
+        let antiFarm = calculator.antiFarmMultiplier(uniqueRatio: run.uniqueZoneRatio)
+
+        return TrailCalculator.TrailResult(
+            totalTrail: run.trail,
+            basePoints: base,
+            speedMultiplier: speed,
+            durationMultiplier: duration,
+            zoneMultiplier: zone,
+            streakMultiplier: 1.0,
+            modeMultiplier: mode,
+            antiFarmMultiplier: antiFarm,
+            dropzoneMultiplier: 1.0,
+            wasCapped: run.trail >= AppConstants.Game.maxTrailPerRun,
+            wasDailyCapped: false
+        )
     }
 
     var body: some View {
@@ -113,6 +143,13 @@ struct RunHistoryDetailView: View {
 
                 reviewSection
                     .screenPadding()
+
+                AIRunAnalysisLauncher(
+                    session: run,
+                    trailResult: derivedTrailResult,
+                    neighborhood: appState.currentUser?.neighborhood
+                )
+                .screenPadding()
             }
             .padding(.vertical)
         }
@@ -266,5 +303,6 @@ struct RunHistoryDetailView: View {
             distance: 5240, avgSpeed: 10.5, trail: 850,
             territoriesCaptured: 12, uniqueZonesVisited: 10, totalZonesVisited: 14
         ))
+        .environmentObject(AppState())
     }
 }

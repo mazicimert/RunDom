@@ -20,16 +20,17 @@ struct DailyChallengeSelectionView: View {
                             onClose()
                         }
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.72))
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
                         Text("challenge.selection.title".localized)
                             .font(.largeTitle.bold())
+                            .foregroundStyle(.white)
 
                         Text("challenge.selection.subtitle".localized)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.72))
                     }
 
                     VStack(spacing: 14) {
@@ -46,7 +47,7 @@ struct DailyChallengeSelectionView: View {
 
                     Text("challenge.selection.footnote".localized)
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.6))
                 }
                 .padding(.horizontal, horizontalPadding)
                 .padding(.top, 24)
@@ -123,8 +124,8 @@ struct DailyChallengeSelectionView: View {
                     LinearGradient(
                         colors: [
                             accentColor.opacity(0.26),
-                            Color.cardBackground,
-                            Color.cardBackground
+                            Color(red: 0.13, green: 0.13, blue: 0.17),
+                            Color(red: 0.10, green: 0.10, blue: 0.13)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing

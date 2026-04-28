@@ -28,13 +28,14 @@ struct OnboardingPageView: View {
                 VStack(spacing: 10) {
                     Text(title)
                         .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
                         .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
 
                     Text(subtitle)
                         .font(.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.72))
                         .multilineTextAlignment(.center)
                         .lineLimit(3)
                         .padding(.horizontal, AppConstants.UI.screenPadding)
@@ -154,7 +155,7 @@ struct OnboardingPageView: View {
 
                     Text("onboarding.placeholder".localized)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.72))
                 }
             }
         }

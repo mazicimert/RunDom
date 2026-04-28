@@ -75,6 +75,8 @@ enum AppConstants {
         static let lastDailyChallengePromptDateKey = "lastDailyChallengePromptDateKey"
         static let mapStyle = "mapStyle"
         static let voiceFeedbackEnabled = "voiceFeedbackEnabled"
+        static let aiAnalysisEnabled = "aiAnalysisEnabled"
+        static let aiDisclosureAccepted = "aiDisclosureAccepted"
     }
 
     // MARK: - Animation Durations

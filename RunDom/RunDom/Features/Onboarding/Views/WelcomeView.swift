@@ -59,7 +59,7 @@ struct WelcomeView: View {
 
                     Text("welcome.subtitle".localized)
                         .font(.title3.weight(.medium))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.72))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 8)
                 }
@@ -112,7 +112,7 @@ struct WelcomeView: View {
 
                         Text("welcome.character.placeholder".localized)
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.72))
                             .multilineTextAlignment(.center)
                     }
                     .padding(28)

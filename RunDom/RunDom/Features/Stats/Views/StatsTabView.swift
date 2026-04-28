@@ -56,6 +56,9 @@ struct StatsTabView: View {
                             weeklyReportCard(report: report)
                         }
 
+                        AIWeeklyAnalysisLauncher()
+                            .screenPadding()
+
                         // Run History
                         historySection
                     }

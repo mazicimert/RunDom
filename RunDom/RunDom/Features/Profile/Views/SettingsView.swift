@@ -50,6 +50,17 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Toggle(isOn: $viewModel.isAIAnalysisEnabled) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("settings.aiAnalysis".localized)
+                            Text("settings.aiAnalysis.description".localized)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section {
                     Toggle(isOn: $unitPreference.useMiles) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("settings.unit".localized)

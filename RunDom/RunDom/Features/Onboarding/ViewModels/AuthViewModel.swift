@@ -24,17 +24,13 @@ final class AuthViewModel: ObservableObject {
         didSet {
             emailError = nil
             passwordResetSent = false
-            if errorMessage == "auth.email.invalidEmail".localized || errorMessage == "auth.email.userNotFound".localized {
-                errorMessage = nil
-            }
+            errorMessage = nil
         }
     }
     @Published var password = "" {
         didSet {
             passwordError = nil
-            if errorMessage == "auth.email.wrongPassword".localized || errorMessage == "auth.email.passwordTooShort".localized {
-                errorMessage = nil
-            }
+            errorMessage = nil
         }
     }
     @Published var confirmPassword = "" {
@@ -84,7 +80,7 @@ final class AuthViewModel: ObservableObject {
                     try await authService.signInWithApple(authorization: authorization)
                     AppLogger.auth.info("Apple Sign In completed")
                 } catch {
-                    errorMessage = "error.generic".localized
+                    applySocialAuthError(error, fallbackKey: "auth.social.appleFailed")
                     AppLogger.auth.error("Apple Sign In failed: \(error.localizedDescription)")
                 }
                 isSigningIn = false
@@ -94,7 +90,7 @@ final class AuthViewModel: ObservableObject {
             if (error as NSError).code == ASAuthorizationError.canceled.rawValue {
                 return
             }
-            errorMessage = "error.generic".localized
+            applySocialAuthError(error, fallbackKey: "auth.social.appleFailed")
             AppLogger.auth.error("Apple Sign In error: \(error.localizedDescription)")
         }
     }
@@ -125,7 +121,7 @@ final class AuthViewModel: ObservableObject {
                 if (error as NSError).code == GIDSignInError.canceled.rawValue {
                     return
                 }
-                self.errorMessage = "error.generic".localized
+                self.applySocialAuthError(error, fallbackKey: "auth.social.googleFailed")
                 AppLogger.auth.error("Google Sign In error: \(error.localizedDescription)")
                 return
             }
@@ -134,7 +130,7 @@ final class AuthViewModel: ObservableObject {
                 let idToken = user.idToken?.tokenString
             else {
                 self.isSigningIn = false
-                self.errorMessage = "error.generic".localized
+                self.errorMessage = "auth.social.googleFailed".localized
                 return
             }
 
@@ -146,13 +142,30 @@ final class AuthViewModel: ObservableObject {
                         idToken: idToken, accessToken: accessToken)
                     AppLogger.auth.info("Google Sign In completed")
                 } catch {
-                    self.errorMessage = "error.generic".localized
+                    self.applySocialAuthError(error, fallbackKey: "auth.social.googleFailed")
                     AppLogger.auth.error(
                         "Firebase Auth via Google failed: \(error.localizedDescription)")
                 }
                 self.isSigningIn = false
             }
         }
+    }
+
+    private func applySocialAuthError(_ error: Error, fallbackKey: String) {
+        let nsError = error as NSError
+        if isNetworkError(nsError) {
+            errorMessage = "auth.error.network".localized
+            return
+        }
+        if nsError.code == AuthErrorCode.tooManyRequests.rawValue {
+            errorMessage = "auth.error.tooManyAttempts".localized
+            return
+        }
+        if nsError.code == AuthErrorCode.userDisabled.rawValue {
+            errorMessage = "auth.error.userDisabled".localized
+            return
+        }
+        errorMessage = fallbackKey.localized
     }
 
     // MARK: - Email Sign In
@@ -188,7 +201,7 @@ final class AuthViewModel: ObservableObject {
                     AppLogger.auth.info("Email Sign In completed")
                 }
             } catch {
-                applyEmailAuthError(error)
+                applyEmailAuthError(error, context: isSignUpMode ? .signUp : .signIn)
                 AppLogger.auth.error("Email auth failed: \(error.localizedDescription)")
             }
             isSigningIn = false
@@ -217,7 +230,7 @@ final class AuthViewModel: ObservableObject {
                 try await authService.sendPasswordReset(email: trimmedEmail)
                 passwordResetSent = true
             } catch {
-                errorMessage = "error.generic".localized
+                applyEmailAuthError(error, context: .passwordReset)
                 AppLogger.auth.error("Password reset failed: \(error.localizedDescription)")
             }
             isSigningIn = false
@@ -293,42 +306,64 @@ final class AuthViewModel: ObservableObject {
         return true
     }
 
-    private func applyEmailAuthError(_ error: Error) {
-        let message = emailErrorMessage(for: error)
-        let nsError = error as NSError
+    private enum EmailAuthContext {
+        case signIn
+        case signUp
+        case passwordReset
 
-        switch nsError.code {
-        case 17008:
-            emailError = message
-        case 17009:
-            passwordError = message
-        case 17011:
-            emailError = message
-        case 17007:
-            emailError = message
-        case 17026:
-            passwordError = message
-        default:
-            errorMessage = message
+        var fallbackKey: String {
+            switch self {
+            case .signIn: return "auth.email.signInFailed"
+            case .signUp: return "auth.email.signUpFailed"
+            case .passwordReset: return "auth.email.resetFailed"
+            }
         }
     }
 
-    private func emailErrorMessage(for error: Error) -> String {
+    private func applyEmailAuthError(_ error: Error, context: EmailAuthContext) {
         let nsError = error as NSError
-        switch nsError.code {
-        case 17008:
-            return "auth.email.invalidEmail".localized
-        case 17009:
-            return "auth.email.wrongPassword".localized
-        case 17011:
-            return "auth.email.userNotFound".localized
-        case 17007:
-            return "auth.email.alreadyInUse".localized
-        case 17026:
-            return "auth.email.passwordTooShort".localized
-        default:
-            return "error.generic".localized
+
+        // Network failure surfaces as NSURLErrorDomain even when wrapped by Firebase.
+        if isNetworkError(nsError) {
+            errorMessage = "auth.error.network".localized
+            return
         }
+
+        switch nsError.code {
+        case AuthErrorCode.invalidEmail.rawValue:
+            emailError = "auth.email.invalidEmail".localized
+        case AuthErrorCode.userNotFound.rawValue:
+            emailError = "auth.email.userNotFound".localized
+        case AuthErrorCode.emailAlreadyInUse.rawValue:
+            emailError = "auth.email.alreadyInUse".localized
+        case AuthErrorCode.wrongPassword.rawValue:
+            passwordError = "auth.email.wrongPassword".localized
+        case AuthErrorCode.weakPassword.rawValue:
+            passwordError = "auth.email.passwordTooShort".localized
+        case AuthErrorCode.invalidCredential.rawValue:
+            // With Firebase email-enumeration protection enabled, both wrong email
+            // and wrong password collapse into this single code — show a banner so
+            // we don't blame the wrong field.
+            errorMessage = "auth.email.invalidCredentials".localized
+        case AuthErrorCode.tooManyRequests.rawValue:
+            errorMessage = "auth.error.tooManyAttempts".localized
+        case AuthErrorCode.userDisabled.rawValue:
+            errorMessage = "auth.error.userDisabled".localized
+        case AuthErrorCode.networkError.rawValue:
+            errorMessage = "auth.error.network".localized
+        default:
+            errorMessage = context.fallbackKey.localized
+        }
+    }
+
+    private func isNetworkError(_ error: NSError) -> Bool {
+        if error.code == AuthErrorCode.networkError.rawValue { return true }
+        if error.domain == NSURLErrorDomain { return true }
+        if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError,
+           underlying.domain == NSURLErrorDomain {
+            return true
+        }
+        return false
     }
 
     private func isValidEmail(_ email: String) -> Bool {

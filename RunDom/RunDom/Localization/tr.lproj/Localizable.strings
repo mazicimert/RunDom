@@ -109,6 +109,15 @@
 "auth.email.firstName.required" = "Ad alanı zorunludur.";
 "auth.email.lastName" = "Soyad (Opsiyonel)";
 "auth.email.alreadyInUse" = "Bu e-posta adresi zaten kullanımda.";
+"auth.email.invalidCredentials" = "E-posta veya şifre hatalı. Lütfen tekrar dene.";
+"auth.email.signInFailed" = "Giriş yapılamadı. Lütfen birazdan tekrar dene.";
+"auth.email.signUpFailed" = "Hesap oluşturulamadı. Lütfen birazdan tekrar dene.";
+"auth.email.resetFailed" = "Sıfırlama e-postası gönderilemedi. Lütfen birazdan tekrar dene.";
+"auth.error.network" = "İnternet bağlantısı yok. Ağını kontrol edip tekrar dene.";
+"auth.error.tooManyAttempts" = "Çok fazla deneme yapıldı. Lütfen biraz bekleyip tekrar dene.";
+"auth.error.userDisabled" = "Bu hesap devre dışı bırakılmış. Lütfen destek ekibimizle iletişime geç.";
+"auth.social.appleFailed" = "Apple ile giriş tamamlanamadı. Lütfen tekrar dene.";
+"auth.social.googleFailed" = "Google ile giriş tamamlanamadı. Lütfen tekrar dene.";
 
 // MARK: - Profile Completion
 "profile.complete.title" = "Profilini Tamamla";
@@ -528,3 +537,85 @@
 "widget.streak" = "gün seri";
 "widget.heatmap.displayName" = "Aktivite Takvimi";
 "widget.heatmap.description" = "Son 12 haftalık koşu aktiviten";
+
+// MARK: - AI Analysis
+"ai.run.title" = "Koşu Analizi";
+"ai.weekly.title" = "Haftalık Analiz";
+"ai.run.loading" = "Koşun analiz ediliyor...";
+"ai.weekly.loading" = "Hafta analiz ediliyor...";
+"ai.loading.subtitle" = "Çarpanların ve stratejin değerlendiriliyor.";
+"ai.run.cta.title" = "AI Koşu Analizi";
+"ai.run.cta.subtitle" = "Strateji koçu çarpanlarını ve rotanı yorumlasın.";
+"ai.run.cta.button" = "AI Analizi Yap";
+"ai.weekly.cta.title" = "Haftalık AI Analizi";
+"ai.weekly.cta.subtitle" = "Hafta sonu için trendin, en iyi anın ve sıradaki odağın.";
+"ai.weekly.cta.button" = "Haftalık Analiz Yap";
+"ai.run.section.summary" = "Koşu Özeti";
+"ai.run.section.highlights" = "Öne Çıkanlar";
+"ai.run.section.commentary" = "AI Yorumu";
+"ai.run.section.next" = "Bir Sonraki Öneri";
+"ai.weekly.section.trend" = "Hafta Trendi";
+"ai.weekly.section.top" = "Öne Çıkan Başarı";
+"ai.weekly.section.weak" = "Zayıf Nokta";
+"ai.weekly.section.focus" = "Sonraki Hafta Odağı";
+"ai.badge.gemini" = "Gemini AI";
+"ai.badge.template" = "Şablon Analiz";
+"ai.disclaimer" = "Strateji önerisi olarak üretilmiştir. Karar yine senin.";
+"ai.error.minThresholds" = "AI analizi için koşu en az 3 dk ve 300 m olmalı.";
+"ai.error.rateLimited" = "Günlük AI analiz limitine ulaştın. Yarın tekrar dene.";
+"ai.error.unauthenticated" = "AI analizi için oturum açman gerekiyor.";
+"ai.error.unavailable" = "AI servisi şu an erişilemez. Şablon tabanlı analiz gösteriliyor.";
+"ai.error.invalidResponse" = "AI yanıtı çözümlenemedi. Şablon tabanlı analiz gösteriliyor.";
+"ai.weekly.error.noRuns" = "Bu hafta analiz edilecek koşu yok.";
+
+"ai.disclosure.title" = "AI Analizi Hakkında";
+"ai.disclosure.body" = "AI analizi metni üretebilmek için anonim koşu özetini Google Gemini API'sine gönderir.";
+"ai.disclosure.point.anonymized" = "Yalnızca oyun verisi gönderilir: mesafe, süre, çarpanlar, mahalle adı.";
+"ai.disclosure.point.noPII" = "Gönderilmez: adın, e-postan, fotoğrafın veya ham GPS koordinatların.";
+"ai.disclosure.point.toggle" = "AI analizini istediğin an Ayarlar'dan kapatabilirsin.";
+"ai.disclosure.continue" = "Devam Et";
+
+"settings.aiAnalysis" = "AI Analizi";
+"settings.aiAnalysis.description" = "AI yorumu için anonim koşu verisi gönderilir.";
+
+"ai.template.run.summary" = "%@ mesafeli ve %@ süreli koşundan %@ %@ kazandın.";
+"ai.template.run.highlight.normal" = "Normal mod puanlarını uçtan uca güvende tuttu.";
+"ai.template.run.highlight.boostKept" = "Boost korundu — ortalama %@ eşiğin üstündeydi.";
+"ai.template.run.highlight.boostLost" = "Ortalama hız 7 km/saat altına düştüğü için Boost x1.0'a indi.";
+"ai.template.run.highlight.newZones" = "%@ yeni H3 bölgesi eklendi — bölge çarpanı için gerçek bir destek.";
+"ai.template.run.highlight.antiFarmHigh" = "Anti-farm oranı %@ ile çarpanı x1.0'da tutuyor.";
+"ai.template.run.highlight.antiFarmMedium" = "Anti-farm oranı %@ çarpanı x0.7'ye çekiyor.";
+"ai.template.run.highlight.antiFarmLow" = "Anti-farm oranı %@ çarpanı x0.4'e indiriyor — fazla tekrar.";
+"ai.template.run.highlight.streak" = "Seri %@ günde — kademeyi koru.";
+"ai.template.run.highlight.runCap" = "Koşu başına 5.000 puan tavanına ulaşıldı.";
+"ai.template.run.highlight.dailyCap" = "Bugünün 15.000 puan tavanı ek kazancı durdurdu.";
+"ai.template.run.highlight.fallback" = "Bu koşudan %@ %@ kazandın.";
+"ai.template.run.commentary.multipliers" = "Hız %@, süre %@, bölge %@.";
+"ai.template.run.commentary.neighborhood" = "Koşu %@ bölgesinde gerçekleşti.";
+"ai.template.run.commentary.trendUp" = "Bu koşu son koşularına göre daha güçlüydü.";
+"ai.template.run.commentary.trendDown" = "Son koşularının ortalamasının altında kaldı.";
+"ai.template.run.commentary.trendFlat" = "Son koşularınla aşağı yukarı aynı çizgide.";
+"ai.template.run.commentary.streakTier1" = "3 günlük seri kademen (x1.2) aktif.";
+"ai.template.run.commentary.streakTier2" = "7 günlük seri kademen (x1.5) aktif — koru.";
+"ai.template.run.commentary.streakTier3" = "14 günlük seri kademen (x2.0) aktif — en yüksek seri bonusu.";
+"ai.template.run.next.exploreZones" = "Sonraki koşunda yeni sokaklara dalıp anti-farm oranını yükselt.";
+"ai.template.run.next.steadyPace" = "Bir sonrakinde Boost'u sadece ortalama ≥ 7 km/saat tutabilirsen seç.";
+"ai.template.run.next.tryBoost" = "Hızın yüksek — Boost moduna geçip x2 ödülü dene.";
+"ai.template.run.next.longerRun" = "~30 dakikayı aşan bir koşu süre çarpanını daha çok açar.";
+"ai.template.run.next.keepStreak" = "Sonraki koşuyu 24 saat içinde yap, seri kademen güvende kalsın.";
+
+"ai.template.week.trend.up" = "Toplam puan %%%@ artarak %@ %@ oldu — güçlü hafta.";
+"ai.template.week.trend.down" = "Toplam puan geçen haftaya göre %%%@ düştü, %@ %@.";
+"ai.template.week.trend.flat" = "Toplam puan %@ %@ ile yaklaşık sabit — istikrarlı hafta.";
+"ai.template.week.trend.firstWeek" = "%@ koşu ile %@ %@ topladın — referans için ilk haftan.";
+"ai.template.week.top.bestRun" = "En iyi tek koşu %@ %@ getirdi (%@).";
+"ai.template.week.top.streak" = "%@ günlük seri bir hafta daha hayatta.";
+"ai.template.week.top.fallback" = "Bu hafta %@ koşuda %@ mesafe.";
+"ai.template.week.weak.antiFarm" = "Ortalama anti-farm oranı %%%@ çarpanı aşağı çekti.";
+"ai.template.week.weak.boostLost" = "%@ Boost koşusunun %@ tanesi yarıda iptal oldu.";
+"ai.template.week.weak.fewRuns" = "Bu hafta sadece %@ koşu — düşük hacim seriyi ve momentumu zorluyor.";
+"ai.template.week.weak.fallback" = "Bölge keşfi daha geniş olsa kazanç katlanır.";
+"ai.template.week.focus.streak" = "3 günlük seri kurarak x1.2 çarpanını aç.";
+"ai.template.week.focus.exploration" = "Yeni H3 bölgelerine yönelip anti-farm oranını %%70 üstüne çıkar.";
+"ai.template.week.focus.distance" = "Önümüzdeki hafta biraz daha uzun bir koşu ekleyerek mesafe düşüşünü tersine çevir.";
+"ai.template.week.focus.consolidate" = "Bu ritmi koru ve daha yüksek tek koşu %@ tepesini hedefle.";
