@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var localizationManager: LocalizationManager
     @EnvironmentObject private var unitPreference: UnitPreference
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SettingsViewModel
 
     init(authService: AuthService) {
@@ -16,19 +17,15 @@ struct SettingsView: View {
             List {
                 // Notifications
                 Section {
-                    HStack {
+                    Toggle(isOn: notificationsToggleBinding) {
                         Label("settings.notifications".localized, systemImage: "bell.fill")
-                        Spacer()
-                        if viewModel.notificationsEnabled {
-                            Text("settings.enabled".localized)
-                                .foregroundStyle(.green)
-                                .font(.subheadline)
-                        } else {
-                            Button("settings.enable".localized) {
-                                viewModel.openNotificationSettings()
-                            }
-                            .font(.subheadline)
-                        }
+                    }
+                } footer: {
+                    if viewModel.notificationStatus == .denied {
+                        Text("settings.notifications.deniedHint".localized)
+                    } else if viewModel.notificationStatus == .authorized
+                                || viewModel.notificationStatus == .provisional {
+                        Text("settings.notifications.enabledHint".localized)
                     }
                 }
 
@@ -99,6 +96,15 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+
+                Section("settings.testing".localized) {
+                    Button(role: .destructive) {
+                        appState.resetOnboardingForTesting()
+                        dismiss()
+                    } label: {
+                        Label("settings.restartOnboarding".localized, systemImage: "arrow.counterclockwise")
+                    }
+                }
             }
             .navigationTitle("settings.title".localized)
             .navigationBarTitleDisplayMode(.inline)
@@ -111,6 +117,11 @@ struct SettingsView: View {
             }
             .task {
                 await viewModel.checkNotificationStatus()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task { await viewModel.checkNotificationStatus() }
+                }
             }
             .alert("auth.signOut".localized, isPresented: $viewModel.showSignOutAlert) {
                 Button("auth.signOut".localized, role: .destructive) {
@@ -160,6 +171,21 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+}
+
+private extension SettingsView {
+    /// Toggle that doesn't update local state directly — taps trigger either a
+    /// system prompt (notDetermined) or open iOS Settings (denied/authorized).
+    /// The actual toggle visual updates via `checkNotificationStatus()` once
+    /// the user returns from Settings (scenePhase active).
+    var notificationsToggleBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.notificationsEnabled },
+            set: { _ in
+                Task { await viewModel.handleNotificationToggleTap() }
+            }
+        )
     }
 }
 

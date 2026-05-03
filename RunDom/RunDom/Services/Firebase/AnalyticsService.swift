@@ -27,6 +27,82 @@ enum AnalyticsService {
         Analytics.logEvent("onboarding_completed", parameters: nil)
     }
 
+    static func logOnboardingHookContinued() {
+        Analytics.logEvent("onboarding_hook_continued", parameters: nil)
+    }
+
+    static func logOnboardingQuizCompleted(
+        weeklyGoal: Int?,
+        motivation: String?,
+        experience: String?,
+        mode: String?
+    ) {
+        var params: [String: Any] = [:]
+        if let weeklyGoal { params["weekly_goal"] = weeklyGoal }
+        if let motivation { params["motivation"] = motivation }
+        if let experience { params["experience"] = experience }
+        if let mode { params["preferred_mode"] = mode }
+        Analytics.logEvent("onboarding_quiz_completed", parameters: params)
+    }
+
+    static func logOnboardingColorConfirmed(hex: String) {
+        Analytics.logEvent("onboarding_color_confirmed", parameters: [
+            "color_hex": hex
+        ])
+    }
+
+    static func logOnboardingLocationPrimeShown() {
+        Analytics.logEvent("onboarding_location_prime_shown", parameters: nil)
+    }
+
+    static func logOnboardingLocationAllowTapped() {
+        Analytics.logEvent("onboarding_location_allow_tapped", parameters: nil)
+    }
+
+    static func logOnboardingLocationSkipped() {
+        Analytics.logEvent("onboarding_location_skipped", parameters: nil)
+    }
+
+    static func logOnboardingFirstMissionShown() {
+        Analytics.logEvent("onboarding_first_mission_shown", parameters: nil)
+    }
+
+    static func logOnboardingFirstMissionAction(action: String) {
+        Analytics.logEvent("onboarding_first_mission_action", parameters: [
+            "action": action
+        ])
+    }
+
+    static func logPostRunNotificationPromptShown() {
+        Analytics.logEvent("post_run_notification_prompt_shown", parameters: nil)
+    }
+
+    static func logPostRunNotificationPromptAllowTapped() {
+        Analytics.logEvent("post_run_notification_prompt_allow_tapped", parameters: nil)
+    }
+
+    static func logPostRunNotificationPromptSkipped() {
+        Analytics.logEvent("post_run_notification_prompt_skipped", parameters: nil)
+    }
+
+    static func logPostRunNotificationPromptResult(granted: Bool) {
+        Analytics.logEvent("post_run_notification_prompt_result", parameters: [
+            "granted": granted
+        ])
+    }
+
+    static func logSettingsNotificationToggleTapped(currentStatus: String) {
+        Analytics.logEvent("settings_notification_toggle_tapped", parameters: [
+            "current_status": currentStatus
+        ])
+    }
+
+    static func logSettingsNotificationPermissionResult(granted: Bool) {
+        Analytics.logEvent("settings_notification_permission_result", parameters: [
+            "granted": granted
+        ])
+    }
+
     // MARK: - Run Events
 
     static func logRunStarted(mode: RunMode) {

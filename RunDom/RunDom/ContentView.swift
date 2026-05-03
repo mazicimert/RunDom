@@ -24,7 +24,7 @@ struct ContentView: View {
                     onComplete: {}
                 )
             } else if appState.shouldShowWelcome {
-                WelcomeView()
+                FirstMissionView()
             } else if appState.requiresProfileCompletion {
                 CompleteProfileView()
             } else {
@@ -37,6 +37,11 @@ struct ContentView: View {
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.shouldShowWelcome)
         .animation(.easeInOut(duration: AppConstants.Animation.standard), value: appState.requiresProfileCompletion)
         .onAppear {
+            onboardingVM.locationManager = appState.locationManager
+        }
+        .onChange(of: appState.isOnboardingComplete) { _, isComplete in
+            guard !isComplete else { return }
+            onboardingVM.resetToStart()
             onboardingVM.locationManager = appState.locationManager
         }
     }
@@ -52,6 +57,15 @@ struct ContentView: View {
             }
             .transition(.opacity)
 
+        case .hook:
+            HookView {
+                onboardingVM.continueFromHook()
+            }
+            .transition(.asymmetric(
+                insertion: .opacity,
+                removal: .move(edge: .leading)
+            ))
+
         case .pages:
             OnboardingContainerView(viewModel: onboardingVM)
                 .transition(.asymmetric(
@@ -59,22 +73,25 @@ struct ContentView: View {
                     removal: .move(edge: .leading)
                 ))
 
+        case .quiz:
+            QuizContainerView(viewModel: onboardingVM)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
+
+        case .colorReveal:
+            ColorRevealView(viewModel: onboardingVM)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing),
+                    removal: .move(edge: .leading)
+                ))
+
         case .locationPermission:
-            PermissionRequestView(
-                type: .location,
+            LocationPrimingView(
+                viewModel: onboardingVM,
                 onAllow: { onboardingVM.requestLocationPermission() },
                 onSkip: { onboardingVM.skipLocationPermission() }
-            )
-            .transition(.asymmetric(
-                insertion: .move(edge: .trailing),
-                removal: .move(edge: .leading)
-            ))
-
-        case .notificationPermission:
-            PermissionRequestView(
-                type: .notification,
-                onAllow: { onboardingVM.requestNotificationPermission() },
-                onSkip: { onboardingVM.skipNotificationPermission() }
             )
             .transition(.asymmetric(
                 insertion: .move(edge: .trailing),

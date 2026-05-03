@@ -35,7 +35,74 @@
 "unit.pace.km" = "/km";
 "unit.pace.mi" = "/mi";
 
-// MARK: - Onboarding
+// MARK: - Onboarding — Hook
+"onboarding.hook.title" = "Run. Conquer. Defend.";
+"onboarding.hook.subtitle" = "The streets have a new owner — you.";
+"onboarding.hook.cta" = "Start";
+
+// MARK: - Onboarding — How It Works (TODO: filled in next iteration)
+// onboarding.howItWorks.page1.*
+// onboarding.howItWorks.page2.*
+// onboarding.howItWorks.page3.*
+
+// MARK: - Onboarding — Quiz
+"onboarding.quiz.complete" = "Create My Character";
+"onboarding.quiz.weeklyGoal.title" = "How many runs per week?";
+"onboarding.quiz.weeklyGoal.subtitle" = "We'll tune your daily challenges to match.";
+"onboarding.quiz.motivation.title" = "What drives you most?";
+"onboarding.quiz.motivation.subtitle" = "Your avatar will speak your language.";
+"onboarding.quiz.experience.title" = "What's your running level?";
+"onboarding.quiz.experience.subtitle" = "We'll suggest a starting pace and goals.";
+"onboarding.quiz.mode.title" = "Pick your default mode";
+"onboarding.quiz.mode.subtitle" = "You can switch any time before a run.";
+"onboarding.quiz.mode.normal.label" = "Normal";
+"onboarding.quiz.mode.normal.description" = "Steady pace, guaranteed points.";
+"onboarding.quiz.mode.boost.label" = "Boost";
+"onboarding.quiz.mode.boost.description" = "Above 7 km/h, 2× points, risky.";
+
+// MARK: - Onboarding — Color Reveal
+"onboarding.colorReveal.title" = "Your Color";
+"onboarding.colorReveal.subtitle" = "Every street you conquer will be painted in this color. It's your flag.";
+"onboarding.colorReveal.changeHint" = "Don't like it? Pick another";
+"onboarding.colorReveal.cta" = "This Is Mine";
+
+// MARK: - Color Names
+"color.name.FF6B6B" = "Coral";
+"color.name.4ECDC4" = "Turquoise";
+"color.name.45B7D1" = "Sky";
+"color.name.96CEB4" = "Jade";
+"color.name.FFEAA7" = "Sunshine";
+"color.name.DDA0DD" = "Plum";
+"color.name.98D8C8" = "Mint";
+"color.name.F7DC6F" = "Gold";
+"color.name.BB8FCE" = "Lavender";
+"color.name.85C1E9" = "Ice";
+"color.name.F0B27A" = "Honey";
+"color.name.82E0AA" = "Lime";
+
+// MARK: - Onboarding — First Mission
+"onboarding.firstMission.greeting.named" = "Welcome, %@";
+"onboarding.firstMission.greeting.generic" = "Welcome";
+"onboarding.firstMission.title" = "Your first conquest awaits";
+"onboarding.firstMission.subtitle" = "Hit the streets and paint your first hex.";
+"onboarding.firstMission.cta.start" = "Start My First Run";
+"onboarding.firstMission.cta.explore" = "Explore the map first";
+
+// MARK: - Runner Profile
+"runnerProfile.weeklyGoal.two" = "2 runs / week";
+"runnerProfile.weeklyGoal.four" = "4 runs / week";
+"runnerProfile.weeklyGoal.six" = "6 runs / week";
+"runnerProfile.weeklyGoal.daily" = "Every day";
+"runnerProfile.motivation.competition" = "Competition";
+"runnerProfile.motivation.health" = "Health";
+"runnerProfile.motivation.exploration" = "Exploration";
+"runnerProfile.motivation.mindClearing" = "Clear my head";
+"runnerProfile.experience.beginner" = "Just starting";
+"runnerProfile.experience.casual" = "Now and then";
+"runnerProfile.experience.regular" = "Regularly";
+"runnerProfile.experience.competitive" = "I race";
+
+// MARK: - Onboarding (legacy slides — will be replaced by How It Works)
 "onboarding.slide1.title" = "Conquer Your City";
 "onboarding.slide1.subtitle" = "See real zones on the map and paint them with your color by running.";
 "onboarding.slide1.support" = "Map ownership updates live as territories change hands.";
@@ -59,12 +126,14 @@
 "permission.notification.subtitle" = "Get notified when your territories are under attack.";
 "permission.notification.button" = "Enable Notifications";
 
-// MARK: - Welcome
-"welcome.title.named" = "Welcome, %@!";
-"welcome.title.generic" = "Welcome!";
-"welcome.subtitle" = "Your first run is ready. Start conquering your neighborhood now.";
-"welcome.cta" = "Continue";
-"welcome.character.placeholder" = "Once you add the character artwork, the large welcome illustration will appear here.";
+// MARK: - Onboarding — Location Priming
+"onboarding.location.title" = "Don't lose your run";
+"onboarding.location.subtitle" = "We need 'Always allow' so we can keep painting territory while your phone is in your pocket.";
+"onboarding.location.bullet1" = "Tracks even when your phone is in your pocket";
+"onboarding.location.bullet2" = "Active only during your runs";
+"onboarding.location.bullet3" = "Required to capture territory";
+"onboarding.location.allow" = "Allow Location Access";
+"onboarding.location.skip" = "Not now";
 
 // MARK: - Auth
 "auth.signInApple" = "Sign in with Apple";
@@ -122,6 +191,12 @@
 // MARK: - Profile Completion
 "profile.complete.title" = "Complete Your Profile";
 "profile.complete.subtitle" = "Tell us your name so other runners can find you.";
+
+// MARK: - Post-Run Notification Prompt
+"postRun.notificationPrompt.title" = "Defend your territory?";
+"postRun.notificationPrompt.subtitle" = "Get notified the moment another runner tries to take the zones you just conquered.";
+"postRun.notificationPrompt.allow" = "Turn on notifications";
+"postRun.notificationPrompt.skip" = "Maybe later";
 
 // MARK: - Run
 "run.start" = "Start Run";
@@ -487,8 +562,8 @@
 // MARK: - Settings
 "settings.title" = "Settings";
 "settings.notifications" = "Notifications";
-"settings.enabled" = "Enabled";
-"settings.enable" = "Enable";
+"settings.notifications.enabledHint" = "We'll alert you when someone tries to take your territory.";
+"settings.notifications.deniedHint" = "Notifications are off in iOS Settings. Tap to open and turn them on.";
 "settings.language" = "Language";
 "settings.voiceFeedback" = "Voice Km Feedback";
 "settings.unit" = "Distance Unit";
@@ -502,6 +577,8 @@
 "settings.deleteAccountRecentLogin" = "For security, you need to sign in again before deleting your account.";
 "settings.about" = "About";
 "settings.version" = "Version";
+"settings.testing" = "Testing";
+"settings.restartOnboarding" = "Restart Onboarding";
 
 // MARK: - Runner
 "runner.defaultName" = "Runner";

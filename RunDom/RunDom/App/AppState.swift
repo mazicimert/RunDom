@@ -106,13 +106,14 @@ final class AppState: ObservableObject {
                 let displayName = firebaseUser.displayName ?? ""
                 let needsCompletion = displayName.isEmpty || Self.isDefaultDisplayName(displayName)
                 let seasonId = SeasonService().generateCurrentSeason().id
-                let newUser = User(
+                var newUser = User(
                     id: firebaseUser.uid,
                     displayName: displayName.isEmpty ? "runner.defaultName".localized : displayName,
                     email: firebaseUser.email ?? "",
-                    color: Self.randomUserColor(),
+                    color: Self.consumePendingUserColor() ?? Self.randomUserColor(),
                     currentSeasonId: seasonId
                 )
+                newUser.runnerProfile = Self.consumePendingRunnerProfile()
                 try await firestoreService.createUser(newUser)
                 currentUser = newUser
                 requiresProfileCompletion = needsCompletion
@@ -141,6 +142,25 @@ final class AppState: ObservableObject {
     func completeOnboarding() {
         isOnboardingComplete = true
         UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete)
+    }
+
+    func resetOnboardingForTesting() {
+        // Sign out so the user has to go through the auth step again.
+        // Otherwise the .auth case in onboardingFlow calls completeOnboarding()
+        // on appear and the still-authenticated user falls straight into MainTabView.
+        if isAuthenticated {
+            signOut()
+        }
+
+        isOnboardingComplete = false
+        shouldShowWelcome = false
+        requiresProfileCompletion = false
+
+        UserDefaults.standard.set(false, forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete)
+        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
+        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission)
+        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.pendingRunnerProfile)
+        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.pendingUserColor)
     }
 
     func dismissWelcome() {
@@ -184,6 +204,26 @@ final class AppState: ObservableObject {
 
     private static func randomUserColor() -> String {
         AppConstants.UserColors.all.randomElement() ?? "#4ECDC4"
+    }
+
+    private static func consumePendingRunnerProfile() -> RunnerProfile? {
+        let key = AppConstants.UserDefaultsKeys.pendingRunnerProfile
+        defer { UserDefaults.standard.removeObject(forKey: key) }
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let profile = try? JSONDecoder().decode(RunnerProfile.self, from: data) else {
+            return nil
+        }
+        return profile
+    }
+
+    private static func consumePendingUserColor() -> String? {
+        let key = AppConstants.UserDefaultsKeys.pendingUserColor
+        defer { UserDefaults.standard.removeObject(forKey: key) }
+        guard let hex = UserDefaults.standard.string(forKey: key),
+              AppConstants.UserColors.all.contains(hex) else {
+            return nil
+        }
+        return hex
     }
 
     private func refreshWeeklyWidget(userId: String) async {

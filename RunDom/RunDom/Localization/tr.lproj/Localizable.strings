@@ -35,7 +35,74 @@
 "unit.pace.km" = "/km";
 "unit.pace.mi" = "/mi";
 
-// MARK: - Onboarding
+// MARK: - Onboarding — Hook
+"onboarding.hook.title" = "Koş. Fethet. Savun.";
+"onboarding.hook.subtitle" = "Sokakların yeni sahibi sensin.";
+"onboarding.hook.cta" = "Başla";
+
+// MARK: - Onboarding — How It Works (TODO: bir sonraki aşamada doldurulacak)
+// onboarding.howItWorks.page1.*
+// onboarding.howItWorks.page2.*
+// onboarding.howItWorks.page3.*
+
+// MARK: - Onboarding — Quiz
+"onboarding.quiz.complete" = "Karakterimi Oluştur";
+"onboarding.quiz.weeklyGoal.title" = "Haftada kaç koşu hedefliyorsun?";
+"onboarding.quiz.weeklyGoal.subtitle" = "Günlük zorluk seviyeni buna göre ayarlayacağız.";
+"onboarding.quiz.motivation.title" = "Seni en çok ne motive ediyor?";
+"onboarding.quiz.motivation.subtitle" = "Avatarın seninle aynı dili konuşacak.";
+"onboarding.quiz.experience.title" = "Koşu seviyen ne?";
+"onboarding.quiz.experience.subtitle" = "Başlangıç temponu ve hedeflerini buna göre öneririz.";
+"onboarding.quiz.mode.title" = "Varsayılan modunu seç";
+"onboarding.quiz.mode.subtitle" = "Her koşudan önce değiştirebilirsin.";
+"onboarding.quiz.mode.normal.label" = "Normal";
+"onboarding.quiz.mode.normal.description" = "Sakin tempo, garantili puan.";
+"onboarding.quiz.mode.boost.label" = "Boost";
+"onboarding.quiz.mode.boost.description" = "7 km/h üstü, 2× puan, riskli.";
+
+// MARK: - Onboarding — Color Reveal
+"onboarding.colorReveal.title" = "Senin Rengin";
+"onboarding.colorReveal.subtitle" = "Fethettiğin her sokak bu renkle boyanacak. Bu artık senin bayrağın.";
+"onboarding.colorReveal.changeHint" = "Beğenmedin mi? Başkasını seç";
+"onboarding.colorReveal.cta" = "Bu Benim";
+
+// MARK: - Color Names
+"color.name.FF6B6B" = "Mercan";
+"color.name.4ECDC4" = "Turkuaz";
+"color.name.45B7D1" = "Gök";
+"color.name.96CEB4" = "Yeşim";
+"color.name.FFEAA7" = "Güneş";
+"color.name.DDA0DD" = "Erik";
+"color.name.98D8C8" = "Mint";
+"color.name.F7DC6F" = "Altın";
+"color.name.BB8FCE" = "Lavanta";
+"color.name.85C1E9" = "Buz";
+"color.name.F0B27A" = "Bal";
+"color.name.82E0AA" = "Lime";
+
+// MARK: - Onboarding — First Mission
+"onboarding.firstMission.greeting.named" = "Hoş geldin, %@";
+"onboarding.firstMission.greeting.generic" = "Hoş geldin";
+"onboarding.firstMission.title" = "İlk fethin seni bekliyor";
+"onboarding.firstMission.subtitle" = "Sokağa çık ve ilk hex'ini renginle boya.";
+"onboarding.firstMission.cta.start" = "İlk Koşumu Başlat";
+"onboarding.firstMission.cta.explore" = "Önce haritayı keşfet";
+
+// MARK: - Runner Profile
+"runnerProfile.weeklyGoal.two" = "Haftada 2 koşu";
+"runnerProfile.weeklyGoal.four" = "Haftada 4 koşu";
+"runnerProfile.weeklyGoal.six" = "Haftada 6 koşu";
+"runnerProfile.weeklyGoal.daily" = "Her gün";
+"runnerProfile.motivation.competition" = "Rekabet";
+"runnerProfile.motivation.health" = "Sağlık";
+"runnerProfile.motivation.exploration" = "Keşif";
+"runnerProfile.motivation.mindClearing" = "Kafamı boşaltmak";
+"runnerProfile.experience.beginner" = "Yeni başladım";
+"runnerProfile.experience.casual" = "Ara sıra";
+"runnerProfile.experience.regular" = "Düzenli";
+"runnerProfile.experience.competitive" = "Yarışlara katılırım";
+
+// MARK: - Onboarding (eski slaytlar — How It Works ile değiştirilecek)
 "onboarding.slide1.title" = "Şehrini Fethet";
 "onboarding.slide1.subtitle" = "Haritada gerçek bölgeleri gör, koşarak alanları kendi renginle kapla.";
 "onboarding.slide1.support" = "Harita ekranı canlı sahiplik durumunu anlık gösterir.";
@@ -59,12 +126,14 @@
 "permission.notification.subtitle" = "Bölgelerin saldırı altındayken bildirim al.";
 "permission.notification.button" = "Bildirimleri Aç";
 
-// MARK: - Welcome
-"welcome.title.named" = "Hoş geldin, %@!";
-"welcome.title.generic" = "Hoş geldin!";
-"welcome.subtitle" = "İlk koşuna hazırsın. Mahalleni fethetmeye şimdi başlayabilirsin.";
-"welcome.cta" = "Devam et";
-"welcome.character.placeholder" = "Karakter görselini eklediğinde burada büyük welcome illüstrasyonu görünecek.";
+// MARK: - Onboarding — Location Priming
+"onboarding.location.title" = "Koşunu kaybetmeyelim";
+"onboarding.location.subtitle" = "Telefon cebine atılırken bile bölgeleri boyamaya devam edebilmemiz için 'Her zaman izin ver' seçeneğine ihtiyacımız var.";
+"onboarding.location.bullet1" = "Telefon cebindeyken bile takip eder";
+"onboarding.location.bullet2" = "Sadece koşu sırasında aktif";
+"onboarding.location.bullet3" = "Bölge fethetmek için zorunlu";
+"onboarding.location.allow" = "Konum Erişimine İzin Ver";
+"onboarding.location.skip" = "Şimdi değil";
 
 // MARK: - Auth
 "auth.signInApple" = "Apple ile Giriş Yap";
@@ -122,6 +191,12 @@
 // MARK: - Profile Completion
 "profile.complete.title" = "Profilini Tamamla";
 "profile.complete.subtitle" = "Diğer koşucuların seni bulabilmesi için adını söyle.";
+
+// MARK: - Post-Run Notification Prompt
+"postRun.notificationPrompt.title" = "Bölgeni koruyalım mı?";
+"postRun.notificationPrompt.subtitle" = "Az önce fethettiğin bölgeleri başka biri almaya çalıştığı an haberin olsun.";
+"postRun.notificationPrompt.allow" = "Bildirimleri Aç";
+"postRun.notificationPrompt.skip" = "Sonra olur";
 
 // MARK: - Run
 "run.start" = "Koşuya Başla";
@@ -487,8 +562,8 @@
 // MARK: - Settings
 "settings.title" = "Ayarlar";
 "settings.notifications" = "Bildirimler";
-"settings.enabled" = "Açık";
-"settings.enable" = "Aç";
+"settings.notifications.enabledHint" = "Birisi bölgeni almaya çalıştığında haberin olur.";
+"settings.notifications.deniedHint" = "Bildirimler iOS Ayarları'ndan kapalı. Açmak için dokun.";
 "settings.language" = "Dil";
 "settings.voiceFeedback" = "Sesli Km Bildirimi";
 "settings.unit" = "Mesafe Birimi";
@@ -502,6 +577,8 @@
 "settings.deleteAccountRecentLogin" = "Güvenlik nedeniyle hesabı silmeden önce yeniden giriş yapman gerekiyor.";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
+"settings.testing" = "Test";
+"settings.restartOnboarding" = "Onboarding’i Baştan Başlat";
 
 // MARK: - Runner
 "runner.defaultName" = "Koşucu";

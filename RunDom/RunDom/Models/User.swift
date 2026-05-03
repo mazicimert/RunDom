@@ -18,6 +18,7 @@ struct User: Codable, Identifiable, Equatable {
     var lastRunDate: Date?
     var fcmToken: String?
     var languageCode: String?
+    var runnerProfile: RunnerProfile?
     var createdAt: Date = Date()
 
     var hasActiveDropzoneBoost: Bool {

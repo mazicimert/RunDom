@@ -12,6 +12,7 @@ struct PostRunSummaryView: View {
     @State private var isGalleryPresented = false
     @State private var showReviewSheet = false
     @State private var reviewBinding: RunReview?
+    @State private var showNotificationPrompt = false
     let onDismiss: () -> Void
 
     init(session: RunSession, onDismiss: @escaping () -> Void) {
@@ -95,6 +96,14 @@ struct PostRunSummaryView: View {
                     viewModel.submitReview(review)
                 }
             }
+            .sheet(isPresented: $showNotificationPrompt) {
+                NotificationPostRunPromptSheet(
+                    userColorHex: appState.currentUser?.color,
+                    onComplete: {}
+                )
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
             .task {
                 if let user = appState.currentUser {
                     await viewModel.processRun(user: user)
@@ -111,6 +120,7 @@ struct PostRunSummaryView: View {
                     } else {
                         showConfetti = true
                     }
+                    scheduleNotificationPromptIfNeeded()
                 }
             }
             .onChange(of: viewModel.errorMessage) { _, message in
@@ -740,6 +750,18 @@ struct PostRunSummaryView: View {
     private func shareSummary() {
         guard canShareSummary else { return }
         isGalleryPresented = true
+    }
+
+    private func scheduleNotificationPromptIfNeeded() {
+        let alreadyAsked = UserDefaults.standard.bool(
+            forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission
+        )
+        guard !alreadyAsked else { return }
+
+        // Let confetti / streak / level-up animations play first
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+            showNotificationPrompt = true
+        }
     }
 }
 

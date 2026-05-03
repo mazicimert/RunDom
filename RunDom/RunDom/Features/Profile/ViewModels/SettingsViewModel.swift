@@ -8,6 +8,7 @@ final class SettingsViewModel: ObservableObject {
     // MARK: - Published State
 
     @Published var notificationsEnabled = false
+    @Published var notificationStatus: UNAuthorizationStatus = .notDetermined
     @Published var showSignOutAlert = false
     @Published var showDeleteAccountAlert = false
     @Published var isDeleting = false
@@ -72,12 +73,48 @@ final class SettingsViewModel: ObservableObject {
 
     func checkNotificationStatus() async {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationStatus = settings.authorizationStatus
         notificationsEnabled = settings.authorizationStatus == .authorized
+            || settings.authorizationStatus == .provisional
+    }
+
+    /// Toggle action handler.
+    /// - notDetermined: requests system permission inline
+    /// - authorized / denied / provisional: opens iOS Settings (the only way to change once decided)
+    func handleNotificationToggleTap() async {
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        AnalyticsService.logSettingsNotificationToggleTapped(
+            currentStatus: Self.statusName(settings.authorizationStatus)
+        )
+
+        if settings.authorizationStatus == .notDetermined {
+            let granted = (try? await center.requestAuthorization(options: [.alert, .badge, .sound])) ?? false
+            UserDefaults.standard.set(
+                true,
+                forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission
+            )
+            AnalyticsService.logSettingsNotificationPermissionResult(granted: granted)
+            await checkNotificationStatus()
+        } else {
+            openNotificationSettings()
+        }
     }
 
     func openNotificationSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
+    }
+
+    private static func statusName(_ status: UNAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined: return "notDetermined"
+        case .denied: return "denied"
+        case .authorized: return "authorized"
+        case .provisional: return "provisional"
+        case .ephemeral: return "ephemeral"
+        @unknown default: return "unknown"
+        }
     }
 
     // MARK: - Account

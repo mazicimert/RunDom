@@ -77,6 +77,8 @@ enum AppConstants {
         static let voiceFeedbackEnabled = "voiceFeedbackEnabled"
         static let aiAnalysisEnabled = "aiAnalysisEnabled"
         static let aiDisclosureAccepted = "aiDisclosureAccepted"
+        static let pendingRunnerProfile = "pendingRunnerProfile"
+        static let pendingUserColor = "pendingUserColor"
     }
 
     // MARK: - Animation Durations
