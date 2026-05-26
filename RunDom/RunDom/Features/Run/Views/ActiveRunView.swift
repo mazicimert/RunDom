@@ -27,6 +27,8 @@ struct ActiveRunView: View {
                 routePoints: viewModel.routePoints,
                 currentLocation: viewModel.routePoints.last?.coordinate,
                 rivalTerritories: viewModel.nearbyRivalTerritories,
+                wonZoneIndices: viewModel.wonZones.sorted(),
+                userColor: viewModel.userColor,
                 currentUserId: viewModel.userId,
                 showsRivalOverlay: viewModel.isRivalOverlayEnabled,
                 isFollowingUser: $isFollowingUser,
@@ -35,7 +37,7 @@ struct ActiveRunView: View {
             )
                 .ignoresSafeArea()
 
-            if viewModel.gpsSignalLost || showRivalTerritoryBanner {
+            if shouldShowTopStatusStack {
                 VStack {
                     topStatusStack
                     Spacer()
@@ -179,8 +181,18 @@ struct ActiveRunView: View {
 
     // MARK: - Top Status
 
+    private var shouldShowTopStatusStack: Bool {
+        viewModel.gpsSignalLost
+            || showRivalTerritoryBanner
+            || !viewModel.hasAlwaysLocationPermission
+    }
+
     private var topStatusStack: some View {
         VStack(spacing: 10) {
+            if !viewModel.hasAlwaysLocationPermission {
+                whenInUseWarningBanner
+            }
+
             if viewModel.gpsSignalLost {
                 gpsWarningBanner
             }
@@ -189,6 +201,22 @@ struct ActiveRunView: View {
                 rivalTerritoryBanner
             }
         }
+    }
+
+    private var whenInUseWarningBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "iphone.gen3.radiowaves.left.and.right")
+                .foregroundStyle(.white)
+            Text("run.whenInUse.banner".localized)
+                .font(.caption.bold())
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.orange.opacity(0.92))
+        .clipShape(Capsule())
+        .accessibilityElement(children: .combine)
     }
 
     private var gpsWarningBanner: some View {
@@ -334,6 +362,8 @@ struct RunMapView: UIViewRepresentable {
     let routePoints: [RoutePoint]
     let currentLocation: CLLocationCoordinate2D?
     let rivalTerritories: [Territory]
+    let wonZoneIndices: [String]
+    let userColor: String
     let currentUserId: String?
     let showsRivalOverlay: Bool
     @Binding var isFollowingUser: Bool
@@ -385,25 +415,35 @@ struct RunMapView: UIViewRepresentable {
                 .map { "\($0.h3Index):\($0.ownerColor)" }
                 .joined(separator: "|")
             : ""
+        let wonSignature = "\(userColor)#\(wonZoneIndices.joined(separator: "|"))"
         let routeNeedsRefresh = routePoints.count >= 2
             && newCount != coordinator.lastRenderedPointCount
             && (newCount % 5 == 0 || newCount - coordinator.lastRenderedPointCount >= 5)
         let rivalNeedsRefresh = rivalSignature != coordinator.lastRivalOverlaySignature
+        let wonNeedsRefresh = wonSignature != coordinator.lastWonOverlaySignature
 
-        guard routeNeedsRefresh || rivalNeedsRefresh else { return }
+        guard routeNeedsRefresh || rivalNeedsRefresh || wonNeedsRefresh else { return }
 
         if routeNeedsRefresh {
             coordinator.lastRenderedPointCount = newCount
         }
 
+        // Cells won since the last refresh — these get the one-shot paint splash.
+        let incomingWon = Set(wonZoneIndices)
+        let newlyWon = incomingWon.subtracting(coordinator.wonCellIndices)
+
         coordinator.lastRivalOverlaySignature = rivalSignature
+        coordinator.lastWonOverlaySignature = wonSignature
         coordinator.currentUserId = currentUserId
         coordinator.rivalTerritoriesById = Dictionary(
             uniqueKeysWithValues: rivalTerritories.map { ($0.h3Index, $0) }
         )
+        coordinator.wonCellIndices = incomingWon
+        coordinator.wonCellColor = userColor
 
         mapView.removeOverlays(mapView.overlays)
 
+        // Rival territories (dim) sit underneath the user's own painted cells.
         if showsRivalOverlay {
             for territory in rivalTerritories.sorted(by: { $0.h3Index < $1.h3Index }) {
                 if let polygon = MKPolygon.fromH3Index(territory.h3Index) {
@@ -412,10 +452,26 @@ struct RunMapView: UIViewRepresentable {
             }
         }
 
+        // The runner's won cells, painted in their color (always visible).
+        for index in wonZoneIndices where coordinator.rivalTerritoriesById[index] == nil {
+            if let polygon = MKPolygon.fromH3Index(index) {
+                mapView.addOverlay(polygon)
+            }
+        }
+
         if routePoints.count >= 2 {
             let coordinates = routePoints.map(\.coordinate)
             let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
             mapView.addOverlay(polyline)
+        }
+
+        // Celebrate freshly won cells with a paint splash on top of the new overlay.
+        if !newlyWon.isEmpty {
+            coordinator.playWonCellSplashes(
+                on: mapView,
+                indices: newlyWon,
+                color: UIColor(Color(hex: userColor) ?? .blue)
+            )
         }
     }
 
@@ -427,7 +483,10 @@ struct RunMapView: UIViewRepresentable {
         var parent: RunMapView
         var lastRenderedPointCount = 0
         var lastRivalOverlaySignature = ""
+        var lastWonOverlaySignature = ""
         var rivalTerritoriesById: [String: Territory] = [:]
+        var wonCellIndices: Set<String> = []
+        var wonCellColor: String = ""
         var currentUserId: String?
         var lastRecenterTrigger: Int = 0
         private var hasPlayedIntro = false
@@ -563,6 +622,21 @@ struct RunMapView: UIViewRepresentable {
 
             if let polygon = overlay as? MKPolygon,
                let h3Index = polygon.title,
+               wonCellIndices.contains(h3Index) {
+                let renderer = TerritoryOverlayRenderer(
+                    polygon: polygon,
+                    color: UIColor(Color(hex: wonCellColor) ?? .blue)
+                )
+                renderer.applyStyle(
+                    isSelected: false,
+                    isOwnedByCurrentUser: true,
+                    isDimmed: false
+                )
+                return renderer
+            }
+
+            if let polygon = overlay as? MKPolygon,
+               let h3Index = polygon.title,
                let territory = rivalTerritoriesById[h3Index] {
                 let renderer = TerritoryOverlayRenderer(
                     polygon: polygon,
@@ -578,6 +652,76 @@ struct RunMapView: UIViewRepresentable {
             }
 
             return MKOverlayRenderer(overlay: overlay)
+        }
+
+        // MARK: - Won Cell Paint Splash
+
+        func playWonCellSplashes(on mapView: MKMapView, indices: Set<String>, color: UIColor) {
+            for index in indices {
+                playWonCellSplash(on: mapView, index: index, color: color)
+            }
+        }
+
+        /// Plays a short pop-and-fade hexagon over a freshly won cell, drawn on top of the
+        /// permanent overlay so the cell reads as being "stamped" onto the map.
+        private func playWonCellSplash(on mapView: MKMapView, index: String, color: UIColor) {
+            guard let polygon = MKPolygon.fromH3Index(index) else { return }
+            let pointCount = polygon.pointCount
+            guard pointCount >= 3 else { return }
+            let mapPoints = polygon.points()
+
+            // First pass: screen-space centroid of the hexagon.
+            var centroid = CGPoint.zero
+            var screenPoints: [CGPoint] = []
+            screenPoints.reserveCapacity(pointCount)
+            for i in 0..<pointCount {
+                let p = mapView.convert(mapPoints[i].coordinate, toPointTo: mapView)
+                screenPoints.append(p)
+                centroid.x += p.x
+                centroid.y += p.y
+            }
+            centroid.x /= CGFloat(pointCount)
+            centroid.y /= CGFloat(pointCount)
+
+            // Build the path relative to the centroid so the layer can scale around it.
+            let path = UIBezierPath()
+            for (i, p) in screenPoints.enumerated() {
+                let rel = CGPoint(x: p.x - centroid.x, y: p.y - centroid.y)
+                if i == 0 { path.move(to: rel) } else { path.addLine(to: rel) }
+            }
+            path.close()
+
+            let layer = CAShapeLayer()
+            layer.path = path.cgPath
+            layer.bounds = .zero            // anchor (0.5,0.5) of a zero rect → centroid
+            layer.position = centroid
+            layer.fillColor = color.withAlphaComponent(0.55).cgColor
+            layer.strokeColor = color.withAlphaComponent(0.95).cgColor
+            layer.lineWidth = 3
+            layer.lineJoin = .round
+            mapView.layer.addSublayer(layer)
+
+            let scale = CABasicAnimation(keyPath: "transform.scale")
+            scale.fromValue = 0.2
+            scale.toValue = 1.0
+            scale.timingFunction = CAMediaTimingFunction(name: .easeOut)
+
+            let opacity = CAKeyframeAnimation(keyPath: "opacity")
+            opacity.values = [0.0, 1.0, 1.0, 0.0]
+            opacity.keyTimes = [0.0, 0.18, 0.6, 1.0]
+
+            let group = CAAnimationGroup()
+            group.animations = [scale, opacity]
+            group.duration = 0.6
+            group.isRemovedOnCompletion = false
+            group.fillMode = .forwards
+
+            CATransaction.begin()
+            CATransaction.setCompletionBlock { [weak layer] in
+                layer?.removeFromSuperlayer()
+            }
+            layer.add(group, forKey: "wonCellSplash")
+            CATransaction.commit()
         }
     }
 }

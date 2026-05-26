@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import SwiftUI
 
@@ -6,6 +7,7 @@ struct LocationPrimingView: View {
     let onAllow: () -> Void
     let onSkip: () -> Void
 
+    @Environment(\.scenePhase) private var scenePhase
     @State private var routeProgress: CGFloat = 0
     @State private var pulseExpanded = false
     @State private var contentVisible = false
@@ -25,12 +27,12 @@ struct LocationPrimingView: View {
                 Spacer().frame(height: 24)
 
                 VStack(spacing: 12) {
-                    Text("onboarding.location.title".localized)
+                    Text(titleKey.localized)
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
-                    Text("onboarding.location.subtitle".localized)
+                    Text(subtitleKey.localized)
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.65))
                         .multilineTextAlignment(.center)
@@ -50,7 +52,7 @@ struct LocationPrimingView: View {
                     Button {
                         onAllow()
                     } label: {
-                        Text("onboarding.location.allow".localized)
+                        Text(ctaKey.localized)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PrimaryButtonStyle())
@@ -71,6 +73,42 @@ struct LocationPrimingView: View {
             }
         }
         .onAppear { animateIn() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                viewModel.reevaluateLocationStatusOnReturn()
+            }
+        }
+    }
+
+    /// CTA / copy adapt to the current iOS auth state.
+    /// - notDetermined: standard "Allow Location Access" → triggers system prompt
+    /// - denied/restricted: "Open iOS Settings" → deep links (system can't re-prompt)
+    /// - authorized: handled by ViewModel by skipping this step entirely
+    private var titleKey: String {
+        switch viewModel.locationAuthStatus {
+        case .denied, .restricted:
+            return "onboarding.location.deniedTitle"
+        default:
+            return "onboarding.location.title"
+        }
+    }
+
+    private var subtitleKey: String {
+        switch viewModel.locationAuthStatus {
+        case .denied, .restricted:
+            return "onboarding.location.deniedSubtitle"
+        default:
+            return "onboarding.location.subtitle"
+        }
+    }
+
+    private var ctaKey: String {
+        switch viewModel.locationAuthStatus {
+        case .denied, .restricted:
+            return "onboarding.location.openSettings"
+        default:
+            return "onboarding.location.allow"
+        }
     }
 
     // MARK: - Derived

@@ -148,7 +148,7 @@ private struct AIAnalysisLoadingView: View {
 }
 
 private struct CroppedLoadingAnimation: View {
-    private let visibleSize = CGSize(width: 190, height: 140)
+    private let visibleSize = CGSize(width: 190, height: 200)
     private let animationSize: CGFloat = 250
 
     var body: some View {
@@ -158,7 +158,6 @@ private struct CroppedLoadingAnimation: View {
             contentMode: .scaleAspectFit
         )
         .frame(width: animationSize, height: animationSize)
-        .offset(y: -18)
         .frame(width: visibleSize.width, height: visibleSize.height)
         .clipped()
         .accessibilityHidden(true)

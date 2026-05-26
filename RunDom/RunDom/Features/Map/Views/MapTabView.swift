@@ -132,6 +132,8 @@ struct MapTabView: View {
 
     private var headerOverlay: some View {
         VStack(spacing: 12) {
+            LocationPermissionBanner(locationManager: appState.locationManager)
+
             if let error = viewModel.errorMessage {
                 ErrorBannerView(
                     message: error,
@@ -227,7 +229,10 @@ struct MapTabView: View {
                 HStack(spacing: 8) {
                     Text(viewModel.selectedTerritoryOwnerName)
                         .font(.headline)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
 
                     Text(
                         viewModel.selectedTerritoryIsCurrentUserOwned
@@ -243,6 +248,7 @@ struct MapTabView: View {
                             .opacity(0.14),
                         in: Capsule()
                     )
+                    .fixedSize()
                 }
 
                 Text("map.territoriesOwned".localized(with: viewModel.selectedTerritoryOwnedCount))

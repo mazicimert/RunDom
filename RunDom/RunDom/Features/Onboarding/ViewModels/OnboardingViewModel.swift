@@ -1,6 +1,7 @@
 import Combine
 import CoreLocation
 import SwiftUI
+import UIKit
 
 enum OnboardingMediaStyle: String, Codable {
     case screenshotCard
@@ -27,14 +28,32 @@ final class OnboardingViewModel: ObservableObject {
     @Published var currentQuizIndex: Int = 0
     @Published var pendingProfile: RunnerProfile = RunnerProfile()
     @Published var pendingColor: String = ""
+    @Published private(set) var locationAuthStatus: CLAuthorizationStatus = .notDetermined
 
     let totalQuizQuestions = 4
 
     // MARK: - Dependencies
 
-    var locationManager: LocationManager?
+    var locationManager: LocationManager? {
+        didSet { locationManagerDidChange() }
+    }
     private var cancellables = Set<AnyCancellable>()
+    private var locationStatusCancellable: AnyCancellable?
     private var viewedPageIndexes = Set<Int>()
+
+    private func locationManagerDidChange() {
+        locationStatusCancellable?.cancel()
+        guard let locationManager else {
+            locationAuthStatus = .notDetermined
+            return
+        }
+        locationAuthStatus = locationManager.authorizationStatus
+        locationStatusCancellable = locationManager.$authorizationStatus
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                self?.locationAuthStatus = status
+            }
+    }
 
     // MARK: - Page Data
 
@@ -256,23 +275,54 @@ final class OnboardingViewModel: ObservableObject {
 
     func requestLocationPermission() {
         AnalyticsService.logOnboardingLocationAllowTapped()
-        locationManager?.requestAlwaysAuthorization()
-        UserDefaults.standard.set(
-            true, forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
 
-        // Kullanıcının cevabını bekle — authorizationStatus değiştiğinde ilerle
-        guard let locationManager = locationManager else {
-            advanceStep()
-            return
-        }
-        locationManager.$authorizationStatus
-            .dropFirst()  // Mevcut değeri atla
-            .first()  // Sadece ilk değişikliği al
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] (_: CLAuthorizationStatus) in
-                self?.advanceStep()
+        let status = locationAuthStatus
+
+        switch status {
+        case .notDetermined:
+            // Normal flow: trigger system prompt and wait for the user's choice
+            UserDefaults.standard.set(
+                true, forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
+            guard let locationManager else {
+                advanceStep()
+                return
             }
-            .store(in: &cancellables)
+            locationManager.requestAlwaysAuthorization()
+            locationManager.$authorizationStatus
+                .dropFirst()  // skip current value
+                .first()  // only first change
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] (_: CLAuthorizationStatus) in
+                    self?.advanceStep()
+                }
+                .store(in: &cancellables)
+
+        case .denied, .restricted:
+            // iOS won't show the system prompt again. Deep-link to Settings.
+            // The view's scenePhase observer will auto-advance if the user
+            // grants permission and returns.
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+
+        case .authorizedAlways, .authorizedWhenInUse:
+            // Already granted — defensive: just advance.
+            advanceStep()
+
+        @unknown default:
+            advanceStep()
+        }
+    }
+
+    /// Called by LocationPrimingView when the scene returns to foreground.
+    /// If the user upgraded permission via iOS Settings, advance to the
+    /// next step automatically.
+    func reevaluateLocationStatusOnReturn() {
+        guard currentStep == .locationPermission else { return }
+        let status = locationAuthStatus
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+            advanceStep()
+        }
     }
 
     func skipLocationPermission() {
@@ -291,16 +341,14 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func advanceToPermissions() {
-        let hasRequestedLocation = UserDefaults.standard.bool(
-            forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission
-        )
+        // Skip the LocationPriming step entirely if iOS already has a granted
+        // answer — we can't re-trigger the system prompt anyway. The recovery
+        // surfaces (Map banner, Settings, PreRun) handle whenInUse upgrades.
+        let status = locationAuthStatus
+        let alreadyAuthorized = status == .authorizedAlways || status == .authorizedWhenInUse
 
         withAnimation(.easeInOut(duration: AppConstants.Animation.standard)) {
-            if !hasRequestedLocation {
-                currentStep = .locationPermission
-            } else {
-                currentStep = .auth
-            }
+            currentStep = alreadyAuthorized ? .auth : .locationPermission
         }
     }
 

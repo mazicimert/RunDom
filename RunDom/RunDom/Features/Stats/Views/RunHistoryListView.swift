@@ -30,6 +30,10 @@ struct RunHistoryListView: View {
                         Haptics.selection()
                         onSelectRun?(run)
                     }
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.96, anchor: .top)),
+                        removal: .opacity.combined(with: .scale(scale: 0.88, anchor: .center))
+                    ))
                 }
 
                 if hasMore {

@@ -1,0 +1,715 @@
+/* Localizable.strings (Spanish) — Runpire */
+
+// MARK: - Common
+"common.ok" = "OK";
+"common.cancel" = "Cancelar";
+"common.done" = "Listo";
+"common.error" = "Error";
+"common.retry" = "Reintentar";
+"common.save" = "Guardar";
+"common.delete" = "Eliminar";
+"common.share" = "Compartir";
+"common.loading" = "Cargando...";
+"common.back" = "Atrás";
+"common.next" = "Siguiente";
+"common.skip" = "Omitir";
+"common.continue" = "Continuar";
+"common.dismiss" = "Cerrar";
+
+// MARK: - Tab Bar
+"tab.map" = "Mapa";
+"tab.run" = "Correr";
+"tab.profile" = "Perfil";
+"tab.leaderboard" = "Clasificación";
+"tab.stats" = "Estadísticas";
+
+// MARK: - Points Unit
+"trail.unit" = "Puntos";
+"trail.points" = "%@ puntos";
+
+// MARK: - Measurement Units
+"unit.distance.km" = "km";
+"unit.distance.mi" = "mi";
+"unit.speed.kmh" = "km/h";
+"unit.speed.mph" = "mph";
+"unit.pace.km" = "/km";
+"unit.pace.mi" = "/mi";
+
+// MARK: - Onboarding — Hook
+"onboarding.hook.title" = "Corre. Conquista. Defiende.";
+"onboarding.hook.subtitle" = "Las calles tienen un nuevo dueño: tú.";
+"onboarding.hook.cta" = "Empezar";
+
+// MARK: - Onboarding — How It Works (TODO: filled in next iteration)
+// onboarding.howItWorks.page1.*
+// onboarding.howItWorks.page2.*
+// onboarding.howItWorks.page3.*
+
+// MARK: - Onboarding — Quiz
+"onboarding.quiz.complete" = "Crear Mi Personaje";
+"onboarding.quiz.weeklyGoal.title" = "¿Cuántas corridas por semana?";
+"onboarding.quiz.weeklyGoal.subtitle" = "Ajustaremos tus desafíos diarios para que coincidan.";
+"onboarding.quiz.motivation.title" = "¿Qué te impulsa más?";
+"onboarding.quiz.motivation.subtitle" = "Tu avatar hablará tu idioma.";
+"onboarding.quiz.experience.title" = "¿Cuál es tu nivel corriendo?";
+"onboarding.quiz.experience.subtitle" = "Te sugeriremos un ritmo y metas iniciales.";
+"onboarding.quiz.mode.title" = "Elige tu modo por defecto";
+"onboarding.quiz.mode.subtitle" = "Puedes cambiarlo en cualquier momento antes de correr.";
+"onboarding.quiz.mode.normal.label" = "Normal";
+"onboarding.quiz.mode.normal.description" = "Ritmo constante, puntos garantizados.";
+"onboarding.quiz.mode.boost.label" = "Boost";
+"onboarding.quiz.mode.boost.description" = "Sobre 7 km/h, 2× puntos, arriesgado.";
+
+// MARK: - Onboarding — Color Reveal
+"onboarding.colorReveal.title" = "Tu Color";
+"onboarding.colorReveal.subtitle" = "Cada calle que conquistes se pintará de este color. Es tu bandera.";
+"onboarding.colorReveal.changeHint" = "¿No te gusta? Elige otro";
+"onboarding.colorReveal.cta" = "Este Es El Mío";
+
+// MARK: - Color Names
+"color.name.FF6B6B" = "Coral";
+"color.name.4ECDC4" = "Turquesa";
+"color.name.45B7D1" = "Cielo";
+"color.name.96CEB4" = "Jade";
+"color.name.FFEAA7" = "Sol";
+"color.name.DDA0DD" = "Ciruela";
+"color.name.98D8C8" = "Menta";
+"color.name.F7DC6F" = "Oro";
+"color.name.BB8FCE" = "Lavanda";
+"color.name.85C1E9" = "Hielo";
+"color.name.F0B27A" = "Miel";
+"color.name.82E0AA" = "Lima";
+
+// MARK: - Onboarding — First Mission
+"onboarding.firstMission.greeting.named" = "Bienvenido, %@";
+"onboarding.firstMission.greeting.generic" = "Bienvenido";
+"onboarding.firstMission.title" = "Tu primera conquista te espera";
+"onboarding.firstMission.subtitle" = "Sal a la calle y pinta tu primer hexágono.";
+"onboarding.firstMission.cta.start" = "Iniciar Mi Primera Corrida";
+"onboarding.firstMission.cta.explore" = "Explorar el mapa primero";
+
+// MARK: - Runner Profile
+"runnerProfile.weeklyGoal.two" = "2 corridas / semana";
+"runnerProfile.weeklyGoal.four" = "4 corridas / semana";
+"runnerProfile.weeklyGoal.six" = "6 corridas / semana";
+"runnerProfile.weeklyGoal.daily" = "Todos los días";
+"runnerProfile.motivation.competition" = "Competencia";
+"runnerProfile.motivation.health" = "Salud";
+"runnerProfile.motivation.exploration" = "Exploración";
+"runnerProfile.motivation.mindClearing" = "Despejar la mente";
+"runnerProfile.experience.beginner" = "Recién empiezo";
+"runnerProfile.experience.casual" = "De vez en cuando";
+"runnerProfile.experience.regular" = "Con regularidad";
+"runnerProfile.experience.competitive" = "Compito";
+
+// MARK: - Onboarding (legacy slides — will be replaced by How It Works)
+"onboarding.slide1.title" = "Conquista Tu Ciudad";
+"onboarding.slide1.subtitle" = "Ve zonas reales en el mapa y píntalas con tu color corriendo.";
+"onboarding.slide1.support" = "El mapa actualiza la propiedad en vivo a medida que los territorios cambian de manos.";
+"onboarding.slide2.title" = "Empieza a Correr, Captura Zonas";
+"onboarding.slide2.subtitle" = "Cuando inicias una corrida, tu ruta y las celdas visitadas se registran automáticamente.";
+"onboarding.slide2.support" = "Entrar en zonas nuevas te da un impulso más fuerte en la progresión.";
+"onboarding.slide3.title" = "Puntos y Rankings";
+"onboarding.slide3.subtitle" = "Acumula puntos en cada corrida y sube en la clasificación semanal.";
+"onboarding.slide3.support" = "Mantén un ritmo constante para liderar tu barrio.";
+"onboarding.slide4.title" = "Empieza Ahora";
+"onboarding.slide4.subtitle" = "Concede los permisos y lanza tu primera corrida en unos toques.";
+"onboarding.slide4.support" = "Primer objetivo: capturar la zona más cercana a ti.";
+"onboarding.placeholder" = "Vista previa de la pantalla próximamente";
+"onboarding.getStarted" = "Empezar";
+
+// MARK: - Permissions
+"permission.location.title" = "Activar Ubicación";
+"permission.location.subtitle" = "Runpire necesita tu ubicación para registrar corridas y conquistar territorios en tiempo real.";
+"permission.location.button" = "Permitir Acceso a la Ubicación";
+"permission.notification.title" = "Sigue en el Juego";
+"permission.notification.subtitle" = "Recibe avisos cuando tus territorios estén bajo ataque.";
+"permission.notification.button" = "Activar Notificaciones";
+
+// MARK: - Onboarding — Location Priming
+"onboarding.location.title" = "No pierdas tu corrida";
+"onboarding.location.subtitle" = "Necesitamos 'Permitir siempre' para seguir pintando territorio mientras el teléfono está en tu bolsillo.";
+"onboarding.location.deniedTitle" = "La ubicación está desactivada";
+"onboarding.location.deniedSubtitle" = "El acceso a la ubicación fue rechazado antes. Abre los Ajustes de iOS para activarlo: el sistema no preguntará de nuevo desde la app.";
+"onboarding.location.bullet1" = "Funciona incluso con el teléfono en el bolsillo";
+"onboarding.location.bullet2" = "Activa solo durante tus corridas";
+"onboarding.location.bullet3" = "Necesaria para capturar territorio";
+"onboarding.location.allow" = "Permitir Acceso a la Ubicación";
+"onboarding.location.openSettings" = "Abrir Ajustes de iOS";
+"onboarding.location.skip" = "Ahora no";
+
+// MARK: - Auth
+"auth.signInApple" = "Iniciar sesión con Apple";
+"auth.signInGoogle" = "Iniciar sesión con Google";
+"auth.signInEmail" = "Iniciar sesión con Correo";
+"auth.hero.title" = "Continúa tu corrida";
+"auth.hero.subtitle" = "Inicia sesión y vuelve a conquistar tu barrio.";
+"auth.hero.body" = "Usa Apple o Google para empezar rápido, o continúa con tu cuenta de correo.";
+"auth.divider" = "o";
+"auth.form.signin.title" = "Bienvenido de vuelta";
+"auth.form.signin.subtitle" = "Inicia sesión de forma segura para seguir avanzando.";
+"auth.form.signin.body" = "Usa tu correo y contraseña para continuar.";
+"auth.form.signup.title" = "Crea tu cuenta";
+"auth.form.signup.subtitle" = "Prepárate para tu primera corrida en un par de pasos.";
+"auth.form.signup.body" = "Añade lo básico, crea tu cuenta y entra al juego.";
+"auth.field.email" = "Correo electrónico";
+"auth.field.password" = "Contraseña";
+"auth.field.confirmPassword" = "Confirmar Contraseña";
+"auth.password.show" = "Mostrar";
+"auth.password.hide" = "Ocultar";
+"auth.signOut" = "Cerrar Sesión";
+"auth.signOutConfirm" = "¿Seguro que quieres cerrar sesión?";
+"auth.email.placeholder" = "Correo electrónico";
+"auth.email.password" = "Contraseña";
+"auth.email.confirmPassword" = "Confirmar Contraseña";
+"auth.email.signIn" = "Iniciar Sesión";
+"auth.email.signUp" = "Crear Cuenta";
+"auth.email.forgotPassword" = "¿Olvidaste tu contraseña?";
+"auth.email.hasAccount" = "¿Ya tienes cuenta? Inicia Sesión";
+"auth.email.noAccount" = "¿No tienes cuenta? Regístrate";
+"auth.email.otherMethods" = "Otros métodos de inicio de sesión";
+"auth.email.resetSent" = "Correo de restablecimiento enviado. Revisa tu bandeja de entrada.";
+"auth.email.enterEmail" = "Ingresa tu correo electrónico primero.";
+"auth.email.fillAllFields" = "Por favor, completa todos los campos.";
+"auth.email.invalidEmail" = "Ingresa un correo electrónico válido.";
+"auth.email.passwordTooShort" = "La contraseña debe tener al menos 6 caracteres.";
+"auth.email.passwordHint" = "Usa al menos 6 caracteres.";
+"auth.email.passwordMismatch" = "Las contraseñas no coinciden.";
+"auth.email.wrongPassword" = "Contraseña incorrecta. Intenta de nuevo.";
+"auth.email.userNotFound" = "No se encontró ninguna cuenta con este correo.";
+"auth.email.firstName" = "Nombre";
+"auth.email.firstName.required" = "El nombre es obligatorio.";
+"auth.email.lastName" = "Apellido (Opcional)";
+"auth.email.alreadyInUse" = "Este correo ya está en uso.";
+"auth.email.invalidCredentials" = "Correo o contraseña incorrectos. Intenta de nuevo.";
+"auth.email.signInFailed" = "No pudimos iniciar tu sesión. Intenta de nuevo en un momento.";
+"auth.email.signUpFailed" = "No pudimos crear tu cuenta. Intenta de nuevo en un momento.";
+"auth.email.resetFailed" = "No pudimos enviar el correo de restablecimiento. Intenta de nuevo en un momento.";
+"auth.error.network" = "Sin conexión a internet. Revisa tu red e intenta de nuevo.";
+"auth.error.tooManyAttempts" = "Demasiados intentos. Espera un momento antes de intentar de nuevo.";
+"auth.error.userDisabled" = "Esta cuenta fue desactivada. Por favor, contacta a soporte.";
+"auth.social.appleFailed" = "El inicio de sesión con Apple no se completó. Intenta de nuevo.";
+"auth.social.googleFailed" = "El inicio de sesión con Google no se completó. Intenta de nuevo.";
+
+// MARK: - Profile Completion
+"profile.complete.title" = "Completa Tu Perfil";
+"profile.complete.subtitle" = "Dinos tu nombre para que otros corredores te encuentren.";
+
+// MARK: - Post-Run Notification Prompt
+"postRun.notificationPrompt.title" = "¿Defender tu territorio?";
+"postRun.notificationPrompt.subtitle" = "Recibe avisos en el momento en que otro corredor intente tomar las zonas que acabas de conquistar.";
+"postRun.notificationPrompt.allow" = "Activar notificaciones";
+"postRun.notificationPrompt.skip" = "Quizás luego";
+
+// MARK: - Run — Background Permission
+"run.whenInUseUpgrade.title" = "Rastreo en segundo plano desactivado";
+"run.whenInUseUpgrade.message" = "La ubicación está como 'Al usar la app' solamente. Si guardas el teléfono en el bolsillo la ruta podría dejar de grabarse. Recomendamos cambiar a 'Siempre' en los Ajustes de iOS.";
+"run.whenInUseUpgrade.openSettings" = "Abrir Ajustes de iOS";
+"run.whenInUseUpgrade.startAnyway" = "Empezar de todos modos";
+"run.whenInUse.banner" = "Rastreo en segundo plano desactivado — mantén la app abierta";
+
+// MARK: - Run
+"run.start" = "Iniciar Corrida";
+"run.stop" = "Detener";
+"run.pause" = "Pausar";
+"run.resume" = "Continuar";
+"run.speedShort" = "Velocidad";
+"run.timeShort" = "Tiempo";
+"run.distanceShort" = "Distancia";
+"run.zonesShort" = "Zonas";
+"run.slideToFinish" = "Desliza para finalizar";
+"run.modeNormal" = "Normal";
+"run.modeBoost" = "Boost";
+"run.boostThreshold" = "Mantente sobre %@ para sostener el Boost";
+"run.distance" = "Distancia";
+"run.duration" = "Duración";
+"run.pace" = "Ritmo";
+"run.avgSpeed" = "Vel. Promedio";
+"run.maxSpeed" = "Vel. Máxima";
+"run.uniqueZones" = "Zonas Únicas";
+"run.trailEarned" = "Puntos Ganados";
+"run.territoriesCaptured" = "Territorios Capturados";
+"run.summary" = "Resumen de la Corrida";
+"run.summary.route" = "Vista General de la Ruta";
+"run.summary.viewOnMap" = "Ver en el Mapa";
+"run.summary.achievements" = "Logros";
+"run.summary.achievement.streak" = "Racha Extendida";
+"run.summary.achievement.daily" = "Recompensa del Desafío Diario";
+"run.summary.levelUp.title" = "¡Subiste de Nivel!";
+"run.summary.breakdown.subtitle" = "Cada multiplicador que dio forma a esta recompensa.";
+"run.summary.heroSubtitle" = "Recorriste %@ en %@";
+"run.summary.performance.captured.single" = "%d territorio capturado";
+"run.summary.performance.captured.multiple" = "%d territorios capturados";
+"run.summary.performance.boostKept" = "Mantuviste el bono de Boost";
+"run.summary.performance.boostLost" = "El Boost cayó, pero la corrida sigue contando";
+"run.summary.performance.saved" = "Tu corrida ha sido guardada";
+"run.summary.shareFailed" = "No se pudo preparar la imagen del resumen.";
+"run.gallery" = "Galería";
+"run.gallery.preview" = "Vista Previa de Galería";
+"run.gallery.overlays" = "Superposiciones";
+"run.gallery.showOverlays" = "Mostrar superposiciones";
+"run.gallery.hideOverlays" = "Ocultar superposiciones";
+"run.gallery.loadingMap" = "Preparando el mapa...";
+"run.gallery.mapFailed" = "No se pudo preparar la vista previa del mapa.";
+"run.gallery.saved" = "La imagen se guardó en tu biblioteca de fotos.";
+"run.gallery.savedButton" = "Guardada";
+"run.gallery.saveFailed" = "No se pudo guardar la imagen.";
+"run.gallery.permissionDenied" = "Se necesita acceso a la Biblioteca de Fotos para guardar la imagen.";
+"run.summary.reason.speedThreshold" = "Sin puntos porque te mantuviste por debajo de %@.";
+"run.summary.reason.dailyCap" = "Sin puntos porque ya alcanzaste el límite diario.";
+"run.boostActive" = "Boost Activo";
+"run.boostCancelled" = "Boost Cancelado";
+"run.selectMode" = "Seleccionar Modo";
+"run.header.title" = "¿Cómo quieres correr hoy?";
+"run.header.subtitle" = "Elige un modo, observa tu meta diaria y prepárate para empezar.";
+"run.header.badge.gps.ready" = "GPS listo";
+"run.header.badge.gps.searching" = "Buscando GPS";
+"run.header.badge.gps.permission" = "Ubicación necesaria";
+"run.header.badge.streak" = "Racha de %@ días";
+"run.header.badge.challenge.safe" = "Desafío activo";
+"run.header.badge.challenge.difficult" = "Desafío activo";
+"run.header.badge.challenge.pending" = "Desafío pendiente";
+"run.normalMode" = "Modo Normal";
+"run.normalMode.desc" = "Corre a tu propio ritmo. Puntos garantizados.";
+"run.modeNormal.tag" = "Constante";
+"run.modeNormal.feature1" = "Puntos garantizados";
+"run.modeNormal.feature2" = "Ritmo flexible";
+"run.boostMode" = "Modo Boost";
+"run.boostMode.desc" = "¡Mantente sobre %@ para ganar %@ puntos!";
+"run.modeBoost.tag" = "Alta Recompensa";
+"run.modeBoost.feature1" = "Sobre %@";
+"run.modeBoost.feature2" = "%@ puntos";
+"run.modeSelected" = "Seleccionado";
+"run.streak" = "Racha de %@ días";
+"run.streakMultiplier" = "Bono de racha: %@";
+"run.streakAtRisk" = "¡En Riesgo!";
+"run.noLocation" = "Acceso a la ubicación necesario.";
+"run.waitingGPS" = "Captando señal de GPS...";
+"run.paused" = "En Pausa";
+"run.time" = "Tiempo";
+"run.zones" = "Zonas";
+"run.gpsLost" = "Señal de GPS perdida";
+"run.rivalOverlay.toggle" = "Áreas Rivales";
+"run.rivalOverlay.accessibility.on" = "Áreas rivales visibles";
+"run.rivalOverlay.accessibility.off" = "Áreas rivales ocultas";
+"run.rivalOverlay.entered" = "Entraste en territorio rival";
+"run.boostSafe" = "Boost seguro";
+"run.boostApproaching" = "Acercándose al umbral";
+"run.boostRequired" = "requerido";
+"run.saving" = "Guardando corrida...";
+"run.done" = "Listo";
+"run.invalidRun" = "Corrida rechazada por anomalías.";
+"run.saveFailed" = "Error al guardar la corrida.";
+"run.breakdown" = "Desglose de Puntos";
+"run.basePoints" = "Puntos Base";
+"run.speedMultiplier" = "Velocidad";
+"run.durationMultiplier" = "Duración";
+"run.zoneMultiplier" = "Bono de Zona";
+"run.streakMultiplier.label" = "Racha";
+"run.boostMultiplier" = "Boost";
+"run.antiFarmMultiplier" = "Anti-Farm";
+"run.capped" = "Límite por corrida alcanzado (5.000)";
+"run.dailyCapped" = "Límite diario alcanzado (15.000)";
+"run.territories" = "Territorios";
+"run.territoryConquered" = "¡Territorio Conquistado!";
+"run.startPoint" = "Inicio";
+"run.endPoint" = "Meta";
+"run.delete.confirmTitle" = "¿Eliminar esta corrida?";
+"run.delete.confirmMessage" = "Esta corrida se eliminará permanentemente.";
+"run.delete.failed" = "Error al eliminar la corrida.";
+
+// MARK: - Run Review
+"run.review.title" = "¿Cómo estuvo tu corrida?";
+"run.review.rate" = "Califica tu corrida";
+"run.review.tags" = "Agregar etiquetas";
+"run.review.note" = "Deja una nota...";
+"run.review.save" = "Guardar Reseña";
+"run.review.button" = "Califica Tu Corrida";
+"run.review.edit" = "Editar Reseña";
+"tag.morning" = "Mañana";
+"tag.evening" = "Noche";
+"tag.rainy" = "Lluvia";
+"tag.hot" = "Calor";
+"tag.tempo" = "Tempo Run";
+"tag.long" = "Corrida Larga";
+"tag.race" = "Carrera";
+"tag.addCustom" = "+ Agregar";
+
+// MARK: - Daily Challenge
+"challenge.loading" = "Cargando desafíos diarios...";
+"challenge.sectionTitle" = "Desafío Diario";
+"challenge.sectionSubtitle" = "Elige una de las dos metas de hoy y gana puntos extra.";
+"challenge.difficulty.safe" = "Seguro";
+"challenge.difficulty.difficult" = "Difícil";
+"challenge.select" = "Elegir Esta Meta";
+"challenge.selected" = "Seleccionada";
+"challenge.locked" = "Hoy elegiste la otra meta";
+"challenge.completed" = "Completada";
+"challenge.duration.title" = "Completa %d min en total hoy";
+"challenge.distance.title" = "Completa %@ en total hoy";
+"challenge.duration.value" = "%d min";
+"challenge.distance.value" = "%@ %@";
+"challenge.progress.value" = "%@ / %@";
+"challenge.reward.value" = "+%@ puntos";
+"challenge.reward.granted" = "Bono del desafío diario: +%@ puntos";
+"challenge.prompt.title" = "Los desafíos de hoy están listos";
+"challenge.prompt.body" = "Elige la meta segura o la difícil y gana puntos extra hoy.";
+"challenge.prompt.action" = "Ver Desafíos";
+"challenge.compact.subtitle.pending" = "Elige una meta antes de tu corrida.";
+"challenge.compact.subtitle.active" = "La meta seleccionada queda aquí mientras corres hoy.";
+"challenge.compact.open" = "Abrir Metas";
+"challenge.compact.pendingTitle" = "La meta de hoy te espera";
+"challenge.compact.pendingBody" = "Puedes volver a abrir el selector de metas y elegir una antes de empezar.";
+"challenge.selection.title" = "Elige la meta de hoy";
+"challenge.selection.subtitle" = "Elige una ahora y sigue su progreso durante el día. La otra meta queda bloqueada tras la selección.";
+"challenge.selection.action" = "Elegir esta meta";
+"challenge.selection.skip" = "Quizás luego";
+"challenge.selection.footnote" = "Tras la selección, tu progreso vuelve a PreRun como un resumen compacto.";
+"territoryLoss.prompt.title" = "Tus Territorios Fueron Capturados";
+"territoryLoss.prompt.body.single" = "Uno de tus territorios fue capturado. Puedes ver el punto exacto en el mapa.";
+"territoryLoss.prompt.body.multiple" = "%d de tus territorios fueron capturados. Puedes revisarlos uno por uno en el mapa.";
+"territoryLoss.prompt.dismiss" = "Cerrar Por Ahora";
+"territoryLoss.prompt.showOnMap" = "Mostrar en el Mapa";
+"territoryLoss.prompt.mapBrowserTitle" = "Territorios capturados";
+"territoryLoss.prompt.closeBrowser" = "Cerrar navegador de territorios";
+"territoryLoss.prompt.previous" = "Territorio Anterior";
+"territoryLoss.prompt.previousShort" = "Anterior";
+"territoryLoss.prompt.next" = "Siguiente Territorio";
+"territoryLoss.prompt.nextShort" = "Siguiente";
+"territoryLoss.prompt.locationLoading" = "Cargando ubicación...";
+"territoryLoss.prompt.locationFallback" = "Ubicación no disponible";
+"territoryLoss.prompt.capturedBy" = "Capturado por %@";
+
+// MARK: - Map
+"map.banner.locationOff.title" = "La ubicación está desactivada";
+"map.banner.locationOff.subtitle" = "Se necesita permiso para capturar territorio.";
+"map.banner.locationOff.action" = "Activar";
+"map.myTerritory" = "Mi Territorio";
+"map.defense" = "Nivel de Defensa";
+"map.owner" = "Dueño";
+"map.noTerritories" = "Aún no hay territorios conquistados.";
+"map.noTerritories.subtitle" = "¡Inicia una corrida para reclamar tu primera zona!";
+"map.territoryDetail" = "Detalle del Territorio";
+"map.decaying" = "Decayendo";
+"map.defenseDecaying" = "La defensa está bajando por inactividad.";
+"map.lastActive" = "Última Actividad";
+"map.filter.all" = "Todos";
+"map.filter.mine" = "Míos";
+"map.filter.rivals" = "Rivales";
+"map.badge.mine" = "Mío";
+"map.badge.rival" = "Rival";
+"map.viewDetails" = "Detalles";
+"map.territoriesOwned" = "%d territorios";
+"map.ownerCalloutMeta" = "Activo %@ | %@";
+"map.ownerCalloutNoArea" = "Área desconocida";
+"map.style.title" = "Estilo del Mapa";
+"map.style.standard" = "Estándar";
+"map.style.hybrid" = "Híbrido";
+"map.style.satellite" = "Satélite";
+"map.heatmap.loading" = "Cargando mapa de calor...";
+"map.inspector.owner.empty" = "Celda vacía";
+"map.inspector.owner.mine" = "Tu territorio";
+"map.inspector.owner.rival" = "Territorio de %@";
+"map.inspector.owner.rival.generic" = "Territorio rival";
+"map.inspector.meta.full" = "%@ · ~%@";
+"map.inspector.meta.distanceOnly" = "%@ de distancia";
+"map.inspector.meta.noLocation" = "Se necesita acceso a la ubicación";
+"map.inspector.duration.minutes" = "%d min";
+"map.inspector.details" = "Detalles";
+
+// MARK: - Profile
+"profile.totalTrail" = "Total de Puntos";
+"profile.totalRuns" = "Corridas";
+"profile.totalDistance" = "Distancia";
+"profile.level.title" = "Corredor Nivel %d";
+"profile.level.remaining" = "Faltan %@";
+"profile.level.sheet.title" = "Progreso de Nivel";
+"profile.level.sheet.allLevelsSection" = "Todos los Niveles";
+"profile.level.sheet.currentMarker" = "Actual";
+"profile.level.sheet.requirement" = "Requiere %@";
+"profile.level.sheet.startingLevel" = "Nivel inicial";
+"profile.level.sheet.accessibilityHint" = "Abre los detalles de progresión de nivel";
+"profile.latestRun.title" = "Última Corrida";
+"profile.streak" = "Racha";
+"profile.streakDays" = "Racha de %d días";
+"profile.streakMultiplier" = "Bono de racha: %@";
+"profile.streakStart.title" = "Inicia tu racha";
+"profile.streakStart.subtitle" = "Incluso una corrida corta hoy inicia tu racha y hace crecer tus bonos.";
+"profile.badges" = "Medallas";
+"profile.noBadges" = "Sin medallas todavía";
+"profile.noBadges.subtitle" = "Completa corridas y desafíos para ganar medallas.";
+"profile.editProfile" = "Editar Perfil";
+"profile.settings" = "Ajustes";
+"profile.changePhoto" = "Cambiar Foto";
+"profile.displayName" = "Nombre Visible";
+"profile.email" = "Correo electrónico";
+"profile.selectColor" = "Seleccionar Color";
+
+// MARK: - Leaderboard
+"leaderboard.filters.title" = "Vista de Clasificación";
+"leaderboard.activeBoard" = "Tabla Activa";
+"leaderboard.global" = "Global";
+"leaderboard.neighborhood" = "Barrio";
+"leaderboard.period.weekly" = "Semanal";
+"leaderboard.period.allTime" = "Histórico";
+"leaderboard.context.subtitle" = "%@ • %@";
+"leaderboard.context.description.weeklyGlobal" = "Estás viendo la carrera global de esta semana.";
+"leaderboard.context.description.weeklyNeighborhood" = "Estás viendo la carrera de barrio de esta semana.";
+"leaderboard.context.description.allTimeGlobal" = "Estás viendo a los líderes globales históricos.";
+"leaderboard.context.description.allTimeNeighborhood" = "Estás viendo a los líderes históricos de tu barrio.";
+"leaderboard.you" = "Tú";
+"leaderboard.pinned.title" = "Tu posición";
+"leaderboard.weekly.endsIn" = "La temporada termina en";
+"leaderboard.weekly.remaining.daysHours" = "%dd %dh";
+"leaderboard.weekly.remaining.hoursMinutes" = "%dh %dm";
+"leaderboard.weekly.remaining.minutes" = "%dm";
+"leaderboard.empty" = "Sin clasificación todavía.";
+"leaderboard.empty.subtitle" = "Completa corridas para aparecer en la clasificación.";
+
+// MARK: - Stats
+"stats.thisWeek" = "Esta Semana";
+"stats.thisMonth" = "Este Mes";
+"stats.runHistory" = "Historial de Corridas";
+"stats.weeklyReport" = "Reporte Semanal";
+"stats.noRuns" = "Sin corridas todavía.";
+"stats.noRuns.subtitle" = "Tu historial de corridas aparecerá aquí.";
+"stats.noData" = "Sin datos";
+"stats.totalDistance" = "Distancia Total";
+"stats.totalTrail" = "Total de Puntos";
+"stats.runCount.single" = "%d corrida";
+"stats.runCount.multiple" = "%d corridas";
+"stats.periodSummary" = "%@ • %@ • %@ puntos";
+"stats.periodSummary.loading" = "Preparando tu resumen...";
+"stats.delta.previousWeek" = "%@ frente a la semana pasada";
+"stats.delta.previousMonth" = "%@ frente al mes pasado";
+"stats.delta.noComparison" = "Datos insuficientes para comparar";
+"stats.delta.newActivity" = "Primera actividad en este período";
+"stats.weekOverWeek" = "vs semana pasada";
+"stats.trailChart" = "Puntos";
+"stats.distanceChart" = "Distancia";
+"stats.date" = "Fecha";
+"stats.uniqueZones" = "Zonas Únicas";
+"stats.week" = "Semana %d, %d";
+"stats.gained" = "Ganados";
+"stats.lost" = "Perdidos";
+"stats.net" = "Neto";
+"stats.rankings" = "Posiciones";
+"stats.longestRun" = "Corrida Más Larga";
+"stats.heatmap.title" = "Últimas 12 Semanas";
+"stats.heatmap.legend.low" = "Menos";
+"stats.heatmap.legend.high" = "Más";
+"stats.heatmap.runCount.single" = "%d corrida";
+"stats.heatmap.runCount.multiple" = "%d corridas";
+"stats.heatmap.noRun" = "Sin corrida";
+"stats.heatmap.weekday.mon" = "Lun";
+"stats.heatmap.weekday.wed" = "Mié";
+"stats.heatmap.weekday.fri" = "Vie";
+"accessibility.heatmap.day" = "%@, %@";
+
+// MARK: - Dropzone
+"dropzone.active" = "¡Dropzone Activa!";
+"dropzone.hint" = "Dropzone apareciendo en %@";
+"dropzone.claimed" = "Reclamada";
+"dropzone.reward" = "Multiplicador x2 por 3 días";
+"dropzone.rewardDesc" = "Reclama esta dropzone para ganar puntos dobles durante 3 días.";
+"dropzone.spotsLeft" = "Lugares Restantes";
+"dropzone.expiresIn" = "Expira En";
+"dropzone.claim" = "Reclamar Dropzone";
+
+// MARK: - Badges
+"badge.locked" = "Bloqueada";
+"badge.secret" = "Medalla Secreta";
+"badge.completed" = "Completada";
+"badge.remaining" = "Restante";
+"badge.category.performance" = "Rendimiento";
+"badge.category.territory" = "Territorio";
+"badge.category.dropzone" = "Dropzone";
+"badge.category.exploration" = "Exploración";
+"badge.category.streak" = "Racha";
+"badge.first_run.name" = "Primeros Pasos";
+"badge.first_run.description" = "Completa tu primera corrida.";
+"badge.distance_5k.name" = "Corredor de 5K";
+"badge.distance_5k.description" = "Completa una corrida de %@.";
+"badge.distance_10k.name" = "Corredor de 10K";
+"badge.distance_10k.description" = "Completa una corrida de %@.";
+"badge.total_distance_100k.name" = "Centurión";
+"badge.total_distance_100k.description" = "Alcanza %@ de distancia total corriendo.";
+"badge.boost_5.name" = "Piloto de Boost";
+"badge.boost_5.description" = "Termina 5 corridas en modo Boost.";
+"badge.first_territory.name" = "Primera Captura";
+"badge.first_territory.description" = "Captura tu primer territorio.";
+"badge.territory_25.name" = "Controlador de Distrito";
+"badge.territory_25.description" = "Captura 25 territorios en total.";
+"badge.territory_100.name" = "Conquistador de la Ciudad";
+"badge.territory_100.description" = "Captura 100 territorios en total.";
+"badge.first_dropzone.name" = "Iniciado de Dropzone";
+"badge.first_dropzone.description" = "Reclama tu primera dropzone.";
+"badge.dropzone_5.name" = "Cazador de Dropzones";
+"badge.dropzone_5.description" = "Reclama 5 dropzones.";
+"badge.streak_7.name" = "Semana Caliente";
+"badge.streak_7.description" = "Alcanza una racha de 7 días corriendo.";
+"badge.streak_30.name" = "Imparable";
+"badge.streak_30.description" = "Alcanza una racha de 30 días corriendo.";
+
+// MARK: - Notifications
+"notification.territoryCaptured" = "¡Tu territorio fue capturado!";
+"notification.territoryCaptured.title" = "Territorio Bajo Ataque";
+"notification.dropzoneActive" = "¡Una Dropzone está activa cerca!";
+"notification.dropzoneActive.title" = "Alerta de Dropzone";
+"notification.dropzoneActive.location" = "¡Una Dropzone está activa en %@!";
+"notification.defenseDropping" = "La defensa de tu territorio está bajando.";
+"notification.defenseDropping.title" = "Defensa Debilitándose";
+"notification.defenseDropping.location" = "La defensa de tu territorio en %@ está bajando.";
+"notification.streakWarning" = "¡Corre hoy para mantener tu racha!";
+"notification.streakWarning.title" = "Racha en Riesgo";
+"notification.streakWarning.body" = "Tienes una racha de %d días. ¡Corre hoy para conservarla!";
+"notification.dailyChallenge.title" = "¡Nuevos Desafíos Te Esperan!";
+"notification.dailyChallenge.body" = "Los desafíos de hoy están listos. Elige tu camino y gana puntos extra.";
+
+// MARK: - Errors
+"error.locationDenied" = "Se necesita acceso a la ubicación. Actívalo en Ajustes.";
+"error.networkOffline" = "Estás sin conexión. Tu corrida se sincronizará al reconectarse.";
+"error.gpsSignalLost" = "Señal de GPS perdida. La corrida continúa.";
+"error.generic" = "Algo salió mal. Intenta de nuevo.";
+
+// MARK: - Settings
+"settings.title" = "Ajustes";
+"settings.notifications" = "Notificaciones";
+"settings.notifications.enabledHint" = "Te avisaremos cuando alguien intente tomar tu territorio.";
+"settings.notifications.deniedHint" = "Las notificaciones están desactivadas en los Ajustes de iOS. Toca para abrir y activarlas.";
+"settings.location" = "Ubicación";
+"settings.location.alwaysHint" = "Siempre permitida — necesaria para rastrear corridas en segundo plano.";
+"settings.location.whenInUseHint" = "Solo al usar la app. El rastreo en segundo plano no funcionará — abre los Ajustes de iOS y elige 'Siempre'.";
+"settings.location.deniedHint" = "La ubicación está desactivada. No puedes capturar territorio hasta activarla. Toca para abrir los Ajustes de iOS.";
+"settings.language" = "Idioma";
+"settings.voiceFeedback" = "Aviso de Voz por Km";
+"settings.unit" = "Unidad de Distancia";
+"settings.unit.km" = "Kilómetros (km)";
+"settings.unit.miles" = "Millas (mi)";
+"settings.language.turkish" = "Turco";
+"settings.language.english" = "Inglés";
+"settings.account" = "Cuenta";
+"settings.deleteAccount" = "Eliminar Cuenta";
+"settings.deleteAccountConfirm" = "Esta acción no se puede deshacer. Todos tus datos se eliminarán permanentemente.";
+"settings.deleteAccountRecentLogin" = "Por seguridad, debes iniciar sesión de nuevo antes de eliminar tu cuenta.";
+"settings.about" = "Acerca de";
+"settings.version" = "Versión";
+"settings.testing" = "Pruebas";
+"settings.restartOnboarding" = "Reiniciar Tutorial";
+
+// MARK: - Runner
+"runner.defaultName" = "Corredor";
+
+// MARK: - Accessibility
+"avatar" = "Avatar";
+"accessibility.selected" = "Seleccionado";
+"accessibility.notSelected" = "No seleccionado";
+"accessibility.run.startHint" = "Toca dos veces para iniciar tu corrida";
+"accessibility.run.recenter" = "Recentrar el mapa en mi ubicación";
+"accessibility.map.centerOnUser" = "Centrar el mapa en mi ubicación";
+"accessibility.map.style" = "Cambiar estilo del mapa";
+"accessibility.map.territoryCount" = "%d territorios conquistados";
+"accessibility.map.zoomIn" = "Acercar";
+"accessibility.map.zoomOut" = "Alejar";
+"accessibility.map.heatmap" = "Alternar capa de mapa de calor";
+"accessibility.map.longPressHint" = "Mantén presionada una celda para ver detalles";
+"accessibility.badge.locked" = "Medalla bloqueada";
+"accessibility.badge.unlocked" = "Medalla desbloqueada";
+"accessibility.leaderboard.rank" = "Posición %d";
+"accessibility.stat.trail" = "%@ puntos";
+"accessibility.stat.distance" = "%@ de distancia";
+"accessibility.stat.runs" = "%d corridas";
+
+// MARK: - Widget
+"widget.displayName" = "Resumen Semanal";
+"widget.description" = "Tus estadísticas de corrida semanales";
+"widget.thisWeek" = "Esta Semana";
+"widget.points" = "Puntos";
+"widget.distance" = "km";
+"widget.runCount.single" = "corrida";
+"widget.runCount.multiple" = "corridas";
+"widget.streak" = "días de racha";
+"widget.heatmap.displayName" = "Calendario de Actividad";
+"widget.heatmap.description" = "Últimas 12 semanas de actividad de corrida";
+
+// MARK: - AI Analysis
+"ai.run.title" = "Análisis de la Corrida";
+"ai.weekly.title" = "Análisis Semanal";
+"ai.run.loading" = "Analizando tu corrida...";
+"ai.weekly.loading" = "Analizando tu semana...";
+"ai.loading.subtitle" = "Revisando tu estrategia y multiplicadores.";
+"ai.run.cta.title" = "Análisis de Corrida con IA";
+"ai.run.cta.subtitle" = "Un entrenador de estrategia lee tus multiplicadores y ruta.";
+"ai.run.cta.button" = "Generar Análisis con IA";
+"ai.weekly.cta.title" = "Análisis Semanal con IA";
+"ai.weekly.cta.subtitle" = "Una mirada de fin de semana a tu tendencia, mejor momento y próximo foco.";
+"ai.weekly.cta.button" = "Generar Análisis Semanal";
+"ai.run.section.summary" = "Resumen de la Corrida";
+"ai.run.section.highlights" = "Destacados";
+"ai.run.section.commentary" = "Comentario de la IA";
+"ai.run.section.next" = "Siguiente Sugerencia";
+"ai.weekly.section.trend" = "Tendencia de la Semana";
+"ai.weekly.section.top" = "Mayor Logro";
+"ai.weekly.section.weak" = "Punto Débil";
+"ai.weekly.section.focus" = "Foco de la Próxima Semana";
+"ai.badge.gemini" = "Gemini AI";
+"ai.badge.template" = "Plantilla de Insight";
+"ai.disclaimer" = "Generado como pista de estrategia. Las decisiones de juego siguen siendo tuyas.";
+"ai.error.minThresholds" = "La corrida debe tener al menos 3 minutos y 300 m para el análisis con IA.";
+"ai.error.rateLimited" = "Límite diario de análisis con IA alcanzado. Intenta de nuevo mañana.";
+"ai.error.unauthenticated" = "Debes iniciar sesión para usar el análisis con IA.";
+"ai.error.unavailable" = "Servicio de IA no disponible. Mostrando un análisis basado en plantilla.";
+"ai.error.invalidResponse" = "No se pudo leer la respuesta de la IA. Mostrando un análisis basado en plantilla.";
+"ai.weekly.error.noRuns" = "No hay corridas esta semana para analizar.";
+
+"ai.disclosure.title" = "Aviso antes del Análisis con IA";
+"ai.disclosure.body" = "El análisis con IA envía un resumen anónimo de tu corrida a la API Gemini de Google para generar el texto.";
+"ai.disclosure.point.anonymized" = "Solo se envían estadísticas del juego: distancia, tiempo, multiplicadores, nombre del barrio.";
+"ai.disclosure.point.noPII" = "Nunca se envían: tu nombre, correo, foto o coordenadas GPS sin procesar.";
+"ai.disclosure.point.toggle" = "Puedes desactivar el análisis con IA en cualquier momento desde Ajustes.";
+"ai.disclosure.continue" = "Continuar";
+
+"settings.aiAnalysis" = "Análisis con IA";
+"settings.aiAnalysis.description" = "Envía datos anónimos de la corrida para generar comentarios con IA.";
+
+"ai.template.run.summary" = "Terminaste una corrida de %@ en %@ y ganaste %@ %@.";
+"ai.template.run.highlight.normal" = "El modo Normal mantuvo tus puntos seguros de principio a fin.";
+"ai.template.run.highlight.boostKept" = "El Boost se sostuvo — el promedio de %@ se mantuvo sobre el umbral.";
+"ai.template.run.highlight.boostLost" = "El Boost cayó a x1.0 porque el ritmo promedio bajó de 7 km/h.";
+"ai.template.run.highlight.newZones" = "%@ nuevas zonas H3 agregadas — un verdadero impulso para el multiplicador de zonas.";
+"ai.template.run.highlight.antiFarmHigh" = "Una tasa anti-farm de %@ mantiene el multiplicador en x1.0.";
+"ai.template.run.highlight.antiFarmMedium" = "La tasa anti-farm de %@ baja el multiplicador a x0.7.";
+"ai.template.run.highlight.antiFarmLow" = "La tasa anti-farm de %@ limita el multiplicador a x0.4 — demasiada superposición.";
+"ai.template.run.highlight.streak" = "La racha sigue en %@ días — mantén el nivel activo.";
+"ai.template.run.highlight.runCap" = "Se alcanzó el límite de 5.000 puntos por corrida.";
+"ai.template.run.highlight.dailyCap" = "El límite diario de 15.000 puntos detuvo ganancias extra aquí.";
+"ai.template.run.highlight.fallback" = "Ganaste %@ %@ en esta corrida.";
+"ai.template.run.commentary.multipliers" = "Velocidad %@, duración %@, zona %@.";
+"ai.template.run.commentary.neighborhood" = "La corrida ocurrió en %@.";
+"ai.template.run.commentary.trendUp" = "Fue más fuerte que tus corridas recientes.";
+"ai.template.run.commentary.trendDown" = "Quedó por debajo de tu promedio reciente.";
+"ai.template.run.commentary.trendFlat" = "Aproximadamente igual a tus corridas recientes.";
+"ai.template.run.commentary.streakTier1" = "Tu nivel de racha de 3 días (x1.2) está activo.";
+"ai.template.run.commentary.streakTier2" = "Tu nivel de racha de 7 días (x1.5) está activo — protégelo.";
+"ai.template.run.commentary.streakTier3" = "Tu nivel de racha de 14 días (x2.0) está activo — el bono de racha más grande.";
+"ai.template.run.next.exploreZones" = "En la próxima corrida, ve a calles nuevas para subir tu tasa anti-farm.";
+"ai.template.run.next.steadyPace" = "La próxima vez elige Boost solo si puedes mantener un promedio ≥ 7 km/h de principio a fin.";
+"ai.template.run.next.tryBoost" = "Tu velocidad es lo bastante alta para probar el modo Boost y ganar recompensa doble.";
+"ai.template.run.next.longerRun" = "Una corrida sobre ~30 min liberaría más del multiplicador de duración.";
+"ai.template.run.next.keepStreak" = "Encaja la próxima corrida en 24h para mantener el nivel de tu racha.";
+
+"ai.template.week.trend.up" = "Los puntos totales subieron %@%% a %@ %@ — semana fuerte.";
+"ai.template.week.trend.down" = "Los puntos totales bajaron %@%% a %@ %@ frente a la semana pasada.";
+"ai.template.week.trend.flat" = "Los puntos totales quedaron casi igual en %@ %@ — semana estable.";
+"ai.template.week.trend.firstWeek" = "%@ corridas sumaron %@ %@ — tu primera semana de referencia.";
+"ai.template.week.top.bestRun" = "La mejor corrida ganó %@ %@ en %@.";
+"ai.template.week.top.streak" = "La racha de %@ días sobrevivió otra semana.";
+"ai.template.week.top.fallback" = "%@ corridas que cubrieron %@ esta semana.";
+"ai.template.week.weak.antiFarm" = "La tasa anti-farm promedio en %@%% bajó el multiplicador.";
+"ai.template.week.weak.boostLost" = "%@ de tus %@ corridas en Boost se cancelaron a mitad de camino.";
+"ai.template.week.weak.fewRuns" = "Solo %@ corridas esta semana — poco volumen daña la racha y el impulso.";
+"ai.template.week.weak.fallback" = "La exploración de zonas podría ser más amplia para un efecto compuesto mayor.";
+"ai.template.week.focus.streak" = "Construye una racha de 3 días para desbloquear el multiplicador x1.2.";
+"ai.template.week.focus.exploration" = "Apunta a zonas H3 nuevas para llevar la tasa anti-farm sobre el 70%%.";
+"ai.template.week.focus.distance" = "Agrega una corrida un poco más larga la próxima semana para revertir la caída de distancia.";
+"ai.template.week.focus.consolidate" = "Mantén este ritmo y apunta a un pico de %@ aún mayor en una sola corrida.";

@@ -10,6 +10,27 @@ final class MessagingService {
         case dropzoneAlerts = "dropzone_alerts"
         case dailyChallengesEn = "daily_challenges_en"
         case dailyChallengesTr = "daily_challenges_tr"
+        case dailyChallengesPt = "daily_challenges_pt"
+        case dailyChallengesEs = "daily_challenges_es"
+        case dailyChallengesDe = "daily_challenges_de"
+
+        static let dailyChallengeTopics: [Topic] = [
+            .dailyChallengesEn,
+            .dailyChallengesTr,
+            .dailyChallengesPt,
+            .dailyChallengesEs,
+            .dailyChallengesDe
+        ]
+
+        static func dailyChallengeTopic(for language: AppLanguage) -> Topic {
+            switch language {
+            case .english: return .dailyChallengesEn
+            case .turkish: return .dailyChallengesTr
+            case .portuguese: return .dailyChallengesPt
+            case .spanish: return .dailyChallengesEs
+            case .german: return .dailyChallengesDe
+            }
+        }
     }
 
     // MARK: - FCM Token
@@ -50,13 +71,13 @@ final class MessagingService {
     }
 
     func subscribeToDailyChallenges() {
-        let preferredLang = Locale.preferredLanguages.first ?? "en"
-        if preferredLang.hasPrefix("tr") {
-            subscribe(to: .dailyChallengesTr)
-            unsubscribe(from: .dailyChallengesEn)
-        } else {
-            subscribe(to: .dailyChallengesEn)
-            unsubscribe(from: .dailyChallengesTr)
+        let selectedCode = LocalizationManager.shared.selectedLanguageCode
+        let language = AppLanguage(rawValue: selectedCode) ?? .english
+        let activeTopic = Topic.dailyChallengeTopic(for: language)
+
+        subscribe(to: activeTopic)
+        for topic in Topic.dailyChallengeTopics where topic != activeTopic {
+            unsubscribe(from: topic)
         }
     }
 }

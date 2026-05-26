@@ -1,3 +1,5 @@
+import Combine
+import CoreLocation
 import SwiftUI
 import UserNotifications
 import FirebaseAuth
@@ -9,6 +11,7 @@ final class SettingsViewModel: ObservableObject {
 
     @Published var notificationsEnabled = false
     @Published var notificationStatus: UNAuthorizationStatus = .notDetermined
+    @Published var locationAuthStatus: CLAuthorizationStatus = .notDetermined
     @Published var showSignOutAlert = false
     @Published var showDeleteAccountAlert = false
     @Published var isDeleting = false
@@ -38,6 +41,8 @@ final class SettingsViewModel: ObservableObject {
     private let firestoreService: FirestoreService
     private let realtimeDBService: RealtimeDBService
     private let offlineStorageService: OfflineStorageService
+    private weak var locationManager: LocationManager?
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
@@ -45,12 +50,14 @@ final class SettingsViewModel: ObservableObject {
         authService: AuthService,
         firestoreService: FirestoreService = FirestoreService(),
         realtimeDBService: RealtimeDBService = RealtimeDBService(),
-        offlineStorageService: OfflineStorageService = .shared
+        offlineStorageService: OfflineStorageService = .shared,
+        locationManager: LocationManager? = nil
     ) {
         self.authService = authService
         self.firestoreService = firestoreService
         self.realtimeDBService = realtimeDBService
         self.offlineStorageService = offlineStorageService
+        self.locationManager = locationManager
         let storedVoice = UserDefaults.standard.object(
             forKey: AppConstants.UserDefaultsKeys.voiceFeedbackEnabled
         ) as? Bool
@@ -59,6 +66,16 @@ final class SettingsViewModel: ObservableObject {
             forKey: AppConstants.UserDefaultsKeys.aiAnalysisEnabled
         ) as? Bool
         self.isAIAnalysisEnabled = storedAI ?? true
+
+        if let locationManager {
+            self.locationAuthStatus = locationManager.authorizationStatus
+            locationManager.$authorizationStatus
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] status in
+                    self?.locationAuthStatus = status
+                }
+                .store(in: &cancellables)
+        }
     }
 
     // MARK: - App Info
@@ -104,6 +121,46 @@ final class SettingsViewModel: ObservableObject {
     func openNotificationSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
+    }
+
+    // MARK: - Location
+
+    /// Toggle is "on" when the user has granted some level of location access.
+    /// Background runs need .authorizedAlways, but for the toggle visual we
+    /// treat .authorizedWhenInUse as on too (footer hint warns about background).
+    var locationEnabled: Bool {
+        locationAuthStatus == .authorizedAlways || locationAuthStatus == .authorizedWhenInUse
+    }
+
+    func handleLocationToggleTap() {
+        AnalyticsService.logSettingsLocationToggleTapped(
+            currentStatus: Self.locationStatusName(locationAuthStatus)
+        )
+
+        switch locationAuthStatus {
+        case .notDetermined:
+            locationManager?.requestAlwaysAuthorization()
+        case .denied, .restricted, .authorizedWhenInUse, .authorizedAlways:
+            openLocationSettings()
+        @unknown default:
+            openLocationSettings()
+        }
+    }
+
+    private func openLocationSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+
+    private static func locationStatusName(_ status: CLAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined: return "notDetermined"
+        case .denied: return "denied"
+        case .restricted: return "restricted"
+        case .authorizedAlways: return "authorizedAlways"
+        case .authorizedWhenInUse: return "authorizedWhenInUse"
+        @unknown default: return "unknown"
+        }
     }
 
     private static func statusName(_ status: UNAuthorizationStatus) -> String {

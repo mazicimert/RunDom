@@ -8,13 +8,29 @@ struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SettingsViewModel
 
-    init(authService: AuthService) {
-        _viewModel = StateObject(wrappedValue: SettingsViewModel(authService: authService))
+    init(authService: AuthService, locationManager: LocationManager) {
+        _viewModel = StateObject(
+            wrappedValue: SettingsViewModel(
+                authService: authService,
+                locationManager: locationManager
+            )
+        )
     }
 
     var body: some View {
         NavigationStack {
             List {
+                // Location
+                Section {
+                    Toggle(isOn: locationToggleBinding) {
+                        Label("settings.location".localized, systemImage: "location.fill")
+                    }
+                } footer: {
+                    if let hint = locationFooterHint {
+                        Text(hint)
+                    }
+                }
+
                 // Notifications
                 Section {
                     Toggle(isOn: notificationsToggleBinding) {
@@ -34,12 +50,12 @@ struct SettingsView: View {
                         "settings.language".localized,
                         selection: $localizationManager.selectedLanguageCode
                     ) {
-                        Text("settings.language.turkish".localized)
-                            .tag(AppLanguage.turkish.rawValue)
-                        Text("settings.language.english".localized)
-                            .tag(AppLanguage.english.rawValue)
+                        ForEach(AppLanguage.allCases) { language in
+                            Text(language.displayName)
+                                .tag(language.rawValue)
+                        }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 }
 
                 Section {
@@ -187,10 +203,38 @@ private extension SettingsView {
             }
         )
     }
+
+    /// Same pattern for location: tap triggers system request (.notDetermined)
+    /// or deep-links to iOS Settings (denied / restricted / partial / always).
+    /// Visual stays in sync via the LocationManager publisher subscription
+    /// in SettingsViewModel.
+    var locationToggleBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.locationEnabled },
+            set: { _ in
+                viewModel.handleLocationToggleTap()
+            }
+        )
+    }
+
+    var locationFooterHint: String? {
+        switch viewModel.locationAuthStatus {
+        case .notDetermined:
+            return nil
+        case .denied, .restricted:
+            return "settings.location.deniedHint".localized
+        case .authorizedWhenInUse:
+            return "settings.location.whenInUseHint".localized
+        case .authorizedAlways:
+            return "settings.location.alwaysHint".localized
+        @unknown default:
+            return nil
+        }
+    }
 }
 
 #Preview {
-    SettingsView(authService: AuthService())
+    SettingsView(authService: AuthService(), locationManager: LocationManager())
         .environmentObject(AppState())
         .environmentObject(LocalizationManager.shared)
         .environmentObject(UnitPreference.shared)

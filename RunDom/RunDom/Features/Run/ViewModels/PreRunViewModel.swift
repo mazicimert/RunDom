@@ -50,6 +50,10 @@ final class PreRunViewModel: ObservableObject {
         locationManager.hasLocationPermission
     }
 
+    var hasAlwaysPermission: Bool {
+        locationManager.hasAlwaysPermission
+    }
+
     // MARK: - Load Streak
 
     func load(user: User?) async {

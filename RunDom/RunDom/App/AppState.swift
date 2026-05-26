@@ -40,6 +40,26 @@ final class AppState: ObservableObject {
 
         observeAuthState()
         observeFCMToken()
+        observeLanguageChanges()
+    }
+
+    private func observeLanguageChanges() {
+        LocalizationManager.shared.$selectedLanguageCode
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] languageCode in
+                guard let self else { return }
+                self.messagingService.subscribeToDailyChallenges()
+                if let userId = self.currentUser?.id {
+                    Task {
+                        try? await self.firestoreService.updateLanguageCode(
+                            userId: userId,
+                            languageCode: languageCode
+                        )
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - FCM Token Observation
@@ -63,8 +83,7 @@ final class AppState: ObservableObject {
             messagingService.subscribeToDailyChallenges()
         }
 
-        let preferredLang = Locale.preferredLanguages.first ?? "en"
-        let langCode = preferredLang.hasPrefix("tr") ? "tr" : "en"
+        let langCode = LocalizationManager.shared.selectedLanguageCode
         try? await firestoreService.updateLanguageCode(userId: userId, languageCode: langCode)
     }
 
@@ -198,8 +217,7 @@ final class AppState: ObservableObject {
     // MARK: - Helpers
 
     private static func isDefaultDisplayName(_ name: String) -> Bool {
-        let defaults = ["runner.defaultName".localized, "Runner", "Koşucu"]
-        return defaults.contains(name)
+        LocalizationManager.localizedStringInAllLanguages(forKey: "runner.defaultName").contains(name)
     }
 
     private static func randomUserColor() -> String {

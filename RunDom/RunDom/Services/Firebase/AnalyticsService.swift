@@ -103,6 +103,40 @@ enum AnalyticsService {
         ])
     }
 
+    static func logSettingsLocationToggleTapped(currentStatus: String) {
+        Analytics.logEvent("settings_location_toggle_tapped", parameters: [
+            "current_status": currentStatus
+        ])
+    }
+
+    static func logMapLocationBannerShown(status: String) {
+        Analytics.logEvent("map_location_banner_shown", parameters: [
+            "status": status
+        ])
+    }
+
+    static func logMapLocationBannerTapped(status: String) {
+        Analytics.logEvent("map_location_banner_tapped", parameters: [
+            "status": status
+        ])
+    }
+
+    static func logPreRunBackgroundUpgradePromptShown() {
+        Analytics.logEvent("prerun_background_upgrade_shown", parameters: nil)
+    }
+
+    static func logPreRunBackgroundUpgradeOpenSettings() {
+        Analytics.logEvent("prerun_background_upgrade_open_settings", parameters: nil)
+    }
+
+    static func logPreRunBackgroundUpgradeStartAnyway() {
+        Analytics.logEvent("prerun_background_upgrade_start_anyway", parameters: nil)
+    }
+
+    static func logPreRunBackgroundUpgradeDismissed() {
+        Analytics.logEvent("prerun_background_upgrade_dismissed", parameters: nil)
+    }
+
     // MARK: - Run Events
 
     static func logRunStarted(mode: RunMode) {

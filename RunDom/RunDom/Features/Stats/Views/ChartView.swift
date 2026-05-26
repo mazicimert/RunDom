@@ -188,7 +188,7 @@ struct TrailChartView: View {
                 Rectangle()
                     .fill(.clear)
                     .contentShape(Rectangle())
-                    .gesture(
+                    .simultaneousGesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { value in
                                 updateSelection(at: value.location, proxy: proxy, geometry: geometry)

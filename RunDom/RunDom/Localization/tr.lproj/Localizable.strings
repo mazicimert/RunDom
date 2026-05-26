@@ -129,10 +129,13 @@
 // MARK: - Onboarding — Location Priming
 "onboarding.location.title" = "Koşunu kaybetmeyelim";
 "onboarding.location.subtitle" = "Telefon cebine atılırken bile bölgeleri boyamaya devam edebilmemiz için 'Her zaman izin ver' seçeneğine ihtiyacımız var.";
+"onboarding.location.deniedTitle" = "Konum kapalı";
+"onboarding.location.deniedSubtitle" = "Konum erişimi daha önce reddedilmiş. Açmak için iOS Ayarları'na git — sistem uygulama içinden tekrar sormaz.";
 "onboarding.location.bullet1" = "Telefon cebindeyken bile takip eder";
 "onboarding.location.bullet2" = "Sadece koşu sırasında aktif";
 "onboarding.location.bullet3" = "Bölge fethetmek için zorunlu";
 "onboarding.location.allow" = "Konum Erişimine İzin Ver";
+"onboarding.location.openSettings" = "iOS Ayarları'nı Aç";
 "onboarding.location.skip" = "Şimdi değil";
 
 // MARK: - Auth
@@ -197,6 +200,13 @@
 "postRun.notificationPrompt.subtitle" = "Az önce fethettiğin bölgeleri başka biri almaya çalıştığı an haberin olsun.";
 "postRun.notificationPrompt.allow" = "Bildirimleri Aç";
 "postRun.notificationPrompt.skip" = "Sonra olur";
+
+// MARK: - Run — Background Permission
+"run.whenInUseUpgrade.title" = "Arka plan takibi kapalı";
+"run.whenInUseUpgrade.message" = "Konum 'Sadece kullanırken' ayarlı. Telefonu cebine atarsan rotan kaybolabilir. iOS Ayarları'ndan 'Her zaman' seçmeni öneririz.";
+"run.whenInUseUpgrade.openSettings" = "iOS Ayarları'nı Aç";
+"run.whenInUseUpgrade.startAnyway" = "Yine de başlat";
+"run.whenInUse.banner" = "Arka plan takibi kapalı — uygulamayı açık tut";
 
 // MARK: - Run
 "run.start" = "Koşuya Başla";
@@ -371,6 +381,9 @@
 "territoryLoss.prompt.capturedBy" = "%@ tarafından ele geçirildi";
 
 // MARK: - Map
+"map.banner.locationOff.title" = "Konumun kapalı";
+"map.banner.locationOff.subtitle" = "Bölge fethetmek için izin gerekiyor.";
+"map.banner.locationOff.action" = "Aç";
 "map.myTerritory" = "Benim Bölgem";
 "map.defense" = "Savunma Seviyesi";
 "map.owner" = "Sahip";
@@ -564,6 +577,10 @@
 "settings.notifications" = "Bildirimler";
 "settings.notifications.enabledHint" = "Birisi bölgeni almaya çalıştığında haberin olur.";
 "settings.notifications.deniedHint" = "Bildirimler iOS Ayarları'ndan kapalı. Açmak için dokun.";
+"settings.location" = "Konum";
+"settings.location.alwaysHint" = "Her zaman açık — koşuları arka planda takip edebilmek için gerekli.";
+"settings.location.whenInUseHint" = "Sadece kullanırken açık. Arka plan koşu takibi çalışmaz — iOS Ayarları'ndan 'Her zaman' seç.";
+"settings.location.deniedHint" = "Konum kapalı. Açmadan bölge fethedemezsin. iOS Ayarları'na gitmek için dokun.";
 "settings.language" = "Dil";
 "settings.voiceFeedback" = "Sesli Km Bildirimi";
 "settings.unit" = "Mesafe Birimi";

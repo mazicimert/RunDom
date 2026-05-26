@@ -221,7 +221,7 @@ struct CompleteProfileView: View {
             return
         }
 
-        let ignoredNames = ["runner.defaultName".localized, "Runner", "Koşucu"]
+        let ignoredNames = LocalizationManager.localizedStringInAllLanguages(forKey: "runner.defaultName")
         guard !ignoredNames.contains(rawName) else { return }
 
         let parts = rawName.split(separator: " ").map(String.init)

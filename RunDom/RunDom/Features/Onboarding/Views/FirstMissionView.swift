@@ -99,7 +99,7 @@ struct FirstMissionView: View {
               !raw.isEmpty else {
             return nil
         }
-        let ignored = ["runner.defaultName".localized, "Runner", "Koşucu"]
+        let ignored = LocalizationManager.localizedStringInAllLanguages(forKey: "runner.defaultName")
         return ignored.contains(raw) ? nil : raw
     }
 

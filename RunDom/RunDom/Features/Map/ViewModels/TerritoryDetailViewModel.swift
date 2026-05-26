@@ -41,7 +41,10 @@ final class TerritoryDetailViewModel: ObservableObject {
     // MARK: - Computed
 
     var defensePercentage: Double {
-        min(territory.decayedDefenseLevel / 100.0, 1.0)
+        // Defense is now measured in meters run inside the cell. Normalize by one run's
+        // max contribution so the bar fills at a single fully-invested run; multi-run
+        // fortresses simply stay full.
+        min(territory.decayedDefenseLevel / AppConstants.Game.maxCellDistancePerRun, 1.0)
     }
 
     var defenseColor: Color {

@@ -107,7 +107,9 @@ struct StatsTabView: View {
                 Task {
                     do {
                         try await historyVM.deleteRun(run)
-                        await reloadAll(userId: userId)
+                        async let stats: () = statsVM.loadStats(userId: userId)
+                        async let reports: () = reportVM.loadReports(userId: userId)
+                        _ = await (stats, reports)
                     } catch {
                         deleteErrorMessage = "run.delete.failed".localized
                         AppLogger.firebase.error("Failed to delete run: \(error.localizedDescription)")

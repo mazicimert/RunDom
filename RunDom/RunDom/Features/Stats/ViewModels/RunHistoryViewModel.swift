@@ -57,6 +57,8 @@ final class RunHistoryViewModel: ObservableObject {
 
     func deleteRun(_ run: RunSession) async throws {
         try await firestoreService.deleteRun(run)
-        runs.removeAll { $0.id == run.id }
+        withAnimation(.easeOut(duration: 0.32)) {
+            runs.removeAll { $0.id == run.id }
+        }
     }
 }

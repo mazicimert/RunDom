@@ -26,6 +26,12 @@ enum AppConstants {
         static let maxTrailPerRun: Double = 5_000
         static let maxTrailPerDay: Double = 15_000
         static let defenseDecayHours: Int = 48
+        /// Immediate claim seed (meters) applied when a runner first enters a new cell —
+        /// gives instant ownership of empty land and a first chip on enemy land.
+        static let cellClaimSeedDistance: Double = 10
+        /// Max distance (meters) a single cell can contribute — to its own defense or as
+        /// attack power against an enemy — within one run. Caps loop-farming a fortress.
+        static let maxCellDistancePerRun: Double = 1_000
         static let dropzoneRewardMultiplier: Double = 2.0
         static let dropzoneRewardDays: Int = 3
         static let dropzoneMaxClaimants: Int = 3

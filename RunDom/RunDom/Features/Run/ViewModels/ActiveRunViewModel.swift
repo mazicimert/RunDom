@@ -29,10 +29,12 @@ final class ActiveRunViewModel: ObservableObject {
     @Published var routePoints: [RoutePoint] = []
     @Published var visitedZones: [String] = []
     @Published var uniqueZones: Set<String> = []
+    @Published var wonZones: Set<String> = []
     @Published var territoriesCaptured: Int = 0
     @Published var territoryConquestAnimationTrigger: Int = 0
     @Published var isBoostActive: Bool = true
     @Published var gpsSignalLost = false
+    @Published var hasAlwaysLocationPermission = false
     @Published var currentH3Index: String?
     @Published var isRivalOverlayEnabled = false
     @Published private(set) var nearbyRivalTerritories: [Territory] = []
@@ -70,6 +72,11 @@ final class ActiveRunViewModel: ObservableObject {
     private var previousRoutePoint: RoutePoint?
     private var speedSamples: [Double] = []
     private var currentSeasonId: String?
+
+    // Per-cell capture accumulation
+    private var currentCellIndex: String?
+    private var currentCellDistance: Double = 0
+    private var distanceAppliedPerCell: [String: Double] = [:]
     private var lastMilestoneKm: Int = 0
     private var lastMilestoneElapsedTime: TimeInterval = 0
     private var rivalTerritoryObserverId: String?
@@ -107,6 +114,15 @@ final class ActiveRunViewModel: ObservableObject {
         self.realtimeDB = realtimeDB
         self.startDate = Date()
         self.isBoostActive = mode == .boost
+        self.hasAlwaysLocationPermission = locationManager.authorizationStatus == .authorizedAlways
+        observeAlwaysAuthorization()
+    }
+
+    private func observeAlwaysAuthorization() {
+        locationManager.$authorizationStatus
+            .map { $0 == .authorizedAlways }
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$hasAlwaysLocationPermission)
     }
 
     // MARK: - Start
@@ -179,6 +195,7 @@ final class ActiveRunViewModel: ObservableObject {
         maxSpeed = max(maxSpeed, speedKmh)
 
         // Anti-cheat: GPS consistency
+        var segmentDistance: Double = 0
         if let prev = previousRoutePoint {
             let flags = antiCheatService.validateGPSConsistency(previous: prev, current: point)
             if flags.contains(.gpsAnomaly) {
@@ -187,7 +204,7 @@ final class ActiveRunViewModel: ObservableObject {
             }
 
             // Calculate distance
-            let segmentDistance = prev.coordinate.distance(to: point.coordinate)
+            segmentDistance = prev.coordinate.distance(to: point.coordinate)
             distance += segmentDistance
             triggerKilometerMilestoneIfNeeded()
         }
@@ -202,6 +219,19 @@ final class ActiveRunViewModel: ObservableObject {
         currentH3Index = h3Index
         visitedZones.append(h3Index)
 
+        // Accumulate distance run within the current cell. When we cross into a new cell,
+        // flush the cell we just left as one capture attempt — attack power / defense gain
+        // equals the real distance run there. Re-entering a cell flushes again, which is a
+        // natural re-attack with no explicit counter.
+        if let currentCellIndex, h3Index != currentCellIndex {
+            flushCell(index: currentCellIndex, distance: currentCellDistance)
+            self.currentCellIndex = h3Index
+            currentCellDistance = segmentDistance
+        } else {
+            currentCellIndex = h3Index
+            currentCellDistance += segmentDistance
+        }
+
         if h3Index != previousH3Index {
             refreshNearbyRivalTerritories()
         }
@@ -209,9 +239,10 @@ final class ActiveRunViewModel: ObservableObject {
         let isNewZone = !uniqueZones.contains(h3Index)
         uniqueZones.insert(h3Index)
 
-        // Capture territory for new zones
+        // Instant claim seed on first entry: paints empty land immediately and lands a
+        // first chip on enemy land. The real accumulated distance is applied on cell exit.
         if isNewZone {
-            captureZone(h3Index: h3Index, distance: 10) // Base distance for entering zone
+            applyCapture(h3Index: h3Index, rawDistance: AppConstants.Game.cellClaimSeedDistance)
         }
 
         // Boost speed check
@@ -247,6 +278,34 @@ final class ActiveRunViewModel: ObservableObject {
 
     // MARK: - Territory Capture
 
+    /// Flushes the distance accumulated during one continuous occupancy of a cell.
+    private func flushCell(index: String, distance: Double) {
+        guard distance > 0 else { return }
+        applyCapture(h3Index: index, rawDistance: distance)
+        currentCellDistance = 0
+    }
+
+    /// Flushes whichever cell the runner is currently standing in (on pause / stop).
+    private func flushCurrentCell() {
+        if let currentCellIndex {
+            flushCell(index: currentCellIndex, distance: currentCellDistance)
+        }
+        currentCellDistance = 0
+    }
+
+    /// Clamps a capture's distance to the per-run, per-cell cap, then sends it.
+    /// This bounds both defense farming (looping your own cell) and a single run's
+    /// attack power against any one enemy cell.
+    private func applyCapture(h3Index: String, rawDistance: Double) {
+        let alreadyApplied = distanceAppliedPerCell[h3Index, default: 0]
+        let remaining = AppConstants.Game.maxCellDistancePerRun - alreadyApplied
+        guard remaining > 0 else { return }
+        let toApply = min(rawDistance, remaining)
+        guard toApply > 0 else { return }
+        distanceAppliedPerCell[h3Index] = alreadyApplied + toApply
+        captureZone(h3Index: h3Index, distance: toApply)
+    }
+
     private func captureZone(h3Index: String, distance: Double) {
         guard let seasonId = currentSeasonId else { return }
         Task {
@@ -258,11 +317,17 @@ final class ActiveRunViewModel: ObservableObject {
                     distance: distance,
                     seasonId: seasonId
                 )
-                if captured.captured {
-                    territoriesCaptured += 1
-                }
 
-                let conqueredFromOpponent = captured.captured
+                guard captured.captured else { return }
+
+                // A cell is only "newly won" the first time it flips to us this run.
+                // Guarding on this dedupes counts, paint, animation, and loss events
+                // across the multiple capture attempts a single run makes per cell.
+                let isNewlyWon = !wonZones.contains(h3Index)
+                wonZones.insert(h3Index)
+                territoriesCaptured = wonZones.count
+
+                let conqueredFromOpponent = isNewlyWon
                     && (captured.previousOwnerId?.isEmpty == false)
                     && captured.previousOwnerId != userId
 
@@ -290,6 +355,7 @@ final class ActiveRunViewModel: ObservableObject {
 
     func pauseRun() {
         guard runState == .running else { return }
+        flushCurrentCell()
         runState = .paused
         pauseStartDate = Date()
         locationManager.stopTracking()
@@ -314,6 +380,7 @@ final class ActiveRunViewModel: ObservableObject {
     // MARK: - Stop
 
     func stopRun() -> RunSession {
+        flushCurrentCell()
         runState = .finished
         timer?.invalidate()
         timer = nil

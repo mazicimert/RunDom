@@ -297,8 +297,11 @@ struct MainTabView: View {
             EditProfileView()
                 .environmentObject(appState)
         case .settings:
-            SettingsView(authService: appState.authService)
-                .environmentObject(appState)
+            SettingsView(
+                authService: appState.authService,
+                locationManager: appState.locationManager
+            )
+            .environmentObject(appState)
         case .levelBreakdown(let totalTrail):
             LevelBreakdownView(totalTrail: totalTrail)
                 .presentationDetents([.large])

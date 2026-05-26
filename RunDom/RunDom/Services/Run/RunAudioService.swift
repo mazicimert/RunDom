@@ -18,18 +18,31 @@ final class RunAudioService: NSObject {
         ) as? Bool ?? true
         guard enabled else { return }
 
-        let isTurkish = LocalizationManager.shared.selectedLanguageCode == AppLanguage.turkish.rawValue
+        let language = AppLanguage(rawValue: LocalizationManager.shared.selectedLanguageCode) ?? .english
         let totalSeconds = max(0, Int(paceSecondsPerKm.rounded()))
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60
 
         let text: String
         let voiceLanguage: String
-        if isTurkish {
+        switch language {
+        case .turkish:
             let unitNoun = useMiles ? "mil" : "kilometre"
             text = "\(km) \(unitNoun). Tempo \(minutes) dakika \(seconds) saniye."
             voiceLanguage = "tr-TR"
-        } else {
+        case .portuguese:
+            let unitNoun = useMiles ? "milhas" : "quilômetros"
+            text = "\(km) \(unitNoun). Ritmo \(minutes) minutos \(seconds) segundos."
+            voiceLanguage = "pt-BR"
+        case .spanish:
+            let unitNoun = useMiles ? "millas" : "kilómetros"
+            text = "\(km) \(unitNoun). Ritmo \(minutes) minutos \(seconds) segundos."
+            voiceLanguage = "es-ES"
+        case .german:
+            let unitNoun = useMiles ? "Meilen" : "Kilometer"
+            text = "\(km) \(unitNoun). Pace \(minutes) Minuten \(seconds) Sekunden."
+            voiceLanguage = "de-DE"
+        case .english:
             let unitNoun = useMiles ? "mile" : "kilometer"
             text = "\(km) \(unitNoun). Pace \(minutes) minutes \(seconds) seconds."
             voiceLanguage = "en-US"

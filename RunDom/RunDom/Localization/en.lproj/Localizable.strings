@@ -129,10 +129,13 @@
 // MARK: - Onboarding — Location Priming
 "onboarding.location.title" = "Don't lose your run";
 "onboarding.location.subtitle" = "We need 'Always allow' so we can keep painting territory while your phone is in your pocket.";
+"onboarding.location.deniedTitle" = "Location is off";
+"onboarding.location.deniedSubtitle" = "Location access was turned down before. Open iOS Settings to enable it — the system won't ask again from inside the app.";
 "onboarding.location.bullet1" = "Tracks even when your phone is in your pocket";
 "onboarding.location.bullet2" = "Active only during your runs";
 "onboarding.location.bullet3" = "Required to capture territory";
 "onboarding.location.allow" = "Allow Location Access";
+"onboarding.location.openSettings" = "Open iOS Settings";
 "onboarding.location.skip" = "Not now";
 
 // MARK: - Auth
@@ -197,6 +200,13 @@
 "postRun.notificationPrompt.subtitle" = "Get notified the moment another runner tries to take the zones you just conquered.";
 "postRun.notificationPrompt.allow" = "Turn on notifications";
 "postRun.notificationPrompt.skip" = "Maybe later";
+
+// MARK: - Run — Background Permission
+"run.whenInUseUpgrade.title" = "Background tracking is off";
+"run.whenInUseUpgrade.message" = "Location is set to 'While Using' only. If you put your phone in your pocket the route may stop being recorded. We recommend switching to 'Always' in iOS Settings.";
+"run.whenInUseUpgrade.openSettings" = "Open iOS Settings";
+"run.whenInUseUpgrade.startAnyway" = "Start anyway";
+"run.whenInUse.banner" = "Background tracking is off — keep the app open";
 
 // MARK: - Run
 "run.start" = "Start Run";
@@ -371,6 +381,9 @@
 "territoryLoss.prompt.capturedBy" = "Captured by %@";
 
 // MARK: - Map
+"map.banner.locationOff.title" = "Location is off";
+"map.banner.locationOff.subtitle" = "Permission is required to capture territory.";
+"map.banner.locationOff.action" = "Enable";
 "map.myTerritory" = "My Territory";
 "map.defense" = "Defense Level";
 "map.owner" = "Owner";
@@ -564,6 +577,10 @@
 "settings.notifications" = "Notifications";
 "settings.notifications.enabledHint" = "We'll alert you when someone tries to take your territory.";
 "settings.notifications.deniedHint" = "Notifications are off in iOS Settings. Tap to open and turn them on.";
+"settings.location" = "Location";
+"settings.location.alwaysHint" = "Always allowed — needed to track runs in the background.";
+"settings.location.whenInUseHint" = "Only while using. Background run tracking won't work — open iOS Settings and choose 'Always'.";
+"settings.location.deniedHint" = "Location is off. You can't capture territory until you enable it. Tap to open iOS Settings.";
 "settings.language" = "Language";
 "settings.voiceFeedback" = "Voice Km Feedback";
 "settings.unit" = "Distance Unit";
