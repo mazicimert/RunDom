@@ -33,7 +33,7 @@ final class AppRouter: ObservableObject {
         var title: String {
             switch self {
             case .map: return "tab.map".localized
-            case .leaderboard: return "tab.leaderboard".localized
+            case .leaderboard: return "tab.social".localized
             case .run: return "tab.run".localized
             case .stats: return "tab.stats".localized
             case .profile: return "tab.profile".localized
@@ -43,7 +43,7 @@ final class AppRouter: ObservableObject {
         var icon: String {
             switch self {
             case .map: return "map.fill"
-            case .leaderboard: return "trophy.fill"
+            case .leaderboard: return "person.2.fill"
             case .run: return "figure.run"
             case .stats: return "chart.bar.fill"
             case .profile: return "person.fill"
@@ -62,6 +62,7 @@ final class AppRouter: ObservableObject {
         case editProfile
         case settings
         case levelBreakdown(totalTrail: Double)
+        case userSearch
 
         var id: String {
             switch self {
@@ -73,6 +74,7 @@ final class AppRouter: ObservableObject {
             case .editProfile: return "editProfile"
             case .settings: return "settings"
             case .levelBreakdown: return "levelBreakdown"
+            case .userSearch: return "userSearch"
             }
         }
     }

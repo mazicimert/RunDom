@@ -21,6 +21,18 @@ struct User: Codable, Identifiable, Equatable {
     var runnerProfile: RunnerProfile?
     var createdAt: Date = Date()
 
+    // Social (Phase 1) — optional until backfilled, treat nil as 0 / unset.
+    var displayNameLowercased: String?
+    var followersCount: Int?
+    var followingCount: Int?
+    var postsCount: Int?
+
+    // Legal acceptance (Phase A.3) — set when the user explicitly accepts the
+    // Community Guidelines + Terms of Use on first post. Bumping
+    // `acceptedTermsVersion` past the bundled value re-triggers the gate.
+    var acceptedCommunityGuidelinesAt: Date?
+    var acceptedTermsVersion: Int?
+
     var hasActiveDropzoneBoost: Bool {
         guard let expiry = dropzoneMultiplierExpiry else { return false }
         return expiry > Date()

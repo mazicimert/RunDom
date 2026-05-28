@@ -22,7 +22,11 @@ final class FirestoreService {
     // MARK: - User
 
     func createUser(_ user: User) async throws {
-        try usersCollection.document(user.id).setData(from: user)
+        var userToWrite = user
+        if userToWrite.displayNameLowercased == nil {
+            userToWrite.displayNameLowercased = user.displayName.lowercased()
+        }
+        try usersCollection.document(user.id).setData(from: userToWrite)
         AppLogger.firebase.info("User created: \(user.id)")
     }
 
@@ -33,7 +37,25 @@ final class FirestoreService {
     }
 
     func updateUser(_ user: User) async throws {
-        try usersCollection.document(user.id).setData(from: user, merge: true)
+        var userToWrite = user
+        // Keep the lowercased mirror in sync with displayName for prefix search.
+        userToWrite.displayNameLowercased = user.displayName.lowercased()
+        try usersCollection.document(user.id).setData(from: userToWrite, merge: true)
+    }
+
+    /// One-shot backfill — writes `displayNameLowercased` for legacy user docs
+    /// that predate the social feature. Idempotent: returns user unchanged if
+    /// the field is already present.
+    @discardableResult
+    func migrateUserSocialFieldsIfNeeded(_ user: User) async throws -> User {
+        guard user.displayNameLowercased == nil else { return user }
+        let lowered = user.displayName.lowercased()
+        try await usersCollection.document(user.id).updateData([
+            "displayNameLowercased": lowered
+        ])
+        var updated = user
+        updated.displayNameLowercased = lowered
+        return updated
     }
 
     func deleteUserAccountData(userId: String) async throws {

@@ -484,6 +484,9 @@
 "stats.delta.previousMonth" = "Geçen aya göre %@";
 "stats.delta.noComparison" = "Karşılaştırma için yeterli veri yok";
 "stats.delta.newActivity" = "Bu dönemin ilk aktivitesi";
+"stats.delta.noActivityThisWeek" = "Bu hafta henüz aktivite yok";
+"stats.delta.noActivityThisMonth" = "Bu ay henüz aktivite yok";
+"stats.chart.empty" = "Bu dönemdeki ilk koşundan sonra grafik burada oluşacak.";
 "stats.weekOverWeek" = "geçen haftaya göre";
 "stats.trailChart" = "Puanlar";
 "stats.distanceChart" = "Mesafe";
@@ -592,6 +595,17 @@
 "settings.deleteAccount" = "Hesabı Sil";
 "settings.deleteAccountConfirm" = "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.";
 "settings.deleteAccountRecentLogin" = "Güvenlik nedeniyle hesabı silmeden önce yeniden giriş yapman gerekiyor.";
+
+// Account Deletion — re-auth flow (Phase A.5)
+"settings.deleteAccount.reauth.title" = "Silmeyi Onayla";
+"settings.deleteAccount.reauth.warning.title" = "Bu işlem kalıcı";
+"settings.deleteAccount.reauth.warning.body" = "Onaylamak için Apple ile bir kez daha giriş yap. Bunu yaptığında hesabın ve tüm verilerin hemen silinecek.";
+"settings.deleteAccount.reauth.bullet1" = "Profilin, koşuların, paylaşımların, yorumların ve beğenilerin silinir.";
+"settings.deleteAccount.reauth.bullet2" = "Takipçi ve takip ettiklerin listesi kaldırılır.";
+"settings.deleteAccount.reauth.bullet3" = "Apple ile Runpire bağlantın iptal edilir.";
+"settings.deleteAccount.reauth.failed" = "Yeniden kimlik doğrulama başarısız oldu. Tekrar dene.";
+"settings.deleteAccount.deleting" = "Hesabın siliniyor... Bu işlem 30 saniye sürebilir.";
+"settings.deleteAccount.failed" = "Hesabın silinemedi. Daha sonra tekrar dene.";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
 "settings.testing" = "Test";
@@ -713,3 +727,119 @@
 "ai.template.week.focus.exploration" = "Yeni H3 bölgelerine yönelip anti-farm oranını %%70 üstüne çıkar.";
 "ai.template.week.focus.distance" = "Önümüzdeki hafta biraz daha uzun bir koşu ekleyerek mesafe düşüşünü tersine çevir.";
 "ai.template.week.focus.consolidate" = "Bu ritmi koru ve daha yüksek tek koşu %@ tepesini hedefle.";
+
+// MARK: - Social (Phase 1)
+"social.share.title" = "Takipçilerle Paylaş";
+"social.share.subtitle" = "Bu koşunu seni takip edenlere göster.";
+"social.share.shared" = "Takipçilerinle paylaşıldı";
+"social.create.title" = "Yeni Paylaşım";
+"social.create.caption.placeholder" = "Bu koşu hakkında bir şeyler yaz...";
+"social.create.visibility.label" = "Görünürlük";
+"social.create.visibility.followers" = "Takipçilerim";
+"social.create.visibility.public" = "Herkese Açık";
+"social.create.publish" = "Paylaş";
+"social.create.cancel" = "İptal";
+"social.create.error" = "Paylaşım oluşturulamadı. Tekrar dene.";
+"social.create.photos.label" = "Fotoğraflar";
+"social.create.photos.add" = "Ekle";
+"social.create.photos.remove" = "Fotoğrafı kaldır";
+"social.create.photos.hint" = "En fazla 4 fotoğraf. Konum bilgisi yüklemeden önce temizlenir.";
+"social.profile.posts.title" = "Paylaşımlarım";
+"social.profile.posts.empty" = "İlk paylaşımını koşu özeti ekranından yapabilirsin.";
+
+// Social — Phase 2 (Follow + Search)
+"social.search.title" = "Koşucu Bul";
+"social.search.placeholder" = "İsme göre ara";
+"social.search.hint" = "Diğer koşucuları bulmak için isim yaz.";
+"social.search.empty" = "Bu isimle eşleşen koşucu yok.";
+"social.followers" = "Takipçi";
+"social.following" = "Takip";
+"social.follow" = "Takip Et";
+"social.unfollow" = "Takip Ediliyor";
+"social.userprofile.posts.title" = "Son Paylaşımlar";
+"social.userprofile.posts.empty" = "Henüz paylaşım yok.";
+"social.followlist.empty.followers" = "Henüz takipçi yok.";
+"social.followlist.empty.following" = "Henüz kimseyi takip etmiyor.";
+
+// Social — Phase 3 (Feed + Tab)
+"tab.social" = "Sosyal";
+"social.tab.feed" = "Akış";
+"social.tab.leaderboard" = "Liderlik";
+"social.feed.empty.title" = "Akışın henüz boş";
+"social.feed.empty.subtitle" = "Diğer koşucuları takip et, paylaşımlarını burada gör.";
+"social.feed.empty.cta" = "Koşucu Bul";
+
+// Social — Phase 5 (Comments)
+"social.comments.title" = "Yorumlar";
+"social.comments.empty" = "Henüz yorum yok. İlk yorumu sen yap.";
+"social.comments.placeholder" = "Yorum yaz...";
+"social.comments.delete" = "Sil";
+"social.comments.report" = "Yorumu bildir";
+
+// Social — Moderation (Phase A.1)
+"social.post.report" = "Paylaşımı bildir";
+"social.post.delete" = "Paylaşımı sil";
+"social.post.delete.confirm.title" = "Paylaşım silinsin mi?";
+"social.post.delete.confirm.message" = "Bu paylaşım senin akışından ve takipçilerinin akışından kaldırılacak. Geri alınamaz.";
+"social.post.delete.confirm.action" = "Sil";
+
+"report.title.post" = "Paylaşımı bildir";
+"report.title.comment" = "Yorumu bildir";
+"report.title.user" = "Kullanıcıyı bildir";
+"report.prompt" = "Bu içeriğin neden uygunsuz olduğunu seç. Ekibimiz inceleyecek.";
+"report.submit" = "Bildir";
+"report.note.hint" = "Detay ekle (opsiyonel, ama daha hızlı işlememizi sağlar).";
+"report.note.placeholder" = "Durumu kısaca açıkla...";
+"report.reason.spam" = "Spam";
+"report.reason.inappropriate" = "Uygunsuz içerik (çıplaklık, şiddet)";
+"report.reason.harassment" = "Taciz veya nefret söylemi";
+"report.reason.misinformation" = "Yanıltıcı veya sahte bilgi";
+"report.reason.other" = "Diğer";
+"report.error.duplicate" = "Bu içeriği zaten bildirmişsin. Üzerindeyiz.";
+"report.error.generic" = "Bildirim gönderilemedi. Tekrar dene.";
+
+// Social — Block (Phase A.2)
+"social.user.report" = "Kullanıcıyı bildir";
+"social.block.action" = "Engelle";
+"social.unblock.action" = "Engeli kaldır";
+"social.block.confirm.title" = "%@ engellensin mi?";
+"social.block.confirm.message" = "Birbirinizin paylaşımlarını ve profilini göremezsiniz. İstediğin zaman Ayarlar'dan kaldırabilirsin.";
+"social.unblock.confirm.title" = "%@ kullanıcısının engeli kaldırılsın mı?";
+"social.block.overlay.byme" = "Bu kullanıcıyı engelledin";
+"social.block.overlay.byme.subtitle" = "Paylaşımları ve istatistikleri gizli. Yanlışlıkla yaptıysan engeli kaldırabilirsin.";
+"social.block.overlay.byother" = "Bu kullanıcının içeriği gösterilmiyor";
+
+"settings.privacy" = "Gizlilik ve Güvenlik";
+"settings.blockedUsers" = "Engellenen Kullanıcılar";
+"settings.blockedUsers.empty.title" = "Engellenen kullanıcı yok";
+"settings.blockedUsers.empty.subtitle" = "Bir kullanıcıyı engellediğinde burada görünür.";
+
+// Privacy Zones (Phase B)
+"settings.privacyZones" = "Gizli Bölgeler";
+"privacy.zones.explainer" = "Ev veya iş gibi yerlerin çevresindeki koşu başlangıç-bitiş noktalarını gizler. Sen kendi rotanı tam görmeye devam edersin — başkalarına gösterilen kısım maskelenir.";
+"privacy.zones.empty.title" = "Henüz gizli bölge yok";
+"privacy.zones.empty.subtitle" = "Ev ve iş konumlarını haritadan gizlemek için bölge ekle.";
+"privacy.zones.add" = "Bölge Ekle";
+"privacy.zones.maxHint" = "En fazla %@ bölge.";
+"privacy.zones.maxReached" = "%@ bölge sınırına ulaştın. Yeni eklemek için birini sil.";
+"privacy.zones.unnamed" = "İsimsiz bölge";
+"privacy.zones.radius" = "%@ m yarıçap";
+"privacy.zones.radius.label" = "Yarıçap";
+"privacy.zones.name.label" = "İsim";
+"privacy.zones.name.placeholder" = "Ev, iş, vb.";
+"privacy.zones.useMyLocation" = "Mevcut konumumu kullan";
+"privacy.zones.add.title" = "Yeni Gizli Bölge";
+"privacy.zones.edit.title" = "Gizli Bölgeyi Düzenle";
+"privacy.zones.delete.confirm" = "%@ silinsin mi?";
+"privacy.zones.banner.title" = "%@ gizli bölgen uygulanacak";
+"privacy.zones.banner.subtitle" = "Gizli bölgelerinin içindeki rota noktaları bu paylaşımda başkalarına gösterilmez.";
+
+// Legal (Phase A.3)
+"settings.legal" = "Yasal";
+"legal.communityGuidelines.title" = "Topluluk Kuralları";
+"legal.termsOfUse.title" = "Kullanım Şartları";
+"legal.acceptance.title" = "Paylaşmadan Önce";
+"legal.acceptance.heading" = "Herkes için güvenli bir topluluk";
+"legal.acceptance.body" = "Runpire, koşucuların bir araya geldiği bir topluluk. Deneyimi saygılı ve güvenli tutmak için paylaşım yapmadan önce Topluluk Kuralları ve Kullanım Şartlarımızı incele.";
+"legal.acceptance.checkbox" = "Topluluk Kurallarını ve Kullanım Şartlarını okudum, kabul ediyorum.";
+"legal.acceptance.continue" = "Kabul Et";

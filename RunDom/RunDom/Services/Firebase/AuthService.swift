@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFunctions
 import AuthenticationServices
 import CryptoKit
 
@@ -10,6 +11,13 @@ final class AuthService: ObservableObject {
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
     private var currentNonce: String?
+
+    // Captured during Apple Sign In / re-auth. One-time use, expires within
+    // ~5 minutes. Consumed by callDeleteAccountCloudFunction to revoke the
+    // Apple identity on the server side, then cleared.
+    private(set) var lastAppleAuthorizationCode: String?
+
+    private lazy var functions: Functions = Functions.functions(region: "europe-west1")
 
     init() {
         authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
@@ -42,6 +50,13 @@ final class AuthService: ObservableObject {
             throw AuthError.invalidCredential
         }
 
+        // Capture the authorizationCode if Apple provided one — required for
+        // account deletion (Apple token revocation).
+        if let codeData = appleIDCredential.authorizationCode,
+           let codeString = String(data: codeData, encoding: .utf8) {
+            lastAppleAuthorizationCode = codeString
+        }
+
         let credential = OAuthProvider.appleCredential(
             withIDToken: idTokenString,
             rawNonce: nonce,
@@ -50,6 +65,34 @@ final class AuthService: ObservableObject {
 
         let result = try await Auth.auth().signIn(with: credential)
         AppLogger.auth.info("Apple Sign In successful: \(result.user.uid)")
+    }
+
+    /// Re-authenticates the current user with a fresh Apple authorization.
+    /// Used before account deletion when the existing session is too old.
+    func reauthenticateWithApple(authorization: ASAuthorization) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.noUser
+        }
+        guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let appleIDToken = appleIDCredential.identityToken,
+              let idTokenString = String(data: appleIDToken, encoding: .utf8),
+              let nonce = currentNonce else {
+            throw AuthError.invalidCredential
+        }
+
+        if let codeData = appleIDCredential.authorizationCode,
+           let codeString = String(data: codeData, encoding: .utf8) {
+            lastAppleAuthorizationCode = codeString
+        }
+
+        let credential = OAuthProvider.appleCredential(
+            withIDToken: idTokenString,
+            rawNonce: nonce,
+            fullName: appleIDCredential.fullName
+        )
+
+        _ = try await user.reauthenticate(with: credential)
+        AppLogger.auth.info("Apple reauthentication successful")
     }
 
     // MARK: - Google Sign In
@@ -107,12 +150,35 @@ final class AuthService: ObservableObject {
         return Date().timeIntervalSince(authTime) > maxAge
     }
 
+    /// Calls the `deleteAccount` Cloud Function which cascades through all
+    /// Firestore + Storage data, revokes the Apple Sign In token, and finally
+    /// deletes the Firebase Auth user via the Admin SDK. The client does NOT
+    /// call `user.delete()` directly — the Cloud Function handles that with
+    /// proper cleanup.
     func deleteAccount() async throws {
-        guard let user = Auth.auth().currentUser else {
+        guard Auth.auth().currentUser != nil else {
             throw AuthError.noUser
         }
-        try await user.delete()
-        AppLogger.auth.info("User account deleted")
+
+        var payload: [String: Any] = [:]
+        if let code = lastAppleAuthorizationCode {
+            payload["appleAuthorizationCode"] = code
+        }
+
+        _ = try await functions.httpsCallable("deleteAccount").call(payload)
+
+        // Token is single-use; clear it so a retry forces a fresh re-auth.
+        lastAppleAuthorizationCode = nil
+
+        // Server has already deleted the auth user; sign out locally to clear
+        // cached credentials / listeners.
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            AppLogger.auth.warning("Local sign out after deletion failed: \(error.localizedDescription)")
+        }
+
+        AppLogger.auth.info("Account deletion completed")
     }
 
     // MARK: - Helpers

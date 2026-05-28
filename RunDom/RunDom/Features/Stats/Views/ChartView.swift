@@ -18,6 +18,7 @@ struct TrailChartView: View {
     @Binding var selectedPoint: ChartDataPoint?
 
     private var isMonthly: Bool { data.count > 7 }
+    private var hasRealData: Bool { data.contains { $0.value > 0 } }
 
     init(
         title: String,
@@ -45,7 +46,7 @@ struct TrailChartView: View {
         VStack(alignment: .leading, spacing: 14) {
             chartHeader
 
-            if data.isEmpty {
+            if !hasRealData {
                 emptyState
             } else {
                 chart
@@ -75,7 +76,7 @@ struct TrailChartView: View {
 
             Spacer(minLength: 0)
 
-            if let selectedPoint {
+            if let selectedPoint, hasRealData {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(valueFormatter(selectedPoint.value))
                         .font(.subheadline.bold().monospacedDigit())
@@ -96,9 +97,11 @@ struct TrailChartView: View {
     }
 
     private var emptyState: some View {
-        Text("stats.noData".localized)
+        Text("stats.chart.empty".localized)
             .font(.caption)
             .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 168)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)

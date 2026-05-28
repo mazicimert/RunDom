@@ -88,6 +88,38 @@ struct SettingsView: View {
                     }
                 }
 
+                // Privacy & Safety
+                Section("settings.privacy".localized) {
+                    NavigationLink {
+                        PrivacyZonesView()
+                            .environmentObject(appState)
+                    } label: {
+                        Label("settings.privacyZones".localized, systemImage: "shield.lefthalf.filled")
+                    }
+
+                    NavigationLink {
+                        BlockedUsersView()
+                            .environmentObject(appState)
+                    } label: {
+                        Label("settings.blockedUsers".localized, systemImage: "person.crop.circle.badge.xmark")
+                    }
+                }
+
+                // Legal
+                Section("settings.legal".localized) {
+                    NavigationLink {
+                        LegalDocumentView(document: .communityGuidelines)
+                    } label: {
+                        Label("legal.communityGuidelines.title".localized, systemImage: "person.3.fill")
+                    }
+
+                    NavigationLink {
+                        LegalDocumentView(document: .termsOfUse)
+                    } label: {
+                        Label("legal.termsOfUse.title".localized, systemImage: "doc.text.fill")
+                    }
+                }
+
                 // Account
                 Section("settings.account".localized) {
                     Button(role: .destructive) {
@@ -150,16 +182,26 @@ struct SettingsView: View {
             }
             .alert("settings.deleteAccount".localized, isPresented: $viewModel.showDeleteAccountAlert) {
                 Button("common.delete".localized, role: .destructive) {
-                    Task {
-                        let success = await viewModel.deleteAccount()
-                        if success {
-                            dismiss()
-                        }
-                    }
+                    viewModel.startAccountDeletion()
                 }
                 Button("common.cancel".localized, role: .cancel) {}
             } message: {
                 Text("settings.deleteAccountConfirm".localized)
+            }
+            .sheet(isPresented: $viewModel.showDeleteReauthSheet) {
+                DeleteAccountReauthSheet(
+                    authService: viewModel.authServicePublic,
+                    onSucceeded: {
+                        await viewModel.performDeletionAfterReauth()
+                    },
+                    onFinished: { success in
+                        if success {
+                            // AppState observes the auth listener and routes
+                            // back to onboarding; just close Settings too.
+                            dismiss()
+                        }
+                    }
+                )
             }
             .alert(
                 "common.error".localized,

@@ -150,14 +150,22 @@ final class StatsViewModel: ObservableObject {
     }
 
     var trailDeltaSummary: StatsDeltaSummary {
-        buildDeltaSummary(current: totalTrail, previous: previousPeriodTrailTotal, hasPreviousData: !previousPeriodRuns.isEmpty)
+        let proratedRuns = previousPeriodRunsProrated
+        return buildDeltaSummary(
+            current: totalTrail,
+            previous: proratedRuns.reduce(0) { $0 + $1.trail },
+            hasCurrentActivity: !filteredRuns.isEmpty,
+            hasPreviousData: !proratedRuns.isEmpty
+        )
     }
 
     var distanceDeltaSummary: StatsDeltaSummary {
-        buildDeltaSummary(
+        let proratedRuns = previousPeriodRunsProrated
+        return buildDeltaSummary(
             current: totalDistanceKm,
-            previous: previousPeriodDistanceTotal / 1000.0,
-            hasPreviousData: !previousPeriodRuns.isEmpty
+            previous: proratedRuns.reduce(0) { $0 + $1.distance } / 1000.0,
+            hasCurrentActivity: !filteredRuns.isEmpty,
+            hasPreviousData: !proratedRuns.isEmpty
         )
     }
 
@@ -227,7 +235,25 @@ final class StatsViewModel: ObservableObject {
         return runs.filter { previousPeriodInterval.contains($0.startDate) }
     }
 
-    private func buildDeltaSummary(current: Double, previous: Double, hasPreviousData: Bool) -> StatsDeltaSummary {
+    private var previousPeriodRunsProrated: [RunSession] {
+        guard let previousInterval = previousPeriodInterval,
+              let currentStart = currentPeriodInterval?.start else { return [] }
+        let elapsed = Date().timeIntervalSince(currentStart)
+        let cutoff = previousInterval.start.addingTimeInterval(elapsed)
+        return runs.filter { $0.startDate >= previousInterval.start && $0.startDate < cutoff }
+    }
+
+    private func buildDeltaSummary(
+        current: Double,
+        previous: Double,
+        hasCurrentActivity: Bool,
+        hasPreviousData: Bool
+    ) -> StatsDeltaSummary {
+        guard hasCurrentActivity else {
+            let key = period == .thisWeek ? "stats.delta.noActivityThisWeek" : "stats.delta.noActivityThisMonth"
+            return StatsDeltaSummary(text: key.localized, tone: .unavailable)
+        }
+
         guard hasPreviousData else {
             return StatsDeltaSummary(
                 text: "stats.delta.noComparison".localized,
@@ -236,12 +262,6 @@ final class StatsViewModel: ObservableObject {
         }
 
         if previous == 0 {
-            if current == 0 {
-                return StatsDeltaSummary(
-                    text: "stats.delta.noComparison".localized,
-                    tone: .neutral
-                )
-            }
             return StatsDeltaSummary(
                 text: "stats.delta.newActivity".localized,
                 tone: .positive

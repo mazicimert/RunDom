@@ -484,6 +484,9 @@
 "stats.delta.previousMonth" = "%@ vs last month";
 "stats.delta.noComparison" = "Not enough data to compare";
 "stats.delta.newActivity" = "First activity this period";
+"stats.delta.noActivityThisWeek" = "No activity this week yet";
+"stats.delta.noActivityThisMonth" = "No activity this month yet";
+"stats.chart.empty" = "Your first run this period will build this chart.";
 "stats.weekOverWeek" = "vs last week";
 "stats.trailChart" = "Points";
 "stats.distanceChart" = "Distance";
@@ -592,6 +595,17 @@
 "settings.deleteAccount" = "Delete Account";
 "settings.deleteAccountConfirm" = "This action cannot be undone. All your data will be permanently deleted.";
 "settings.deleteAccountRecentLogin" = "For security, you need to sign in again before deleting your account.";
+
+// Account Deletion — re-auth flow (Phase A.5)
+"settings.deleteAccount.reauth.title" = "Confirm Deletion";
+"settings.deleteAccount.reauth.warning.title" = "This is permanent";
+"settings.deleteAccount.reauth.warning.body" = "Sign in with Apple one more time to confirm. Once you do, your account and all data will be deleted immediately.";
+"settings.deleteAccount.reauth.bullet1" = "Your profile, runs, posts, comments and likes will be deleted.";
+"settings.deleteAccount.reauth.bullet2" = "Your followers and following lists will be removed.";
+"settings.deleteAccount.reauth.bullet3" = "Your Apple Sign In with Runpire will be revoked.";
+"settings.deleteAccount.reauth.failed" = "Re-authentication failed. Try again.";
+"settings.deleteAccount.deleting" = "Deleting your account... This may take up to 30 seconds.";
+"settings.deleteAccount.failed" = "Could not delete your account. Try again later.";
 "settings.about" = "About";
 "settings.version" = "Version";
 "settings.testing" = "Testing";
@@ -713,3 +727,119 @@
 "ai.template.week.focus.exploration" = "Aim for fresh H3 zones to push the anti-farm ratio above 70%%.";
 "ai.template.week.focus.distance" = "Add one slightly longer run next week to reverse the distance dip.";
 "ai.template.week.focus.consolidate" = "Hold this rhythm and aim for a higher single-run %@ peak.";
+
+// MARK: - Social (Phase 1)
+"social.share.title" = "Share with Followers";
+"social.share.subtitle" = "Show this run to people who follow you.";
+"social.share.shared" = "Shared with your followers";
+"social.create.title" = "New Post";
+"social.create.caption.placeholder" = "Say something about this run...";
+"social.create.visibility.label" = "Visibility";
+"social.create.visibility.followers" = "Followers";
+"social.create.visibility.public" = "Public";
+"social.create.publish" = "Publish";
+"social.create.cancel" = "Cancel";
+"social.create.error" = "Could not create post. Try again.";
+"social.create.photos.label" = "Photos";
+"social.create.photos.add" = "Add";
+"social.create.photos.remove" = "Remove photo";
+"social.create.photos.hint" = "Up to 4 photos. Location data is removed before upload.";
+"social.profile.posts.title" = "My Posts";
+"social.profile.posts.empty" = "Share your first run from the run summary screen.";
+
+// Social — Phase 2 (Follow + Search)
+"social.search.title" = "Find Runners";
+"social.search.placeholder" = "Search by name";
+"social.search.hint" = "Type a name to discover other runners.";
+"social.search.empty" = "No runners match this name.";
+"social.followers" = "Followers";
+"social.following" = "Following";
+"social.follow" = "Follow";
+"social.unfollow" = "Following";
+"social.userprofile.posts.title" = "Recent Posts";
+"social.userprofile.posts.empty" = "No posts yet.";
+"social.followlist.empty.followers" = "No followers yet.";
+"social.followlist.empty.following" = "Not following anyone yet.";
+
+// Social — Phase 3 (Feed + Tab)
+"tab.social" = "Social";
+"social.tab.feed" = "Feed";
+"social.tab.leaderboard" = "Leaderboard";
+"social.feed.empty.title" = "Your feed is empty";
+"social.feed.empty.subtitle" = "Follow other runners to see their posts here.";
+"social.feed.empty.cta" = "Find Runners";
+
+// Social — Phase 5 (Comments)
+"social.comments.title" = "Comments";
+"social.comments.empty" = "No comments yet. Be the first.";
+"social.comments.placeholder" = "Add a comment...";
+"social.comments.delete" = "Delete";
+"social.comments.report" = "Report comment";
+
+// Social — Moderation (Phase A.1)
+"social.post.report" = "Report post";
+"social.post.delete" = "Delete post";
+"social.post.delete.confirm.title" = "Delete post?";
+"social.post.delete.confirm.message" = "This post will be removed from your feed and your followers' feeds. This cannot be undone.";
+"social.post.delete.confirm.action" = "Delete";
+
+"report.title.post" = "Report post";
+"report.title.comment" = "Report comment";
+"report.title.user" = "Report user";
+"report.prompt" = "Tell us why this content is a problem. Our team will review it.";
+"report.submit" = "Report";
+"report.note.hint" = "Add details (optional, but it helps us act faster).";
+"report.note.placeholder" = "Describe the issue...";
+"report.reason.spam" = "Spam";
+"report.reason.inappropriate" = "Inappropriate content (nudity, violence)";
+"report.reason.harassment" = "Harassment or hate speech";
+"report.reason.misinformation" = "False or misleading";
+"report.reason.other" = "Other";
+"report.error.duplicate" = "You already reported this. We're on it.";
+"report.error.generic" = "Could not submit your report. Try again.";
+
+// Social — Block (Phase A.2)
+"social.user.report" = "Report user";
+"social.block.action" = "Block";
+"social.unblock.action" = "Unblock";
+"social.block.confirm.title" = "Block %@?";
+"social.block.confirm.message" = "You won't see each other's posts or profile. You can unblock anytime from Settings.";
+"social.unblock.confirm.title" = "Unblock %@?";
+"social.block.overlay.byme" = "You blocked this user";
+"social.block.overlay.byme.subtitle" = "Posts and stats are hidden. Tap unblock if this was a mistake.";
+"social.block.overlay.byother" = "This user's content isn't available";
+
+"settings.privacy" = "Privacy & Safety";
+"settings.blockedUsers" = "Blocked Users";
+"settings.blockedUsers.empty.title" = "No blocked users";
+"settings.blockedUsers.empty.subtitle" = "When you block someone, they'll appear here.";
+
+// Privacy Zones (Phase B)
+"settings.privacyZones" = "Privacy Zones";
+"privacy.zones.explainer" = "Hide the start and end of your runs around places like home and work. You'll still see your own route in full — only what others see is masked.";
+"privacy.zones.empty.title" = "No privacy zones yet";
+"privacy.zones.empty.subtitle" = "Add zones to keep your home and work locations off the map.";
+"privacy.zones.add" = "Add Zone";
+"privacy.zones.maxHint" = "Up to %@ zones.";
+"privacy.zones.maxReached" = "You've reached the limit of %@ zones. Remove one to add another.";
+"privacy.zones.unnamed" = "Unnamed zone";
+"privacy.zones.radius" = "%@ m radius";
+"privacy.zones.radius.label" = "Radius";
+"privacy.zones.name.label" = "Name";
+"privacy.zones.name.placeholder" = "Home, Work, etc.";
+"privacy.zones.useMyLocation" = "Use my current location";
+"privacy.zones.add.title" = "New Privacy Zone";
+"privacy.zones.edit.title" = "Edit Privacy Zone";
+"privacy.zones.delete.confirm" = "Delete %@?";
+"privacy.zones.banner.title" = "%@ privacy zone(s) active";
+"privacy.zones.banner.subtitle" = "Route points inside your zones won't be shown to others on this post.";
+
+// Legal (Phase A.3)
+"settings.legal" = "Legal";
+"legal.communityGuidelines.title" = "Community Guidelines";
+"legal.termsOfUse.title" = "Terms of Use";
+"legal.acceptance.title" = "Before You Post";
+"legal.acceptance.heading" = "A safe community for everyone";
+"legal.acceptance.body" = "Runpire is a community of runners. To keep the experience respectful and safe, please review our Community Guidelines and Terms of Use before posting.";
+"legal.acceptance.checkbox" = "I have read and accept the Community Guidelines and Terms of Use.";
+"legal.acceptance.continue" = "Accept";

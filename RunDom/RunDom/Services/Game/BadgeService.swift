@@ -23,7 +23,6 @@ final class BadgeService {
         guard let user = try await firestoreService.getUser(id: userId) else { return }
 
         let runs = try await firestoreService.getAllRuns(userId: userId)
-        let dropzoneClaimCount = try await firestoreService.getClaimedDropzoneCount(userId: userId)
         let existingBadges = try await firestoreService.getBadges(userId: userId)
 
         let longestRunDistance = runs.map(\.distance).max() ?? 0
@@ -42,8 +41,8 @@ final class BadgeService {
             Self.BadgeId.firstTerritory: Double(totalTerritories),
             Self.BadgeId.territory25: Double(totalTerritories),
             Self.BadgeId.territory100: Double(totalTerritories),
-            Self.BadgeId.firstDropzone: Double(dropzoneClaimCount),
-            Self.BadgeId.dropzone5: Double(dropzoneClaimCount),
+            Self.BadgeId.firstDropzone: 0,
+            Self.BadgeId.dropzone5: 0,
             Self.BadgeId.streak7: Double(streakDays),
             Self.BadgeId.streak30: Double(streakDays),
         ]

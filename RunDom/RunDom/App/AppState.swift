@@ -98,6 +98,13 @@ final class AppState: ObservableObject {
                 if isAuth {
                     Task { await self.loadCurrentUser() }
                 } else {
+                    // Tear down listeners that hold a uid before clearing
+                    // currentUser. Without this, listeners briefly query
+                    // with a deleted/signed-out uid and Firestore floods the
+                    // logs with `Missing or insufficient permissions`.
+                    BlockedUsersStore.shared.stop()
+                    PrivacyZonesStore.shared.stop()
+
                     self.currentUser = nil
                     self.shouldShowWelcome = false
                     self.isLoading = false
@@ -118,8 +125,9 @@ final class AppState: ObservableObject {
             if let user = try await firestoreService.getUser(id: firebaseUser.uid) {
                 // Firestore is the source of truth for user profile data
                 let syncedUser = try await firestoreService.syncUserSeasonState(user)
-                currentUser = syncedUser
-                requiresProfileCompletion = Self.isDefaultDisplayName(syncedUser.displayName)
+                let migratedUser = (try? await firestoreService.migrateUserSocialFieldsIfNeeded(syncedUser)) ?? syncedUser
+                currentUser = migratedUser
+                requiresProfileCompletion = Self.isDefaultDisplayName(migratedUser.displayName)
             } else {
                 // First-time sign in — create user document
                 let displayName = firebaseUser.displayName ?? ""
@@ -149,6 +157,14 @@ final class AppState: ObservableObject {
 
             Task { await persistFCMTokenAndLanguage(userId: firebaseUser.uid) }
             Task { await refreshWeeklyWidget(userId: firebaseUser.uid) }
+
+            // Start observing the user's blocked / blockedBy sets so feed,
+            // search and profile views can filter reactively.
+            BlockedUsersStore.shared.start(for: firebaseUser.uid)
+
+            // Privacy zones live cache — consumed synchronously by PostService
+            // when masking route previews.
+            PrivacyZonesStore.shared.start(for: firebaseUser.uid)
         } catch {
             AppLogger.firebase.error("Failed to load user: \(error.localizedDescription)")
         }
@@ -192,6 +208,9 @@ final class AppState: ObservableObject {
         if let userId = currentUser?.id {
             Task { try? await firestoreService.clearFCMToken(userId: userId) }
         }
+        // BlockedUsersStore.shared.stop() runs via observeAuthState() once
+        // isAuthenticated flips to false — keeping it in one place avoids
+        // drift between this and the account-deletion path.
         do {
             try authService.signOut()
             currentUser = nil

@@ -484,6 +484,9 @@
 "stats.delta.previousMonth" = "%@ ggü. letztem Monat";
 "stats.delta.noComparison" = "Nicht genug Daten zum Vergleich";
 "stats.delta.newActivity" = "Erste Aktivität in diesem Zeitraum";
+"stats.delta.noActivityThisWeek" = "Diese Woche noch keine Aktivität";
+"stats.delta.noActivityThisMonth" = "Diesen Monat noch keine Aktivität";
+"stats.chart.empty" = "Dein erster Lauf in diesem Zeitraum wird dieses Diagramm erstellen.";
 "stats.weekOverWeek" = "ggü. letzter Woche";
 "stats.trailChart" = "Punkte";
 "stats.distanceChart" = "Distanz";
@@ -713,3 +716,46 @@
 "ai.template.week.focus.exploration" = "Ziele auf frische H3-Zonen, um die Anti-Farm-Quote über 70%% zu drücken.";
 "ai.template.week.focus.distance" = "Füge nächste Woche einen leicht längeren Lauf hinzu, um den Distanz-Rückgang umzukehren.";
 "ai.template.week.focus.consolidate" = "Halte diesen Rhythmus und ziele auf einen noch höheren Einzel-Spitzenwert von %@.";
+
+// MARK: - Social (Phase 1)
+"social.share.title" = "Mit Followern teilen";
+"social.share.subtitle" = "Zeig diesen Lauf deinen Followern.";
+"social.share.shared" = "Mit deinen Followern geteilt";
+"social.create.title" = "Neuer Beitrag";
+"social.create.caption.placeholder" = "Sag etwas zu diesem Lauf...";
+"social.create.visibility.label" = "Sichtbarkeit";
+"social.create.visibility.followers" = "Follower";
+"social.create.visibility.public" = "Öffentlich";
+"social.create.publish" = "Veröffentlichen";
+"social.create.cancel" = "Abbrechen";
+"social.create.error" = "Beitrag konnte nicht erstellt werden. Versuche es erneut.";
+"social.profile.posts.title" = "Meine Beiträge";
+"social.profile.posts.empty" = "Teile deinen ersten Lauf vom Lauf-Zusammenfassungs-Bildschirm aus.";
+
+// Social — Phase 2 (Follow + Search)
+"social.search.title" = "Läufer Finden";
+"social.search.placeholder" = "Nach Name suchen";
+"social.search.hint" = "Gib einen Namen ein, um andere Läufer zu entdecken.";
+"social.search.empty" = "Keine Läufer mit diesem Namen.";
+"social.followers" = "Follower";
+"social.following" = "Folge ich";
+"social.follow" = "Folgen";
+"social.unfollow" = "Folge ich";
+"social.userprofile.posts.title" = "Letzte Beiträge";
+"social.userprofile.posts.empty" = "Noch keine Beiträge.";
+"social.followlist.empty.followers" = "Noch keine Follower.";
+"social.followlist.empty.following" = "Folgt noch niemandem.";
+
+// Social — Phase 3 (Feed + Tab)
+"tab.social" = "Sozial";
+"social.tab.feed" = "Feed";
+"social.tab.leaderboard" = "Bestenliste";
+"social.feed.empty.title" = "Dein Feed ist leer";
+"social.feed.empty.subtitle" = "Folge anderen Läufern, um ihre Beiträge hier zu sehen.";
+"social.feed.empty.cta" = "Läufer Finden";
+
+// Social — Phase 5 (Comments)
+"social.comments.title" = "Kommentare";
+"social.comments.empty" = "Noch keine Kommentare. Sei der Erste.";
+"social.comments.placeholder" = "Kommentar hinzufügen...";
+"social.comments.delete" = "Löschen";

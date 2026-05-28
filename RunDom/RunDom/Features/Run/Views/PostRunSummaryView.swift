@@ -13,6 +13,8 @@ struct PostRunSummaryView: View {
     @State private var showReviewSheet = false
     @State private var reviewBinding: RunReview?
     @State private var showNotificationPrompt = false
+    @State private var showCreatePost = false
+    @State private var hasSharedToFollowers = false
     let onDismiss: () -> Void
 
     init(session: RunSession, onDismiss: @escaping () -> Void) {
@@ -31,6 +33,8 @@ struct PostRunSummaryView: View {
                         heroSection
                         routeSummarySection
                         statsGrid
+
+                        shareWithFollowersSection
 
                         if showsAchievementsSection {
                             achievementsSection
@@ -103,6 +107,17 @@ struct PostRunSummaryView: View {
                 )
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showCreatePost) {
+                if let user = appState.currentUser {
+                    CreatePostSheet(
+                        session: viewModel.session,
+                        author: user,
+                        onPublished: { _ in
+                            hasSharedToFollowers = true
+                        }
+                    )
+                }
             }
             .task {
                 if let user = appState.currentUser {
@@ -548,6 +563,54 @@ struct PostRunSummaryView: View {
             .disabled(viewModel.isSaving)
         }
         .padding(.top, 4)
+    }
+
+    @ViewBuilder
+    private var shareWithFollowersSection: some View {
+        if viewModel.isSaved {
+            if hasSharedToFollowers {
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+                    Text("social.share.shared".localized)
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                }
+                .summarySurface(fill: summaryCardFill)
+            } else {
+                Button {
+                    showCreatePost = true
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "person.2.fill")
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                            .frame(width: 42, height: 42)
+                            .background(Color.accentColor, in: Circle())
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("social.share.title".localized)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("social.share.subtitle".localized)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 12)
+
+                        Image(systemName: "chevron.right")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .summarySurface(fill: summaryCardFill)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     private var bottomActionBar: some View {

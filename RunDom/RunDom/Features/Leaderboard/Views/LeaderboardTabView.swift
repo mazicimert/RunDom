@@ -49,7 +49,6 @@ struct LeaderboardTabView: View {
                 }
             }
         }
-        .navigationTitle("tab.leaderboard".localized)
         .task {
             await viewModel.loadLeaderboard(currentUser: appState.currentUser)
         }

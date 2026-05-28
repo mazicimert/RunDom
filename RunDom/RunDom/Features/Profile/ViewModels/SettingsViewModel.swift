@@ -14,6 +14,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var locationAuthStatus: CLAuthorizationStatus = .notDetermined
     @Published var showSignOutAlert = false
     @Published var showDeleteAccountAlert = false
+    @Published var showDeleteReauthSheet = false
     @Published var isDeleting = false
     @Published var errorMessage: String?
     @Published var isVoiceFeedbackEnabled: Bool {
@@ -43,6 +44,10 @@ final class SettingsViewModel: ObservableObject {
     private let offlineStorageService: OfflineStorageService
     private weak var locationManager: LocationManager?
     private var cancellables = Set<AnyCancellable>()
+
+    // Exposed for the re-auth sheet which needs the same AuthService instance
+    // so the captured Apple authorizationCode survives across views.
+    var authServicePublic: AuthService { authService }
 
     // MARK: - Init
 
@@ -176,23 +181,25 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Account
 
-    func deleteAccount() async -> Bool {
-        guard let userId = authService.currentUser?.uid else {
-            errorMessage = "error.generic".localized
-            return false
-        }
+    /// Step 1 of deletion: user confirmed the destructive alert. We open the
+    /// re-auth sheet so the user signs in with Apple again — this gives us a
+    /// fresh authorizationCode for server-side Apple token revocation and
+    /// satisfies Firebase's "requires recent login" guarantee.
+    func startAccountDeletion() {
+        showDeleteReauthSheet = true
+    }
 
+    /// Step 2 of deletion: called by the re-auth sheet after a successful
+    /// Apple Sign In re-authentication. Triggers the Cloud Function which
+    /// cascades through Firestore, Storage, Apple token revocation and the
+    /// Firebase Auth record itself.
+    func performDeletionAfterReauth() async -> Bool {
         isDeleting = true
         defer { isDeleting = false }
 
         do {
-            if try await authService.requiresRecentSignInForAccountDeletion() {
-                errorMessage = "settings.deleteAccountRecentLogin".localized
-                return false
-            }
-
-            _ = try await realtimeDBService.deleteTerritoriesOwned(by: userId)
-            try await firestoreService.deleteUserAccountData(userId: userId)
+            // Clear local-only state ahead of the server call so the offline
+            // cache doesn't outlive the account.
             try? offlineStorageService.clearAll()
             try await authService.deleteAccount()
             return true

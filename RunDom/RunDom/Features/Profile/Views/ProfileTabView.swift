@@ -22,6 +22,8 @@ struct ProfileTabView: View {
 
                 profileHeader
 
+                followCountersRow
+
                 statsSection
 
                 latestRunSection
@@ -31,6 +33,8 @@ struct ProfileTabView: View {
                 } else if resolvedUser != nil {
                     streakMotivationSection
                 }
+
+                myPostsSection
 
                 badgesSection
             }
@@ -45,6 +49,14 @@ struct ProfileTabView: View {
                     Image(systemName: "gearshape")
                 }
                 .accessibilityLabel("profile.settings".localized)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.presentedSheet = .userSearch
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .accessibilityLabel("social.search.title".localized)
             }
         }
         .refreshable {
@@ -61,12 +73,14 @@ struct ProfileTabView: View {
             if let newUser {
                 if viewModel.user?.id != newUser.id {
                     viewModel.latestRun = nil
+                    viewModel.posts = []
                 }
                 viewModel.user = newUser
             } else {
                 viewModel.user = nil
                 viewModel.badges = []
                 viewModel.latestRun = nil
+                viewModel.posts = []
             }
         }
     }
@@ -173,6 +187,50 @@ struct ProfileTabView: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityHint("profile.level.sheet.accessibilityHint".localized)
+    }
+
+    // MARK: - Follow Counters Row
+
+    @ViewBuilder
+    private var followCountersRow: some View {
+        if let user = resolvedUser {
+            HStack(spacing: 12) {
+                NavigationLink {
+                    FollowListView(userId: user.id, mode: .followers)
+                        .environmentObject(appState)
+                } label: {
+                    followCounterCard(
+                        value: user.followersCount ?? 0,
+                        label: "social.followers".localized
+                    )
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink {
+                    FollowListView(userId: user.id, mode: .following)
+                        .environmentObject(appState)
+                } label: {
+                    followCounterCard(
+                        value: user.followingCount ?? 0,
+                        label: "social.following".localized
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .screenPadding()
+        }
+    }
+
+    private func followCounterCard(value: Int, label: String) -> some View {
+        VStack(spacing: 4) {
+            Text("\(value)")
+                .font(.title3.bold())
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .cardStyle()
     }
 
     // MARK: - Stats Section
@@ -321,6 +379,78 @@ struct ProfileTabView: View {
         }
         .cardStyle()
         .screenPadding()
+    }
+
+    // MARK: - My Posts Section
+
+    private var myPostsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("social.profile.posts.title".localized)
+                    .font(.headline)
+                Spacer()
+                if !viewModel.posts.isEmpty {
+                    Text("\(viewModel.posts.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if viewModel.posts.isEmpty {
+                Text("social.profile.posts.empty".localized)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.vertical, 16)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(viewModel.posts) { post in
+                        profilePostRow(post)
+                    }
+                }
+            }
+        }
+        .screenPadding()
+    }
+
+    private func profilePostRow(_ post: Post) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill((Color(hex: post.authorColor) ?? Color.accentColor).opacity(0.18))
+                    .frame(width: 42, height: 42)
+                Image(systemName: "figure.run")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color(hex: post.authorColor) ?? .accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(post.distance.formattedDistanceFromMeters)
+                        .font(.subheadline.weight(.semibold))
+                    Text("•")
+                        .foregroundStyle(.secondary)
+                    Text("trail.points".localized(with: post.trail.formattedTrail))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
+
+                if let note = post.note, !note.isEmpty {
+                    Text(note)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            Text(post.createdAt.relativeFormatted())
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .cardStyle()
     }
 
     // MARK: - Badges Section

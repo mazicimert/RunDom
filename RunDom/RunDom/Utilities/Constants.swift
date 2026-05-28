@@ -85,6 +85,8 @@ enum AppConstants {
         static let aiDisclosureAccepted = "aiDisclosureAccepted"
         static let pendingRunnerProfile = "pendingRunnerProfile"
         static let pendingUserColor = "pendingUserColor"
+        static let acceptedCommunityGuidelinesAt = "acceptedCommunityGuidelinesAt"
+        static let acceptedTermsVersion = "acceptedTermsVersion"
     }
 
     // MARK: - Animation Durations
@@ -112,5 +114,13 @@ enum AppConstants {
         static let smallCornerRadius: CGFloat = 8
         static let cardPadding: CGFloat = 16
         static let screenPadding: CGFloat = 20
+    }
+
+    // MARK: - Post Photos
+
+    enum PostPhoto {
+        static let maxCount = 4
+        static let maxDimension: CGFloat = 2048
+        static let jpegQuality: CGFloat = 0.7
     }
 }

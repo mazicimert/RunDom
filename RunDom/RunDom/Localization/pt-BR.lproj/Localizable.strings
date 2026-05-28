@@ -484,6 +484,9 @@
 "stats.delta.previousMonth" = "%@ em relação ao mês passado";
 "stats.delta.noComparison" = "Dados insuficientes para comparar";
 "stats.delta.newActivity" = "Primeira atividade neste período";
+"stats.delta.noActivityThisWeek" = "Nenhuma atividade esta semana ainda";
+"stats.delta.noActivityThisMonth" = "Nenhuma atividade este mês ainda";
+"stats.chart.empty" = "Sua primeira corrida neste período criará este gráfico.";
 "stats.weekOverWeek" = "vs semana passada";
 "stats.trailChart" = "Pontos";
 "stats.distanceChart" = "Distância";
@@ -713,3 +716,46 @@
 "ai.template.week.focus.exploration" = "Mire em zonas H3 novas para empurrar a taxa anti-farm acima de 70%%.";
 "ai.template.week.focus.distance" = "Adicione uma corrida um pouco mais longa na próxima semana para reverter a queda de distância.";
 "ai.template.week.focus.consolidate" = "Mantenha esse ritmo e busque um pico de %@ ainda maior em uma única corrida.";
+
+// MARK: - Social (Phase 1)
+"social.share.title" = "Compartilhar com Seguidores";
+"social.share.subtitle" = "Mostre esta corrida para quem te segue.";
+"social.share.shared" = "Compartilhado com seus seguidores";
+"social.create.title" = "Nova Publicação";
+"social.create.caption.placeholder" = "Diga algo sobre esta corrida...";
+"social.create.visibility.label" = "Visibilidade";
+"social.create.visibility.followers" = "Seguidores";
+"social.create.visibility.public" = "Público";
+"social.create.publish" = "Publicar";
+"social.create.cancel" = "Cancelar";
+"social.create.error" = "Não foi possível criar a publicação. Tente novamente.";
+"social.profile.posts.title" = "Minhas Publicações";
+"social.profile.posts.empty" = "Compartilhe sua primeira corrida na tela de resumo de corrida.";
+
+// Social — Phase 2 (Follow + Search)
+"social.search.title" = "Encontrar Corredores";
+"social.search.placeholder" = "Buscar por nome";
+"social.search.hint" = "Digite um nome para descobrir outros corredores.";
+"social.search.empty" = "Nenhum corredor com esse nome.";
+"social.followers" = "Seguidores";
+"social.following" = "Seguindo";
+"social.follow" = "Seguir";
+"social.unfollow" = "Seguindo";
+"social.userprofile.posts.title" = "Publicações Recentes";
+"social.userprofile.posts.empty" = "Nenhuma publicação ainda.";
+"social.followlist.empty.followers" = "Ainda sem seguidores.";
+"social.followlist.empty.following" = "Ainda não segue ninguém.";
+
+// Social — Phase 3 (Feed + Tab)
+"tab.social" = "Social";
+"social.tab.feed" = "Feed";
+"social.tab.leaderboard" = "Ranking";
+"social.feed.empty.title" = "Seu feed está vazio";
+"social.feed.empty.subtitle" = "Siga outros corredores para ver suas publicações aqui.";
+"social.feed.empty.cta" = "Encontrar Corredores";
+
+// Social — Phase 5 (Comments)
+"social.comments.title" = "Comentários";
+"social.comments.empty" = "Sem comentários ainda. Seja o primeiro.";
+"social.comments.placeholder" = "Adicionar um comentário...";
+"social.comments.delete" = "Excluir";

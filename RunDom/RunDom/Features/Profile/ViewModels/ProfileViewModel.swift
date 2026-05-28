@@ -8,6 +8,7 @@ final class ProfileViewModel: ObservableObject {
     @Published var user: User?
     @Published var badges: [Badge] = []
     @Published var latestRun: RunSession?
+    @Published var posts: [Post] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -16,15 +17,18 @@ final class ProfileViewModel: ObservableObject {
     private let firestoreService: FirestoreService
     private let storageService: StorageService
     private let badgeService: BadgeService
+    private let postService: PostService
 
     // MARK: - Init
 
     init(firestoreService: FirestoreService = FirestoreService(),
          storageService: StorageService = StorageService(),
-         badgeService: BadgeService = BadgeService()) {
+         badgeService: BadgeService = BadgeService(),
+         postService: PostService = PostService()) {
         self.firestoreService = firestoreService
         self.storageService = storageService
         self.badgeService = badgeService
+        self.postService = postService
     }
 
     // MARK: - Computed
@@ -62,6 +66,15 @@ final class ProfileViewModel: ObservableObject {
         } catch {
             AppLogger.firebase.error("Failed to load profile: \(error.localizedDescription)")
             errorMessage = "error.generic".localized
+        }
+
+        // Posts are loaded tolerantly — empty stays if rules deny or query fails.
+        do {
+            let result = try await postService.getPosts(byUser: userId, limit: 5)
+            posts = result.posts
+        } catch {
+            AppLogger.firebase.warning("Failed to load posts: \(error.localizedDescription)")
+            posts = []
         }
 
         isLoading = false

@@ -13,7 +13,7 @@ RunDom (user-facing brand: **Runpire**) is a gamified running app where users co
 ## Tech Stack
 
 - **Language:** Swift (SwiftUI)
-- **Min Deployment Target:** iOS 16+ (Xcode project currently set to 18.4)
+- **Min Deployment Target:** iOS 17.0 (Xcode project) — note: B (Privacy Zones) uses iOS 17+ Map API (`MapCameraPosition`, `MapCircle`, `onMapCameraChange`); lowering below iOS 17 requires rewriting `AddPrivacyZoneView` with an MKMapView wrapper
 - **UI Framework:** SwiftUI
 - **Maps:** MapKit (territory overlays, animations, snapshotter for share cards)
 - **Location:** CoreLocation (real-time GPS, background tracking)

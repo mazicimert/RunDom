@@ -25,12 +25,12 @@ struct MainTabView: View {
                 }
                 .tag(AppRouter.Tab.map)
 
-                // Leaderboard Tab
+                // Social Tab (Feed + Leaderboard, segmented)
                 NavigationStack {
-                    LeaderboardTabView(locationManager: appState.locationManager)
+                    SocialTabView(locationManager: appState.locationManager)
                 }
                 .tabItem {
-                    Label("tab.leaderboard".localized, systemImage: "trophy.fill")
+                    Label("tab.social".localized, systemImage: "person.2.fill")
                 }
                 .tag(AppRouter.Tab.leaderboard)
 
@@ -306,6 +306,9 @@ struct MainTabView: View {
             LevelBreakdownView(totalTrail: totalTrail)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
+        case .userSearch:
+            UserSearchView()
+                .environmentObject(appState)
         }
     }
 }

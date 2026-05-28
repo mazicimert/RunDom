@@ -3,11 +3,12 @@ import SwiftUI
 struct PreRunView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var unitPreference: UnitPreference
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var viewModel: PreRunViewModel
     @State private var showWhenInUseUpgradePrompt = false
     let onStartRun: (RunMode) -> Void
 
-    private let cardCornerRadius: CGFloat = 20
+    private let cardCornerRadius: CGFloat = 24
 
     init(locationManager: LocationManager, onStartRun: @escaping (RunMode) -> Void) {
         _viewModel = StateObject(wrappedValue: PreRunViewModel(locationManager: locationManager))
@@ -15,27 +16,33 @@ struct PreRunView: View {
     }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 26) {
-                headerSection
-                    .padding(.horizontal, AppConstants.UI.screenPadding)
+        ZStack {
+            PreRunTheme.background(for: colorScheme)
+                .ignoresSafeArea()
 
-                modesSection
-
-                dailyChallengeSection
-
-                if let reward = viewModel.dailyChallengeReward {
-                    rewardBanner(reward)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 28) {
+                    headerSection
                         .padding(.horizontal, AppConstants.UI.screenPadding)
-                }
 
-                if !viewModel.isLocationReady || viewModel.streakInfo != nil {
-                    footerStatusRow
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, AppConstants.UI.screenPadding)
+                    modesSection
+
+                    dailyChallengeSection
+
+                    if let reward = viewModel.dailyChallengeReward {
+                        rewardBanner(reward)
+                            .padding(.horizontal, AppConstants.UI.screenPadding)
+                    }
+
+                    if !viewModel.isLocationReady || viewModel.streakInfo != nil {
+                        footerStatusRow
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, AppConstants.UI.screenPadding)
+                    }
                 }
+                .padding(.top, 14)
+                .padding(.bottom, 116)
             }
-            .padding(.vertical, 24)
         }
         .refreshable {
             await reloadScreen()
@@ -62,9 +69,22 @@ struct PreRunView: View {
                 .accessibilityHint("accessibility.run.startHint".localized)
             }
             .padding(.horizontal, AppConstants.UI.screenPadding)
-            .padding(.vertical, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
+            .background {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(alignment: .top) {
+                        Rectangle()
+                            .fill(Color.primary.opacity(0.05))
+                            .frame(height: 1)
+                    }
+                    .ignoresSafeArea()
+            }
         }
         .navigationTitle("tab.run".localized)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .alert(
             "run.whenInUseUpgrade.title".localized,
             isPresented: $showWhenInUseUpgradePrompt
@@ -127,16 +147,18 @@ struct PreRunView: View {
     // MARK: - Header
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("run.header.title".localized)
-                .font(.title2.bold())
+                .font(.title.weight(.bold))
+                .foregroundStyle(.primary)
 
             Text("run.header.subtitle".localized)
-                .font(.subheadline)
+                .font(.body)
                 .foregroundStyle(.secondary)
+                .lineSpacing(3)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     ForEach(headerBadges) { badge in
                         headerBadge(badge)
                     }
@@ -192,15 +214,15 @@ struct PreRunView: View {
             Image(systemName: badge.icon)
                 .foregroundStyle(badge.color)
             Text(badge.title)
-                .foregroundStyle(.primary.opacity(0.85))
+                .foregroundStyle(.primary.opacity(0.82))
         }
-        .font(.caption.weight(.medium))
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Color.cardBackground, in: Capsule())
+        .font(.footnote.weight(.semibold))
+        .padding(.horizontal, 13)
+        .padding(.vertical, 8)
+        .background(PreRunTheme.pillFill(for: colorScheme), in: Capsule())
         .overlay(
             Capsule()
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.05), lineWidth: 1)
         )
     }
 
@@ -233,12 +255,12 @@ struct PreRunView: View {
     // MARK: - Mode Section
 
     private var modesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("run.selectMode".localized)
                 .font(.headline)
                 .padding(.horizontal, AppConstants.UI.screenPadding)
 
-            VStack(spacing: 12) {
+            VStack(spacing: 14) {
                 modeCard(
                     mode: .normal,
                     icon: "figure.run",
@@ -339,11 +361,12 @@ struct PreRunView: View {
                 .tint(accentColor)
         }
         .padding(16)
-        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+        .background(PreRunTheme.cardFill(for: colorScheme), in: RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.05), lineWidth: 1)
         )
+        .shadow(color: PreRunTheme.cardShadow(for: colorScheme), radius: 14, x: 0, y: 8)
     }
 
     private var compactUnselectedChallengeCard: some View {
@@ -366,11 +389,12 @@ struct PreRunView: View {
             Spacer(minLength: 8)
         }
         .padding(16)
-        .background(Color.cardBackground, in: RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+        .background(PreRunTheme.cardFill(for: colorScheme), in: RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.05), lineWidth: 1)
         )
+        .shadow(color: PreRunTheme.cardShadow(for: colorScheme), radius: 14, x: 0, y: 8)
     }
 
     private func rewardBanner(_ reward: DailyChallengeReward) -> some View {
@@ -382,7 +406,11 @@ struct PreRunView: View {
         .foregroundStyle(.boostGreen)
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(Color.boostGreen.opacity(0.12), in: Capsule())
+        .background(Color.boostGreen.opacity(colorScheme == .dark ? 0.16 : 0.10), in: Capsule())
+        .overlay {
+            Capsule()
+                .stroke(Color.boostGreen.opacity(0.16), lineWidth: 1)
+        }
     }
 
     private func challengeAccentColor(for challenge: DailyChallengeTemplate) -> Color {
@@ -405,6 +433,9 @@ struct PreRunView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(PreRunTheme.pillFill(for: colorScheme), in: Capsule())
         } else if let streak = viewModel.streakInfo, streak.days > 0 {
             HStack(spacing: 8) {
                 Image(systemName: "flame.fill")
@@ -420,6 +451,9 @@ struct PreRunView: View {
                         .foregroundStyle(.red)
                 }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(PreRunTheme.pillFill(for: colorScheme), in: Capsule())
         }
     }
 
@@ -435,21 +469,20 @@ struct PreRunView: View {
                 viewModel.selectedMode = mode
             }
         } label: {
-            HStack(spacing: 14) {
+            HStack(spacing: 16) {
                 Image(systemName: icon)
-                    .font(.title3.weight(.semibold))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(color)
-                    .frame(width: 46, height: 46)
+                    .frame(width: 52, height: 52)
                     .background(
-                        color.opacity(isSelected ? 0.18 : 0.12),
-                        in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        color.opacity(isSelected ? 0.18 : 0.11),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(modeTag(for: mode))
-                        .font(.caption2.weight(.semibold))
+                        .font(.caption.weight(.bold))
                         .textCase(.uppercase)
-                        .tracking(0.6)
                         .foregroundStyle(color)
 
                     Text(title)
@@ -464,35 +497,25 @@ struct PreRunView: View {
 
                 Spacer(minLength: 8)
 
-                ZStack {
-                    Circle()
-                        .strokeBorder(
-                            isSelected ? color : Color.secondary.opacity(0.4),
-                            lineWidth: 2
-                        )
-                        .frame(width: 24, height: 24)
-
-                    if isSelected {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 14, height: 14)
-                            .transition(.scale.combined(with: .opacity))
-                    }
-                }
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(isSelected ? color : Color.secondary.opacity(0.45))
+                    .frame(width: 28, height: 28)
             }
-            .padding(16)
+            .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                    .fill(isSelected ? color.opacity(0.10) : Color.cardBackground)
+                    .fill(isSelected ? PreRunTheme.selectedCardFill(color: color, for: colorScheme) : PreRunTheme.cardFill(for: colorScheme))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
                     .stroke(
-                        isSelected ? color.opacity(0.55) : Color.primary.opacity(0.06),
-                        lineWidth: isSelected ? 1.5 : 1
+                        isSelected ? color.opacity(0.36) : Color.primary.opacity(0.05),
+                        lineWidth: 1
                     )
             )
+            .shadow(color: isSelected ? color.opacity(0.14) : PreRunTheme.cardShadow(for: colorScheme), radius: isSelected ? 18 : 12, x: 0, y: 9)
         }
         .buttonStyle(.plain)
         .contentShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
@@ -520,6 +543,8 @@ struct PreRunView: View {
 }
 
 private struct StartRunButton: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let isEnabled: Bool
     let action: () -> Void
 
@@ -538,17 +563,33 @@ private struct StartRunButton: View {
                 Capsule()
                     .fill(
                         LinearGradient(
-                            colors: [Color.accentColor, Color.accentColor.opacity(0.82)],
+                            colors: buttonGradientColors,
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .shadow(color: Color.accentColor.opacity(0.32), radius: 14, x: 0, y: 6)
+                    .shadow(color: buttonShadowColor, radius: 16, x: 0, y: 8)
             }
             .opacity(isEnabled ? 1 : 0.45)
         }
         .buttonStyle(StartRunButtonStyle())
         .disabled(!isEnabled)
+    }
+
+    private var buttonGradientColors: [Color] {
+        guard isEnabled else {
+            return [Color.secondary.opacity(0.35), Color.secondary.opacity(0.25)]
+        }
+
+        return colorScheme == .dark
+            ? [Color.boostGreen.opacity(0.95), Color.territoryBlue.opacity(0.95)]
+            : [Color.boostGreen, Color.territoryBlue]
+    }
+
+    private var buttonShadowColor: Color {
+        isEnabled
+            ? Color.territoryBlue.opacity(colorScheme == .dark ? 0.26 : 0.20)
+            : Color.clear
     }
 }
 
@@ -565,4 +606,44 @@ private struct RunHeaderBadge: Identifiable {
     let title: String
     let icon: String
     let color: Color
+}
+
+private enum PreRunTheme {
+    static func background(for colorScheme: ColorScheme) -> LinearGradient {
+        let colors: [Color] = colorScheme == .dark
+            ? [
+                Color(red: 0.035, green: 0.047, blue: 0.055),
+                Color(red: 0.050, green: 0.070, blue: 0.082),
+                Color(red: 0.030, green: 0.035, blue: 0.040)
+            ]
+            : [
+                Color(red: 0.965, green: 0.985, blue: 0.975),
+                Color(red: 0.945, green: 0.965, blue: 0.995),
+                Color(red: 0.985, green: 0.975, blue: 0.955)
+            ]
+
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    static func cardFill(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.white.opacity(0.075)
+            : Color.white.opacity(0.78)
+    }
+
+    static func selectedCardFill(color: Color, for colorScheme: ColorScheme) -> Color {
+        color.opacity(colorScheme == .dark ? 0.135 : 0.105)
+    }
+
+    static func pillFill(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.white.opacity(0.095)
+            : Color.white.opacity(0.68)
+    }
+
+    static func cardShadow(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.black.opacity(0.18)
+            : Color.black.opacity(0.055)
+    }
 }
