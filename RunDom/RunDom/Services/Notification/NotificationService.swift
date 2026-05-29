@@ -13,6 +13,9 @@ final class NotificationService {
         case defenseDropping = "defense_dropping"
         case streakWarning = "streak_warning"
         case dailyChallenge = "daily_challenge"
+        case socialFollow = "social_follow"
+        case socialLike = "social_like"
+        case socialComment = "social_comment"
 
         var categoryIdentifier: String { rawValue }
     }
@@ -191,6 +194,16 @@ final class NotificationService {
             return .run
         case .dailyChallenge:
             return .dailyChallenge
+        case .socialFollow:
+            if let senderId = userInfo["senderId"] as? String {
+                return .socialUserProfile(userId: senderId)
+            }
+            return nil
+        case .socialLike, .socialComment:
+            if let postId = userInfo["postId"] as? String {
+                return .socialPost(postId: postId)
+            }
+            return nil
         }
     }
 
@@ -256,4 +269,6 @@ enum NotificationDestination {
     case profile
     case dailyChallenge
     case territoryLossInbox(initialLossEventId: String?)
+    case socialPost(postId: String)
+    case socialUserProfile(userId: String)
 }

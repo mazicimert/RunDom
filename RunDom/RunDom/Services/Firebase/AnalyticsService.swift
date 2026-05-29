@@ -224,6 +224,16 @@ enum AnalyticsService {
         Analytics.logEvent("ai_disclosure_accepted", parameters: nil)
     }
 
+    // MARK: - Social Share Events
+
+    static func logPostExternalShare(postId: String, hasPhoto: Bool, template: String) {
+        Analytics.logEvent("post_external_share", parameters: [
+            "post_id": postId,
+            "has_photo": hasPhoto ? 1 : 0,
+            "template": template
+        ])
+    }
+
     // MARK: - Auth Events
 
     static func logSignIn(method: String) {

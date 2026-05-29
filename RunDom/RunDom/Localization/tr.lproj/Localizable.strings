@@ -843,3 +843,11 @@
 "legal.acceptance.body" = "Runpire, koşucuların bir araya geldiği bir topluluk. Deneyimi saygılı ve güvenli tutmak için paylaşım yapmadan önce Topluluk Kuralları ve Kullanım Şartlarımızı incele.";
 "legal.acceptance.checkbox" = "Topluluk Kurallarını ve Kullanım Şartlarını okudum, kabul ediyorum.";
 "legal.acceptance.continue" = "Kabul Et";
+
+// Sosyal — Harici Paylaşım (Phase C)
+"social.externalShare.selectPhoto" = "Fotoğraf Seç";
+"social.externalShare.preparing" = "Hazırlanıyor...";
+"social.externalShare.template" = "Şablon";
+"social.externalShare.template.hero" = "Hero";
+"social.externalShare.template.card" = "Kart";
+"social.externalShare.template.stripe" = "Şerit";

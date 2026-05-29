@@ -843,3 +843,11 @@
 "legal.acceptance.body" = "Runpire is a community of runners. To keep the experience respectful and safe, please review our Community Guidelines and Terms of Use before posting.";
 "legal.acceptance.checkbox" = "I have read and accept the Community Guidelines and Terms of Use.";
 "legal.acceptance.continue" = "Accept";
+
+// Social — External Share (Phase C)
+"social.externalShare.selectPhoto" = "Choose Photo";
+"social.externalShare.preparing" = "Preparing...";
+"social.externalShare.template" = "Template";
+"social.externalShare.template.hero" = "Hero";
+"social.externalShare.template.card" = "Card";
+"social.externalShare.template.stripe" = "Stripe";

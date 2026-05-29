@@ -14,6 +14,7 @@ struct PostDetailView: View {
     @State private var showReportSheet = false
     @State private var reportCommentTarget: Comment?
     @State private var showDeleteConfirm = false
+    @State private var showShareComposer = false
     @FocusState private var isInputFocused: Bool
 
     @Environment(\.dismiss) private var dismiss
@@ -54,7 +55,16 @@ struct PostDetailView: View {
         .toolbar {
             if viewModel.post != nil {
                 ToolbarItem(placement: .topBarTrailing) {
-                    postActionMenu
+                    HStack(spacing: 8) {
+                        Button {
+                            showShareComposer = true
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .accessibilityLabel("common.share".localized)
+                        postActionMenu
+                    }
                 }
             }
         }
@@ -105,6 +115,11 @@ struct PostDetailView: View {
             Button("common.cancel".localized, role: .cancel) {}
         } message: {
             Text("social.post.delete.confirm.message".localized)
+        }
+        .sheet(isPresented: $showShareComposer) {
+            if let post = viewModel.post {
+                PostShareComposerView(post: post)
+            }
         }
     }
 

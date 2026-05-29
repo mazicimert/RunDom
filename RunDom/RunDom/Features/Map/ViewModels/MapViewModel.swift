@@ -237,9 +237,15 @@ final class MapViewModel: ObservableObject {
     }
 
     private func fallbackSeasonId() -> String {
-        let calendar = Calendar.current
-        let week = calendar.component(.weekOfYear, from: Date())
-        let year = calendar.component(.year, from: Date())
+        // Must match SeasonService.generateCurrentSeason / FirestoreService.generatedSeasonIdForCurrentWeek
+        // (ISO8601 calendar, UTC, week-of-year + year-for-week-of-year). Using Calendar.current
+        // with `.year` here produced a different id, so cells captured during a run could land in a
+        // different season bucket than the map read back — and thus never appear on the map.
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let now = Date()
+        let week = calendar.component(.weekOfYear, from: now)
+        let year = calendar.component(.yearForWeekOfYear, from: now)
         return "season_\(year)_w\(week)"
     }
 

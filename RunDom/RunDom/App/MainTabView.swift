@@ -309,6 +309,32 @@ struct MainTabView: View {
         case .userSearch:
             UserSearchView()
                 .environmentObject(appState)
+        case .socialPostDetail(let postId):
+            NavigationStack {
+                PostDetailView(postId: postId)
+                    .environmentObject(appState)
+                    .environmentObject(router)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("common.done".localized) {
+                                router.dismissSheet()
+                            }
+                        }
+                    }
+            }
+        case .socialUserProfile(let userId):
+            NavigationStack {
+                UserProfileView(userId: userId)
+                    .environmentObject(appState)
+                    .environmentObject(router)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("common.done".localized) {
+                                router.dismissSheet()
+                            }
+                        }
+                    }
+            }
         }
     }
 }

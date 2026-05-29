@@ -63,6 +63,8 @@ final class AppRouter: ObservableObject {
         case settings
         case levelBreakdown(totalTrail: Double)
         case userSearch
+        case socialPostDetail(postId: String)
+        case socialUserProfile(userId: String)
 
         var id: String {
             switch self {
@@ -75,6 +77,8 @@ final class AppRouter: ObservableObject {
             case .settings: return "settings"
             case .levelBreakdown: return "levelBreakdown"
             case .userSearch: return "userSearch"
+            case .socialPostDetail(let id): return "socialPostDetail-\(id)"
+            case .socialUserProfile(let id): return "socialUserProfile-\(id)"
             }
         }
     }
@@ -118,6 +122,10 @@ final class AppRouter: ObservableObject {
             selectedTab = .run
         case .profile:
             selectedTab = .profile
+        case .socialPost(let postId):
+            presentedSheet = .socialPostDetail(postId: postId)
+        case .socialUserProfile(let userId):
+            presentedSheet = .socialUserProfile(userId: userId)
         }
     }
 }

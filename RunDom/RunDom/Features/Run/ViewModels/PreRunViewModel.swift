@@ -1,13 +1,24 @@
 import SwiftUI
 import Combine
+import CoreLocation
 
 @MainActor
 final class PreRunViewModel: ObservableObject {
+
+    /// The "can I start a run right now?" gate, derived from permission + GPS readiness.
+    /// Drives both the status line and the primary button's appearance/action.
+    enum LocationGate: Equatable {
+        case needsPermission   // not asked yet → request in-app
+        case permissionDenied  // denied/restricted → deep-link to Settings
+        case searching         // permitted, waiting for first GPS fix
+        case ready             // good to go
+    }
 
     // MARK: - Published State
 
     @Published var selectedMode: RunMode = .normal
     @Published var isLocationReady = false
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var isStarting = false
     @Published var streakInfo: StreakService.StreakInfo?
     @Published var dailyChallengeState: DailyChallengeState?
@@ -44,6 +55,10 @@ final class PreRunViewModel: ObservableObject {
             .map { $0 != nil }
             .receive(on: DispatchQueue.main)
             .assign(to: &$isLocationReady)
+
+        locationManager.$authorizationStatus
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$authorizationStatus)
     }
 
     var hasLocationPermission: Bool {
@@ -52,6 +67,24 @@ final class PreRunViewModel: ObservableObject {
 
     var hasAlwaysPermission: Bool {
         locationManager.hasAlwaysPermission
+    }
+
+    /// Single source of truth for the primary button + status line.
+    var locationGate: LocationGate {
+        switch authorizationStatus {
+        case .notDetermined:
+            return .needsPermission
+        case .denied, .restricted:
+            return .permissionDenied
+        default:
+            return isLocationReady ? .ready : .searching
+        }
+    }
+
+    /// Requests location permission in-app (When In Use is enough to start a run;
+    /// the Always upgrade is handled separately once a run begins).
+    func requestLocationPermission() {
+        locationManager.requestWhenInUseAuthorization()
     }
 
     // MARK: - Load Streak

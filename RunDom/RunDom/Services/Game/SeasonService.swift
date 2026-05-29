@@ -15,13 +15,26 @@ final class SeasonService {
     // MARK: - Active Season
 
     /// Returns the current active season from Firestore, or creates one if none exists.
+    ///
+    /// The Firestore lookup is best-effort: if it returns no document *or* fails
+    /// (e.g. a missing composite index, offline, or a rules error), we fall back to
+    /// the locally generated season for the current week. The generated id mirrors the
+    /// season-doc id scheme (`season_<year>_w<week>`), so it stays consistent with the
+    /// territory store and observers. Never let a season lookup failure silently disable
+    /// territory capture — that would stop cells from being painted during a run.
     func getOrCreateCurrentSeason() async throws -> Season {
-        if let season = try await firestoreService.getCurrentSeason() {
+        do {
+            if let season = try await firestoreService.getCurrentSeason() {
+                return season
+            }
+            let season = generateCurrentSeason()
+            AppLogger.game.info("No active season found, using generated: \(season.id)")
+            return season
+        } catch {
+            let season = generateCurrentSeason()
+            AppLogger.game.error("Season lookup failed (\(error.localizedDescription)), falling back to generated: \(season.id)")
             return season
         }
-        let season = generateCurrentSeason()
-        AppLogger.game.info("No active season found, using generated: \(season.id)")
-        return season
     }
 
     // MARK: - Season Generation

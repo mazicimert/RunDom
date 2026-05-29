@@ -12,6 +12,7 @@ struct PostCardView: View {
     @State private var showReportSheet = false
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
+    @State private var navigateToDetail = false
 
     private let likeService = LikeService()
     private let postService = PostService()
@@ -39,10 +40,18 @@ struct PostCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
             heroMedia
-            statsRow
-            if let note = post.note, !note.isEmpty {
-                noteText(note)
+            Button {
+                navigateToDetail = true
+            } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    statsRow
+                    if let note = post.note, !note.isEmpty {
+                        noteText(note)
+                    }
+                }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             likeFooter
         }
         .background(
@@ -89,6 +98,10 @@ struct PostCardView: View {
             Button("common.cancel".localized, role: .cancel) {}
         } message: {
             Text("social.post.delete.confirm.message".localized)
+        }
+        .navigationDestination(isPresented: $navigateToDetail) {
+            PostDetailView(postId: post.id)
+                .environmentObject(appState)
         }
     }
 
@@ -196,6 +209,9 @@ struct PostCardView: View {
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             Task { await handleDoubleTap() }
+        }
+        .onTapGesture {
+            navigateToDetail = true
         }
     }
 

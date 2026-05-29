@@ -127,6 +127,14 @@ final class ActiveRunViewModel: ObservableObject {
 
     // MARK: - Start
 
+    /// Best-known coordinate for the cinematic map intro, available *before* the run
+    /// timer starts — the shared `LocationManager` is already warm from the PreRun
+    /// screen, so the descent can begin the moment the map appears instead of waiting
+    /// on MapKit's own (laggy) user-location callback.
+    var introStartCoordinate: CLLocationCoordinate2D? {
+        locationManager.currentLocation?.coordinate ?? locationManager.lastKnownCoordinate
+    }
+
     func startRun() {
         startDate = Date()
         locationManager.startTracking()
