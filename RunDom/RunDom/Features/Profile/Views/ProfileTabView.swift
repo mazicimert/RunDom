@@ -28,7 +28,7 @@ struct ProfileTabView: View {
 
                 latestRunSection
 
-                if let user = resolvedUser, user.streakDays > 0 {
+                if let user = resolvedUser, user.effectiveStreakDays > 0 {
                     streakSection(user: user)
                 } else if resolvedUser != nil {
                     streakMotivationSection
@@ -345,7 +345,7 @@ struct ProfileTabView: View {
                 .foregroundStyle(.orange)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(String(format: "profile.streakDays".localized, user.streakDays))
+                Text(String(format: "profile.streakDays".localized, user.effectiveStreakDays))
                     .font(.headline)
 
                 Text(String(format: "profile.streakMultiplier".localized, String(format: "x%.1f", user.streakMultiplier)))
@@ -385,14 +385,22 @@ struct ProfileTabView: View {
 
     private var myPostsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(spacing: 8) {
                 Text("social.profile.posts.title".localized)
                     .font(.headline)
+
                 Spacer()
+
                 if !viewModel.posts.isEmpty {
-                    Text("\(viewModel.posts.count)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    NavigationLink {
+                        if let userId = resolvedUser?.id {
+                            MyPostsListView(userId: userId)
+                                .environmentObject(appState)
+                        }
+                    } label: {
+                        seeAllLabel
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
@@ -405,8 +413,14 @@ struct ProfileTabView: View {
                     .padding(.vertical, 16)
             } else {
                 VStack(spacing: 8) {
-                    ForEach(viewModel.posts) { post in
-                        profilePostRow(post)
+                    ForEach(viewModel.posts.prefix(Self.postPreviewCount)) { post in
+                        NavigationLink {
+                            PostDetailView(postId: post.id)
+                                .environmentObject(appState)
+                        } label: {
+                            ProfilePostRowView(post: post)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -414,50 +428,13 @@ struct ProfileTabView: View {
         .screenPadding()
     }
 
-    private func profilePostRow(_ post: Post) -> some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill((Color(hex: post.authorColor) ?? Color.accentColor).opacity(0.18))
-                    .frame(width: 42, height: 42)
-                Image(systemName: "figure.run")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(Color(hex: post.authorColor) ?? .accentColor)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(post.distance.formattedDistanceFromMeters)
-                        .font(.subheadline.weight(.semibold))
-                    Text("•")
-                        .foregroundStyle(.secondary)
-                    Text("trail.points".localized(with: post.trail.formattedTrail))
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-
-                if let note = post.note, !note.isEmpty {
-                    Text(note)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-            }
-
-            Spacer(minLength: 8)
-
-            Text(post.createdAt.relativeFormatted())
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-        }
-        .cardStyle()
-    }
+    private static let postPreviewCount = 2
 
     // MARK: - Badges Section
 
     private var badgesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(spacing: 8) {
                 Text("profile.badges".localized)
                     .font(.headline)
 
@@ -467,18 +444,41 @@ struct ProfileTabView: View {
                     Text("\(viewModel.unlockedBadges.count)/\(viewModel.badges.count)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+
+                    if viewModel.badges.count > ProfileViewModel.badgePreviewCount {
+                        NavigationLink {
+                            AllBadgesView(
+                                badges: viewModel.badges,
+                                unlockedCount: viewModel.unlockedBadges.count
+                            )
+                            .environmentObject(router)
+                        } label: {
+                            seeAllLabel
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
 
             if viewModel.isLoading && viewModel.badges.isEmpty {
                 ProfileBadgesSkeleton()
             } else {
-                BadgeGridView(badges: viewModel.badges) { badge in
+                BadgeGridView(badges: viewModel.previewBadges) { badge in
                     router.presentedSheet = .badgeDetail(badge: badge)
                 }
             }
         }
         .screenPadding()
+    }
+
+    private var seeAllLabel: some View {
+        HStack(spacing: 2) {
+            Text("common.seeAll".localized)
+                .font(.subheadline.weight(.semibold))
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.bold))
+        }
+        .foregroundStyle(Color.accentColor)
     }
 
     private func retryLoadProfile() {
@@ -525,22 +525,21 @@ private struct ProfileSkeletonStatCard: View {
 
 private struct ProfileBadgesSkeleton: View {
     private let columns = [
-        GridItem(.adaptive(minimum: 80), spacing: 16)
+        GridItem(.adaptive(minimum: 96), spacing: 20)
     ]
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 16) {
+        LazyVGrid(columns: columns, spacing: 24) {
             ForEach(0..<6, id: \.self) { _ in
-                VStack(spacing: 8) {
+                VStack(spacing: 10) {
                     Circle()
                         .fill(Color.secondary.opacity(0.16))
-                        .frame(width: 56, height: 56)
+                        .frame(width: 70, height: 70)
                         .shimmer()
 
-                    ProfileSkeletonBlock(width: 54, height: 12)
-                    ProfileSkeletonBlock(width: 38, height: 4)
+                    ProfileSkeletonBlock(width: 60, height: 12)
                 }
-                .frame(width: 80)
+                .frame(width: 96)
             }
         }
         .padding(.vertical, 4)
@@ -558,4 +557,3 @@ private struct ProfileSkeletonBlock: View {
             .shimmer()
     }
 }
-

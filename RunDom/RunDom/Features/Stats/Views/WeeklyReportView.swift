@@ -38,9 +38,9 @@ struct WeeklyReportView: View {
                         iconColor: .blue
                     )
                     StatCardView(
-                        icon: "speedometer",
-                        value: report.avgSpeed.formattedSpeed,
-                        label: "run.avgSpeed".localized,
+                        icon: "stopwatch",
+                        value: "\(report.avgSpeed.formattedPace) \(UnitPreference.shared.paceUnitLabel)",
+                        label: "run.avgPace".localized,
                         iconColor: .purple
                     )
                 }

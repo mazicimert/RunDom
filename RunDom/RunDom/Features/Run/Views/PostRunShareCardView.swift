@@ -6,7 +6,7 @@ struct PostRunShareCardView: View {
     let modeText: String
     let performanceText: String
     let subtitleText: String
-    let avgSpeedText: String
+    let avgPaceText: String
     let brandText: String
     let dateText: String
     let canvasSize: CGSize
@@ -57,7 +57,7 @@ struct PostRunShareCardView: View {
         [
             ShareMetricItem(icon: "ruler", text: session.distance.formattedDistanceFromMeters, tint: .territoryBlue, title: "run.distance".localized),
             ShareMetricItem(icon: "clock", text: durationText, tint: .white, title: "run.duration".localized),
-            ShareMetricItem(icon: "speedometer", text: avgSpeedText, tint: .boostGreen, title: "run.avgSpeed".localized)
+            ShareMetricItem(icon: "stopwatch", text: avgPaceText, tint: .boostGreen, title: "run.avgPace".localized)
         ]
     }
 
@@ -379,7 +379,7 @@ private struct ShareCardPreviewContainer: View {
     let modeText: String
     let performanceText: String
     let subtitleText: String
-    let avgSpeedText: String
+    let avgPaceText: String
     let dateText: String
     let canvasSize: CGSize
 
@@ -390,7 +390,7 @@ private struct ShareCardPreviewContainer: View {
             modeText: modeText,
             performanceText: performanceText,
             subtitleText: subtitleText,
-            avgSpeedText: avgSpeedText,
+            avgPaceText: avgPaceText,
             brandText: "Runpire",
             dateText: dateText,
             canvasSize: canvasSize
@@ -411,7 +411,7 @@ private struct ShareCardPreviewContainer: View {
         modeText: "Normal Mod",
         performanceText: "2 bölge ele geçirildi",
         subtitleText: "0,05 km mesafeyi 00:11 içinde tamamladın",
-        avgSpeedText: "4,5 km/h",
+        avgPaceText: "13'20\" /km",
         dateText: "25 Mar 2026 • 18:42",
         canvasSize: CGSize(width: 390, height: 844)
     )
@@ -426,7 +426,7 @@ private struct ShareCardPreviewContainer: View {
         modeText: "Boost Aktif",
         performanceText: "12 bölge ele geçirildi",
         subtitleText: "12,48 km mesafeyi 01:24:32 içinde tamamladın",
-        avgSpeedText: "8,9 km/h",
+        avgPaceText: "6'44\" /km",
         dateText: "25 Mar 2026 • 06:10",
         canvasSize: CGSize(width: 390, height: 844)
     )
@@ -441,7 +441,7 @@ private struct ShareCardPreviewContainer: View {
         modeText: "Boost Active",
         performanceText: "12 territories captured",
         subtitleText: "You covered 12.48 km in 1:24:32",
-        avgSpeedText: "8.9 km/h",
+        avgPaceText: "6'44\" /km",
         dateText: "Mar 25, 2026 • 6:10 AM",
         canvasSize: CGSize(width: 390, height: 844)
     )
@@ -456,7 +456,7 @@ private struct ShareCardPreviewContainer: View {
         modeText: "Normal Mod",
         performanceText: "Koşun kaydedildi",
         subtitleText: "Bugünkü limite ulaştığın için bu koşudan puan alamadın.",
-        avgSpeedText: "6,2 km/h",
+        avgPaceText: "9'40\" /km",
         dateText: "25 Mar 2026 • 21:05",
         canvasSize: CGSize(width: 390, height: 844)
     )

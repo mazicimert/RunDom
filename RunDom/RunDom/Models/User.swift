@@ -38,12 +38,21 @@ struct User: Codable, Identifiable, Equatable {
         return expiry > Date()
     }
 
+    /// The streak as it stands *right now*, decayed for days elapsed since the
+    /// last run. The stored `streakDays` is only recomputed when a run completes,
+    /// so reading it directly shows a stale value after the user has been away.
+    /// Use this for any *display* of the streak.
+    var effectiveStreakDays: Int {
+        StreakService.effectiveStreakDays(streakDays: streakDays, lastRunDate: lastRunDate)
+    }
+
     var streakMultiplier: Double {
-        if streakDays >= AppConstants.Streak.tier3Days {
+        let days = effectiveStreakDays
+        if days >= AppConstants.Streak.tier3Days {
             return AppConstants.Streak.tier3Multiplier
-        } else if streakDays >= AppConstants.Streak.tier2Days {
+        } else if days >= AppConstants.Streak.tier2Days {
             return AppConstants.Streak.tier2Multiplier
-        } else if streakDays >= AppConstants.Streak.tier1Days {
+        } else if days >= AppConstants.Streak.tier1Days {
             return AppConstants.Streak.tier1Multiplier
         }
         return AppConstants.Streak.noStreakMultiplier

@@ -1,10 +1,11 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct RunGalleryView: View {
     let session: RunSession
 
+    @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
-    @Namespace private var overlayToggleNamespace
 
     @State private var snapshotImage: UIImage?
     @State private var shareItems: [Any] = []
@@ -13,14 +14,11 @@ struct RunGalleryView: View {
     @State private var isSaving = false
     @State private var isLoadingSnapshot = true
     @State private var galleryAlert: GalleryAlert?
-    @State private var showsOverlays = true
+    @State private var isPermissionAlertPresented = false
+    @State private var selectedTemplate: PostShareTemplate = .hero
     @State private var didSaveCurrentPreview = false
 
-    private let previewRenderSize = CGSize(width: 1080, height: 1350)
-
-    private var summaryViewModel: PostRunViewModel {
-        PostRunViewModel(session: session)
-    }
+    private let previewRenderSize = CGSize(width: 1080, height: 1920)
 
     private var canExport: Bool {
         snapshotImage != nil && !isLoadingSnapshot && !isRendering && !isSaving
@@ -71,10 +69,20 @@ struct RunGalleryView: View {
                     dismissButton: .default(Text("common.ok".localized))
                 )
             }
+            .alert("run.gallery.permissionDenied.title".localized, isPresented: $isPermissionAlertPresented) {
+                Button("common.settings".localized) {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("common.cancel".localized, role: .cancel) {}
+            } message: {
+                Text("run.gallery.permissionDenied".localized)
+            }
             .task {
                 await loadSnapshot()
             }
-            .onChange(of: showsOverlays) { _ in
+            .onChange(of: selectedTemplate) { _ in
                 didSaveCurrentPreview = false
             }
         }
@@ -112,12 +120,7 @@ struct RunGalleryView: View {
                     .fill(Color.white.opacity(0.05))
 
                 if let snapshotImage {
-                    RunGalleryPreviewCard(
-                        snapshotImage: snapshotImage,
-                        session: session,
-                        trailText: summaryViewModel.trailText,
-                        showOverlays: showsOverlays
-                    )
+                    scaledGalleryPreview(snapshotImage: snapshotImage)
                     .transition(.opacity)
                 } else if isLoadingSnapshot {
                     VStack(spacing: 14) {
@@ -147,29 +150,52 @@ struct RunGalleryView: View {
         }
     }
 
+    private func scaledGalleryPreview(snapshotImage: UIImage) -> some View {
+        GeometryReader { proxy in
+            let scale = min(
+                proxy.size.width / previewRenderSize.width,
+                proxy.size.height / previewRenderSize.height
+            )
+
+            PostShareCardView(
+                post: galleryPost,
+                photoImage: snapshotImage,
+                template: selectedTemplate
+            )
+            .frame(width: previewRenderSize.width, height: previewRenderSize.height)
+            .scaleEffect(scale, anchor: .topLeading)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+            .allowsHitTesting(false)
+        }
+    }
+
     private var controlsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("run.gallery.overlays".localized)
+            Text("social.externalShare.template".localized)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.92))
 
-            HStack(spacing: 10) {
-                overlayToggleButton(
-                    title: "run.gallery.showOverlays".localized,
-                    isSelected: showsOverlays
-                ) {
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                        showsOverlays = true
+            HStack(spacing: 8) {
+                ForEach(PostShareTemplate.allCases) { template in
+                    Button {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+                            selectedTemplate = template
+                        }
+                    } label: {
+                        Text(template.localizedName)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(selectedTemplate == template ? Color.black : .white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: 52)
+                            .padding(.horizontal, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .fill(selectedTemplate == template ? Color.white : Color.white.opacity(0.04))
+                            )
                     }
-                }
-
-                overlayToggleButton(
-                    title: "run.gallery.hideOverlays".localized,
-                    isSelected: !showsOverlays
-                ) {
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                        showsOverlays = false
-                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -179,36 +205,6 @@ struct RunGalleryView: View {
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .strokeBorder(Color.white.opacity(0.05), lineWidth: 1)
         )
-    }
-
-    private func overlayToggleButton(
-        title: String,
-        isSelected: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(isSelected ? Color.black : .white)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.86)
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: 52)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(Color.white)
-                            .matchedGeometryEffect(id: "overlay-toggle", in: overlayToggleNamespace)
-                    } else {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(Color.white.opacity(0.04))
-                    }
-                }
-        }
-        .buttonStyle(.plain)
     }
 
     private var actionBar: some View {
@@ -325,17 +321,15 @@ struct RunGalleryView: View {
             } catch {
                 await MainActor.run {
                     isSaving = false
-                    let message: String
-                    if let error = error as? RunGalleryPhotoLibrarySaver.SaveError,
-                       error == .permissionDenied {
-                        message = "run.gallery.permissionDenied".localized
+                    if let saveError = error as? RunGalleryPhotoLibrarySaver.SaveError,
+                       saveError == .permissionDenied {
+                        isPermissionAlertPresented = true
                     } else {
-                        message = "run.gallery.saveFailed".localized
+                        galleryAlert = GalleryAlert(
+                            title: "common.error".localized,
+                            message: "run.gallery.saveFailed".localized
+                        )
                     }
-                    galleryAlert = GalleryAlert(
-                        title: "common.error".localized,
-                        message: message
-                    )
                 }
             }
         }
@@ -344,169 +338,42 @@ struct RunGalleryView: View {
     private func renderedPreviewImage() -> UIImage? {
         guard let snapshotImage else { return nil }
 
-        let preview = RunGalleryPreviewCard(
-            snapshotImage: snapshotImage,
-            session: session,
-            trailText: summaryViewModel.trailText,
-            showOverlays: showsOverlays
+        let preview = PostShareCardView(
+            post: galleryPost,
+            photoImage: snapshotImage,
+            template: selectedTemplate
         )
         .frame(width: previewRenderSize.width, height: previewRenderSize.height)
+        .environment(\.colorScheme, .dark)
 
         let renderer = ImageRenderer(content: preview)
         renderer.proposedSize = ProposedViewSize(previewRenderSize)
-        renderer.scale = 1
+        renderer.scale = 3
         return renderer.uiImage
     }
-}
 
-private struct RunGalleryPreviewCard: View {
-    let snapshotImage: UIImage
-    let session: RunSession
-    let trailText: String
-    let showOverlays: Bool
-
-    private let accentColor = Color.accentColor
-
-    private var metrics: [(value: String, title: String)] {
-        [
-            (session.distance.formattedDistanceFromMeters, "run.distance".localized),
-            (session.duration.formattedDuration, "run.duration".localized),
-            (session.avgSpeed.formattedSpeed, "run.avgSpeed".localized)
-        ]
-    }
-
-    var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let horizontalPadding = max(size.width * 0.055, 20)
-            let topPadding = max(size.height * 0.034, 18)
-            let bottomPadding = max(size.height * 0.05, 26)
-            let brandFontSize = min(size.width * 0.16, 62)
-            let trailFontSize = min(size.width * 0.19, 72)
-            let trailLabelFontSize = min(size.width * 0.05, 19)
-            let metricValueFontSize = min(size.width * 0.085, 32)
-            let metricLabelFontSize = min(size.width * 0.042, 17)
-
-            ZStack(alignment: .top) {
-                Image(uiImage: snapshotImage)
-                    .resizable()
-                    .scaledToFill()
-                    .overlay(
-                        LinearGradient(
-                            colors: [
-                                Color.black.opacity(0.12),
-                                Color.clear,
-                                Color.black.opacity(showOverlays ? 0.44 : 0.12)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-
-                overlayContent(
-                    size: size,
-                    horizontalPadding: horizontalPadding,
-                    topPadding: topPadding,
-                    bottomPadding: bottomPadding,
-                    brandFontSize: brandFontSize,
-                    trailFontSize: trailFontSize,
-                    trailLabelFontSize: trailLabelFontSize,
-                    metricValueFontSize: metricValueFontSize,
-                    metricLabelFontSize: metricLabelFontSize
-                )
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.black)
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        }
-    }
-
-    @ViewBuilder
-    private func overlayContent(
-        size: CGSize,
-        horizontalPadding: CGFloat,
-        topPadding: CGFloat,
-        bottomPadding: CGFloat,
-        brandFontSize: CGFloat,
-        trailFontSize: CGFloat,
-        trailLabelFontSize: CGFloat,
-        metricValueFontSize: CGFloat,
-        metricLabelFontSize: CGFloat
-    ) -> some View {
-        if showOverlays {
-            VStack(spacing: 0) {
-                Text("RUNPIRE")
-                    .font(.system(size: brandFontSize, weight: .black, design: .rounded))
-                    .kerning(2)
-                    .foregroundStyle(.white.opacity(0.94))
-                    .frame(maxWidth: .infinity)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .padding(.top, topPadding)
-                    .padding(.horizontal, horizontalPadding)
-                    .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-
-                Spacer()
-
-                VStack(spacing: max(size.height * 0.014, 10)) {
-                    HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(trailText)
-                            .font(.system(size: trailFontSize, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.65)
-
-                        Text("run.trailEarned".localized.uppercased())
-                            .font(.system(size: trailLabelFontSize, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.68))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .padding(.bottom, 6)
-
-                        Spacer(minLength: 0)
-                    }
-
-                    HStack(spacing: max(size.width * 0.025, 10)) {
-                        ForEach(Array(metrics.enumerated()), id: \.offset) { _, metric in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(metric.value)
-                                    .font(.system(size: metricValueFontSize, weight: .black, design: .rounded))
-                                    .foregroundStyle(.white)
-                                    .monospacedDigit()
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.52)
-
-                                Text(metric.title)
-                                    .font(.system(size: metricLabelFontSize, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(accentColor.opacity(0.9))
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                }
-                .padding(.horizontal, horizontalPadding)
-                .padding(.top, max(size.height * 0.024, 14))
-                .padding(.bottom, bottomPadding)
-                .frame(maxWidth: .infinity)
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color.black.opacity(0.0),
-                            Color.black.opacity(0.34),
-                            Color.black.opacity(0.72)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-            .animation(.spring(response: 0.36, dampingFraction: 0.82), value: showOverlays)
-        }
+    private var galleryPost: Post {
+        Post(
+            id: session.id,
+            authorId: session.userId,
+            authorDisplayName: "Runpire",
+            authorPhotoURL: nil,
+            authorColor: appState.currentUser?.color ?? "#4ECDC4",
+            runId: session.id,
+            createdAt: Date(),
+            distance: session.distance,
+            duration: session.duration,
+            avgSpeed: session.avgSpeed,
+            trail: session.trail,
+            startDate: session.startDate,
+            tags: session.tags,
+            note: session.note,
+            routePreview: session.route.map { point in
+                GeoPoint(latitude: point.latitude, longitude: point.longitude)
+            },
+            shareCardImageURL: nil,
+            photoURLs: nil
+        )
     }
 }
 
@@ -536,4 +403,5 @@ private struct GalleryAlert: Identifiable {
             RoutePoint(latitude: 41.028, longitude: 28.989, timestamp: Date(), speed: 2.4, altitude: 22)
         ]
     ))
+    .environmentObject(AppState())
 }

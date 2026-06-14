@@ -9,15 +9,12 @@ struct BadgeDetailView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    ZStack {
-                        Circle()
-                            .fill(badge.isUnlocked ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.1))
-                            .frame(width: 108, height: 108)
-
-                        Image(systemName: isHiddenSecret ? "questionmark" : badge.iconName)
-                            .font(.system(size: 44, weight: .semibold))
-                            .foregroundStyle(badge.isUnlocked ? Color.accentColor : Color.secondary)
-                    }
+                    BadgeMedallion(
+                        badge: badge,
+                        size: 108,
+                        iconSize: 44,
+                        ringWidth: 6
+                    )
                     .padding(.top, 12)
 
                     Text(isHiddenSecret ? "badge.secret".localized : badge.localizedName)
@@ -31,9 +28,10 @@ struct BadgeDetailView: View {
 
                     Text("badge.category.\(badge.category.rawValue)".localized)
                         .font(.caption.weight(.semibold))
+                        .foregroundStyle(badge.category.themeColor)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.accentColor.opacity(0.1))
+                        .background(badge.category.themeColor.opacity(0.12))
                         .clipShape(Capsule())
 
                     if badge.isUnlocked {
@@ -55,7 +53,7 @@ struct BadgeDetailView: View {
                     } else {
                         VStack(spacing: 10) {
                             ProgressView(value: badge.progressPercentage)
-                                .tint(.accentColor)
+                                .tint(badge.category.themeColor)
                                 .progressViewStyle(.linear)
 
                             HStack {

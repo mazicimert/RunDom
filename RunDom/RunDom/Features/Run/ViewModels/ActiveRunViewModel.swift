@@ -70,7 +70,6 @@ final class ActiveRunViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var previousRoutePoint: RoutePoint?
-    private var speedSamples: [Double] = []
     private var currentSeasonId: String?
 
     // Per-cell capture accumulation
@@ -198,8 +197,6 @@ final class ActiveRunViewModel: ObservableObject {
         // Update speed
         let speedKmh = max(point.speed * 3.6, 0)
         currentSpeed = speedKmh
-        speedSamples.append(speedKmh)
-        avgSpeed = speedSamples.reduce(0, +) / Double(speedSamples.count)
         maxSpeed = max(maxSpeed, speedKmh)
 
         // Anti-cheat: GPS consistency
@@ -216,6 +213,12 @@ final class ActiveRunViewModel: ObservableObject {
             distance += segmentDistance
             triggerKilometerMilestoneIfNeeded()
         }
+
+        // Average speed is derived from total distance over elapsed time, not the
+        // mean of instantaneous GPS samples. Instantaneous readings include zeros
+        // (standstill / invalid -1 clamped to 0) that drag the mean far below the
+        // true pace, which previously produced wildly wrong pace values.
+        avgSpeed = elapsedTime > 0 ? (distance / 1000.0) / (elapsedTime / 3600.0) : 0
 
         // Add to route
         routePoints.append(point)

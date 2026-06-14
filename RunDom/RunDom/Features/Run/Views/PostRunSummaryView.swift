@@ -264,30 +264,46 @@ struct PostRunSummaryView: View {
                     .multilineTextAlignment(.center)
 
                 Text(viewModel.trailText)
-                    .font(.system(size: 68, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .font(.system(size: isTrailVoided ? 54 : 68, weight: .black, design: .rounded))
+                    .foregroundStyle(isTrailVoided ? Color.white.opacity(0.5) : .white)
                     .minimumScaleFactor(0.7)
 
                 Text("run.trailEarned".localized)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.72))
+                    .foregroundStyle(.white.opacity(0.82))
 
                 Text(viewModel.heroSubtitleText)
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.64))
+                    .foregroundStyle(.white.opacity(0.78))
                     .multilineTextAlignment(.center)
 
                 if let resultReasonText = viewModel.resultReasonText {
-                    Text(resultReasonText)
-                        .font(.caption.weight(.semibold))
+                    VStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2.weight(.bold))
+                            Text(resultReasonText)
+                                .font(.caption.weight(.semibold))
+                                .multilineTextAlignment(.center)
+                        }
                         .foregroundStyle(Color.boostYellow)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
                         .background(
                             Capsule()
-                                .fill(Color.boostYellow.opacity(0.14))
+                                .fill(Color.black.opacity(0.38))
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(Color.boostYellow.opacity(0.5), lineWidth: 1)
+                                )
                         )
-                        .multilineTextAlignment(.center)
+
+                        Text("run.summary.voided.encourage".localized)
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 2)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -361,31 +377,13 @@ struct PostRunSummaryView: View {
                         .font(.headline.weight(.bold))
                         .foregroundStyle(.primary)
 
-                    ZStack(alignment: .topLeading) {
-                        PostRunMapView(routePoints: viewModel.session.route)
-                            .frame(height: 214)
-                            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                    .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
-                            )
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                summaryChip(icon: "ruler", text: viewModel.distanceKm.formattedDistance, tint: .territoryBlue)
-                                summaryChip(icon: "clock", text: viewModel.durationText, tint: .white)
-                                summaryChip(icon: "map", text: "\(viewModel.session.territoriesCaptured)", tint: .boostGreen)
-                            }
-                            .padding(14)
-                        }
-                    }
-
-                    HStack(spacing: 12) {
-                        Text(viewModel.heroSubtitleText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
+                    PostRunMapView(routePoints: viewModel.session.route)
+                        .frame(height: 214)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+                        )
                 }
                 .summarySurface(fill: summaryCardFill)
             }
@@ -407,9 +405,9 @@ struct PostRunSummaryView: View {
             )
 
             PostRunCompactStatCard(
-                icon: "speedometer",
-                value: viewModel.avgSpeedText,
-                label: "run.avgSpeed".localized
+                icon: "timer",
+                value: viewModel.avgPaceText,
+                label: "run.avgPace".localized
             )
 
             PostRunCompactStatCard(
@@ -458,64 +456,92 @@ struct PostRunSummaryView: View {
 
     @ViewBuilder
     private func multiplierBreakdown(result: TrailCalculator.TrailResult) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let speedIsCause = isTrailVoided && result.speedMultiplier == 0
+
+        VStack(alignment: .leading, spacing: 14) {
             Text("run.breakdown".localized)
                 .font(.headline.weight(.bold))
                 .foregroundStyle(.primary)
 
-            Text("run.summary.breakdown.subtitle".localized)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            Text(!isTrailVoided
+                 ? "run.summary.breakdown.subtitle".localized
+                 : (result.speedMultiplier == 0
+                    ? "run.summary.breakdown.voided.speed".localized
+                    : "run.summary.breakdown.voided".localized))
+                .font(.footnote)
+                .foregroundStyle(isTrailVoided ? Color.boostYellow.opacity(0.92) : Color.secondary)
 
-            VStack(spacing: 12) {
-                breakdownRow(
+            VStack(spacing: 0) {
+                ledgerRow(
                     label: "run.basePoints".localized,
                     value: String(format: "%.0f", result.basePoints),
                     tone: .neutral,
-                    intensity: basePointsIntensity
+                    dimmed: isTrailVoided
                 )
-                breakdownRow(
+                ledgerDivider
+                ledgerRow(
                     label: "run.speedMultiplier".localized,
                     value: multiplierText(for: result.speedMultiplier),
                     tone: multiplierTone(for: result.speedMultiplier),
-                    intensity: multiplierIntensity(for: result.speedMultiplier)
+                    dimmed: isTrailVoided && !speedIsCause,
+                    isCause: speedIsCause
                 )
-                breakdownRow(
+                ledgerDivider
+                ledgerRow(
                     label: "run.durationMultiplier".localized,
                     value: multiplierText(for: result.durationMultiplier),
                     tone: multiplierTone(for: result.durationMultiplier),
-                    intensity: multiplierIntensity(for: result.durationMultiplier)
+                    dimmed: isTrailVoided
                 )
-                breakdownRow(
+                ledgerDivider
+                ledgerRow(
                     label: "run.zoneMultiplier".localized,
                     value: multiplierText(for: result.zoneMultiplier),
                     tone: multiplierTone(for: result.zoneMultiplier),
-                    intensity: multiplierIntensity(for: result.zoneMultiplier)
+                    dimmed: isTrailVoided
                 )
-                breakdownRow(
+                ledgerDivider
+                ledgerRow(
                     label: "run.streakMultiplier.label".localized,
                     value: multiplierText(for: result.streakMultiplier),
                     tone: multiplierTone(for: result.streakMultiplier),
-                    intensity: multiplierIntensity(for: result.streakMultiplier)
+                    dimmed: isTrailVoided
                 )
 
                 if result.modeMultiplier > 1.0 {
-                    breakdownRow(
+                    ledgerDivider
+                    ledgerRow(
                         label: "run.boostMultiplier".localized,
                         value: multiplierText(for: result.modeMultiplier, decimals: 1),
                         tone: multiplierTone(for: result.modeMultiplier, decimals: 1),
-                        intensity: multiplierIntensity(for: result.modeMultiplier)
+                        dimmed: isTrailVoided
                     )
                 }
 
                 if result.antiFarmMultiplier < 1.0 {
-                    breakdownRow(
+                    ledgerDivider
+                    ledgerRow(
                         label: "run.antiFarmMultiplier".localized,
                         value: multiplierText(for: result.antiFarmMultiplier),
                         tone: multiplierTone(for: result.antiFarmMultiplier),
-                        intensity: multiplierIntensity(for: result.antiFarmMultiplier)
+                        dimmed: isTrailVoided
                     )
                 }
+            }
+
+            Rectangle()
+                .fill(Color.primary.opacity(0.14))
+                .frame(height: 1)
+
+            HStack(spacing: 10) {
+                Text("run.trailEarned".localized)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(viewModel.trailText)
+                    .font(.title3.weight(.bold))
+                    .monospacedDigit()
+                    .foregroundStyle(isTrailVoided ? Color.secondary : Color.primary)
             }
 
             if result.wasCapped || result.wasDailyCapped {
@@ -539,35 +565,25 @@ struct PostRunSummaryView: View {
     }
 
     private var reviewActionSection: some View {
-        VStack(spacing: 10) {
-            Button {
-                reviewBinding = viewModel.review
-                showReviewSheet = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: viewModel.review?.hasContent == true ? "star.fill" : "star")
-                    Text(viewModel.review?.hasContent == true
-                         ? "run.review.edit".localized
-                         : "run.review.button".localized)
-                }
-                .frame(maxWidth: .infinity)
+        Button {
+            reviewBinding = viewModel.review
+            showReviewSheet = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: viewModel.review?.hasContent == true ? "star.fill" : "star")
+                Text(viewModel.review?.hasContent == true
+                     ? "run.review.edit".localized
+                     : "run.review.button".localized)
             }
-            .buttonStyle(SecondaryButtonStyle())
-
-            Button {
-                onDismiss()
-            } label: {
-                Text("common.done".localized)
-            }
-            .buttonStyle(PrimaryButtonStyle())
-            .disabled(viewModel.isSaving)
+            .frame(maxWidth: .infinity)
         }
+        .buttonStyle(SecondaryButtonStyle())
         .padding(.top, 4)
     }
 
     @ViewBuilder
     private var shareWithFollowersSection: some View {
-        if viewModel.isSaved {
+        if viewModel.isSaved && !isTrailVoided {
             if hasSharedToFollowers {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.seal.fill")
@@ -652,8 +668,9 @@ struct PostRunSummaryView: View {
         )
     }
 
-    private var basePointsIntensity: CGFloat {
-        0.24
+    private var isTrailVoided: Bool {
+        guard let result = viewModel.trailResult else { return false }
+        return result.totalTrail == 0
     }
 
     private var canShareSummary: Bool {
@@ -661,7 +678,7 @@ struct PostRunSummaryView: View {
     }
 
     private func multiplierText(for value: Double, decimals: Int = 2) -> String {
-        String(format: "x%.\(decimals)f", roundedMultiplierValue(value, decimals: decimals))
+        String(format: "×%.\(decimals)f", roundedMultiplierValue(value, decimals: decimals))
     }
 
     private func multiplierTone(for value: Double, decimals: Int = 2) -> BreakdownTone {
@@ -747,57 +764,51 @@ struct PostRunSummaryView: View {
         }
     }
 
-    private func breakdownRow(
+    private var ledgerDivider: some View {
+        Rectangle()
+            .fill(Color.primary.opacity(0.07))
+            .frame(height: 1)
+    }
+
+    private func ledgerRow(
         label: String,
         value: String,
         tone: BreakdownTone,
-        intensity: CGFloat
+        dimmed: Bool = false,
+        isCause: Bool = false
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                Text(label)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        HStack(spacing: 10) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(isCause ? Color.primary : Color.secondary)
 
-                Spacer()
-
-                Text(value)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(tone.foreground)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+            if isCause {
+                Text("run.summary.breakdown.cause".localized)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
                     .background(
                         Capsule()
-                            .fill(tone.foreground.opacity(0.14))
+                            .fill(Color.red.opacity(0.15))
                     )
             }
 
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.primary.opacity(0.08))
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: tone.gradient,
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: max(proxy.size.width * intensity, 28))
-                }
+            Spacer(minLength: 12)
+
+            if let symbol = tone.trendSymbol {
+                Image(systemName: symbol)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(tone.foreground)
             }
-            .frame(height: 6)
-        }
-    }
 
-    private func multiplierIntensity(for multiplier: Double) -> CGFloat {
-        if multiplier < 1.0 {
-            return CGFloat(0.14 + min(max(multiplier, 0), 1) * 0.18)
+            Text(value)
+                .font(.callout.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(tone.foreground)
         }
-
-        let positiveGain = min(multiplier - 1.0, 1.0)
-        return CGFloat(0.24 + positiveGain * 0.42)
+        .padding(.vertical, 11)
+        .opacity(dimmed ? 0.4 : 1.0)
     }
 
     private func inspectRunOnMap() {
@@ -851,19 +862,49 @@ struct PostRunMapView: UIViewRepresentable {
         let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
         mapView.addOverlay(polyline)
 
-        let startAnnotation = MKPointAnnotation()
-        startAnnotation.coordinate = coordinates.first!
-        startAnnotation.title = "run.startPoint".localized
+        let startCoord = coordinates.first!
+        let endCoord = coordinates.last!
+        let startEndDistance = CLLocation(latitude: startCoord.latitude, longitude: startCoord.longitude)
+            .distance(from: CLLocation(latitude: endCoord.latitude, longitude: endCoord.longitude))
 
-        let endAnnotation = MKPointAnnotation()
-        endAnnotation.coordinate = coordinates.last!
-        endAnnotation.title = "run.endPoint".localized
+        // For very short routes the start/finish pins overlap, so collapse them into one.
+        if startEndDistance < 25 {
+            let routeAnnotation = MKPointAnnotation()
+            routeAnnotation.coordinate = startCoord
+            routeAnnotation.title = "run.route".localized
+            mapView.addAnnotation(routeAnnotation)
+        } else {
+            let startAnnotation = MKPointAnnotation()
+            startAnnotation.coordinate = startCoord
+            startAnnotation.title = "run.startPoint".localized
 
-        mapView.addAnnotations([startAnnotation, endAnnotation])
+            let endAnnotation = MKPointAnnotation()
+            endAnnotation.coordinate = endCoord
+            endAnnotation.title = "run.endPoint".localized
+
+            mapView.addAnnotations([startAnnotation, endAnnotation])
+        }
 
         let rect = polyline.boundingMapRect
-        let insets = UIEdgeInsets(top: 32, left: 32, bottom: 32, right: 32)
-        mapView.setVisibleMapRect(rect, edgePadding: insets, animated: false)
+        let metersPerPoint = MKMetersPerMapPointAtLatitude(startCoord.latitude)
+        let rectSpanMeters = max(rect.size.width, rect.size.height) * metersPerPoint
+
+        // Guarantee a sensible zoom level for tiny routes instead of zooming in to the max.
+        if rectSpanMeters < 150 {
+            let center = CLLocationCoordinate2D(
+                latitude: (startCoord.latitude + endCoord.latitude) / 2,
+                longitude: (startCoord.longitude + endCoord.longitude) / 2
+            )
+            let region = MKCoordinateRegion(
+                center: center,
+                latitudinalMeters: 200,
+                longitudinalMeters: 200
+            )
+            mapView.setRegion(region, animated: false)
+        } else {
+            let insets = UIEdgeInsets(top: 32, left: 32, bottom: 32, right: 32)
+            mapView.setVisibleMapRect(rect, edgePadding: insets, animated: false)
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -897,18 +938,18 @@ private enum BreakdownTone {
         case .negative:
             return .red
         case .neutral:
-            return .territoryBlue
+            return .primary
         }
     }
 
-    var gradient: [Color] {
+    var trendSymbol: String? {
         switch self {
         case .positive:
-            return [.boostGreen.opacity(0.85), .territoryBlue.opacity(0.72)]
+            return "arrow.up"
         case .negative:
-            return [.red.opacity(0.9), .orange.opacity(0.8)]
+            return "arrow.down"
         case .neutral:
-            return [.territoryBlue.opacity(0.85), .territoryBlue.opacity(0.45)]
+            return nil
         }
     }
 }
@@ -925,7 +966,7 @@ private struct PostRunCompactStatCard: View {
                 .foregroundStyle(.territoryBlue)
                 .frame(width: 34, height: 34)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.territoryBlue.opacity(0.14))
                 )
 
@@ -959,10 +1000,10 @@ private extension View {
     func summarySurface(fill: LinearGradient) -> some View {
         padding(18)
             .background(
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .fill(fill)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
                             .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
                     )
             )

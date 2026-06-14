@@ -6,6 +6,7 @@ enum PostShareTemplate: String, CaseIterable, Identifiable {
     case hero
     case card
     case stripe
+    case mapOnly
 
     var id: String { rawValue }
 
@@ -14,6 +15,7 @@ enum PostShareTemplate: String, CaseIterable, Identifiable {
         case .hero: return "social.externalShare.template.hero".localized
         case .card: return "social.externalShare.template.card".localized
         case .stripe: return "social.externalShare.template.stripe".localized
+        case .mapOnly: return "social.externalShare.template.mapOnly".localized
         }
     }
 }
@@ -32,12 +34,19 @@ struct PostShareCardView: View {
         Color(hex: post.authorColor) ?? .accentColor
     }
 
+    /// Average pace (min per km/mi) derived from the run's average speed.
+    private var paceValueText: String {
+        guard post.avgSpeed > 0 else { return "--" }
+        return "\(post.avgSpeed.formattedPace) \(UnitPreference.shared.paceUnitLabel)"
+    }
+
     var body: some View {
         Group {
             switch template {
             case .hero: heroTemplate
             case .card: cardTemplate
             case .stripe: stripeTemplate
+            case .mapOnly: mapOnlyTemplate
             }
         }
         .frame(width: canvasWidth, height: canvasHeight)
@@ -53,6 +62,11 @@ struct PostShareCardView: View {
                 .clipped()
             heroGradient
             heroStatsLayer
+        }
+        .overlay(alignment: .topTrailing) {
+            pointsBadge(iconSize: 40, valueSize: 60, labelSize: 24, hPadding: 36, vPadding: 24)
+                .padding(.top, 96)
+                .padding(.trailing, 80)
         }
     }
 
@@ -100,10 +114,10 @@ struct PostShareCardView: View {
             )
             verticalDivider(height: 88, opacity: 0.22, hPadding: 42)
             heroMetricItem(
-                icon: "flame.fill",
-                value: post.trail.formattedTrail,
-                label: "trail.unit".localized,
-                tint: accentColor
+                icon: "stopwatch.fill",
+                value: paceValueText,
+                label: "run.pace".localized,
+                tint: .white
             )
         }
     }
@@ -146,13 +160,17 @@ struct PostShareCardView: View {
                 backgroundFill
                     .frame(width: canvasWidth - 80, height: 1000)
                     .clipped()
+                    .overlay(alignment: .topTrailing) {
+                        pointsBadge(iconSize: 38, valueSize: 56, labelSize: 22, hPadding: 32, vPadding: 22)
+                            .padding(.top, 40)
+                            .padding(.trailing, 40)
+                    }
 
                 // Stats panel (bottom of polaroid) — content vertically centered
                 VStack(alignment: .leading, spacing: 0) {
                     Spacer(minLength: 0)
                     VStack(alignment: .leading, spacing: 44) {
                         cardStatsGrid
-                        cardRouteSection
                         brandRow(iconSize: 56, textSize: 44, textColor: .white)
                     }
                     .padding(.horizontal, 60)
@@ -186,9 +204,9 @@ struct PostShareCardView: View {
             )
             verticalDivider(height: 96, opacity: 0.16, hPadding: 28)
             cardStatItem(
-                value: post.trail.formattedTrail,
-                label: "trail.unit".localized,
-                accent: true
+                value: paceValueText,
+                label: "run.pace".localized,
+                accent: false
             )
         }
     }
@@ -210,41 +228,6 @@ struct PostShareCardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var cardRouteSection: some View {
-        HStack(spacing: 28) {
-            RouteMiniView(
-                routePreview: post.routePreview,
-                strokeColor: accentColor
-            )
-            .frame(width: 280, height: 160)
-            .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(.white.opacity(0.06))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .strokeBorder(.white.opacity(0.08), lineWidth: 1)
-            )
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text("run.summary.route".localized)
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .textCase(.uppercase)
-                    .tracking(1.5)
-                if post.avgSpeed > 0 {
-                    Text(String(format: "%.1f", post.avgSpeed) + " " + "unit.speed.kmh".localized)
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text("run.avgSpeed".localized)
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-            }
-            Spacer(minLength: 0)
-        }
-    }
-
     // MARK: - Stripe Template
 
     private var stripeTemplate: some View {
@@ -255,6 +238,11 @@ struct PostShareCardView: View {
             stripeBar
         }
         .frame(width: canvasWidth, height: canvasHeight)
+        .overlay(alignment: .topTrailing) {
+            pointsBadge(iconSize: 38, valueSize: 56, labelSize: 22, hPadding: 32, vPadding: 22)
+                .padding(.top, 96)
+                .padding(.trailing, 60)
+        }
     }
 
     private var stripeBar: some View {
@@ -271,8 +259,8 @@ struct PostShareCardView: View {
                 )
                 verticalDivider(height: 80, opacity: 0.35, hPadding: 24)
                 stripeStat(
-                    value: post.trail.formattedTrail,
-                    label: "trail.unit".localized
+                    value: paceValueText,
+                    label: "run.pace".localized
                 )
             }
             brandRow(iconSize: 46, textSize: 36, textColor: .white)
@@ -304,6 +292,14 @@ struct PostShareCardView: View {
                 .tracking(1.5)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Map Only Template
+
+    private var mapOnlyTemplate: some View {
+        backgroundFill
+            .frame(width: canvasWidth, height: canvasHeight)
+            .clipped()
     }
 
     // MARK: - Shared building blocks
@@ -344,6 +340,41 @@ struct PostShareCardView: View {
             .padding(.horizontal, hPadding)
     }
 
+    /// Highlighted Points badge anchored to the top-right of each template.
+    /// Uses the user's accent color so it carries the run's identity colour
+    /// and stays legible over arbitrary photo backgrounds.
+    private func pointsBadge(iconSize: CGFloat, valueSize: CGFloat, labelSize: CGFloat, hPadding: CGFloat, vPadding: CGFloat) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: iconSize, weight: .bold))
+                .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(post.trail.formattedTrail)
+                    .font(.system(size: valueSize, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .monospacedDigit()
+                Text("trail.unit".localized)
+                    .font(.system(size: labelSize, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .textCase(.uppercase)
+                    .tracking(1.5)
+            }
+        }
+        .padding(.horizontal, hPadding)
+        .padding(.vertical, vPadding)
+        .background(
+            Capsule(style: .continuous)
+                .fill(accentColor)
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(.white.opacity(0.18), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.28), radius: 18, x: 0, y: 8)
+        )
+    }
+
     private func brandRow(iconSize: CGFloat, textSize: CGFloat, textColor: Color) -> some View {
         HStack(spacing: 20) {
             Image("logo")
@@ -366,76 +397,6 @@ struct PostShareCardView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, secs)
         }
         return String(format: "%d:%02d", minutes, secs)
-    }
-}
-
-// MARK: - Route mini (used by Card template)
-
-private struct RouteMiniView: View {
-    let routePreview: [GeoPoint]
-    let strokeColor: Color
-
-    var body: some View {
-        GeometryReader { proxy in
-            let points = normalizedPoints(in: proxy.size)
-
-            if points.count >= 2 {
-                ZStack {
-                    Path { path in
-                        path.move(to: points[0])
-                        for p in points.dropFirst() { path.addLine(to: p) }
-                    }
-                    .stroke(
-                        strokeColor,
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round)
-                    )
-
-                    if let first = points.first {
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 10, height: 10)
-                            .overlay(Circle().stroke(strokeColor, lineWidth: 3))
-                            .position(first)
-                    }
-                    if let last = points.last {
-                        Circle()
-                            .fill(strokeColor)
-                            .frame(width: 10, height: 10)
-                            .overlay(Circle().stroke(.white, lineWidth: 3))
-                            .position(last)
-                    }
-                }
-            } else {
-                Image(systemName: "map")
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundStyle(.white.opacity(0.25))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-    }
-
-    private func normalizedPoints(in size: CGSize) -> [CGPoint] {
-        guard routePreview.count >= 2 else { return [] }
-        let latitudes = routePreview.map(\.latitude)
-        let longitudes = routePreview.map(\.longitude)
-        guard let minLat = latitudes.min(), let maxLat = latitudes.max(),
-              let minLon = longitudes.min(), let maxLon = longitudes.max() else {
-            return []
-        }
-        let latSpan = max(maxLat - minLat, 0.00001)
-        let lonSpan = max(maxLon - minLon, 0.00001)
-        let inset: CGFloat = 18
-        let rect = CGRect(x: inset, y: inset, width: size.width - 2*inset, height: size.height - 2*inset)
-        let scale = min(rect.width / lonSpan, rect.height / latSpan)
-        let drawW = lonSpan * scale
-        let drawH = latSpan * scale
-        let xOff = rect.minX + (rect.width - drawW) / 2
-        let yOff = rect.minY + (rect.height - drawH) / 2
-        return routePreview.map { p in
-            let x = xOff + ((p.longitude - minLon) * scale)
-            let y = yOff + (drawH - (p.latitude - minLat) * scale)
-            return CGPoint(x: x, y: y)
-        }
     }
 }
 
@@ -488,6 +449,11 @@ private extension Post {
 
 #Preview("Stripe") {
     PostShareCardPreview(post: .preview, photo: nil, template: .stripe)
+        .padding()
+}
+
+#Preview("Map Only") {
+    PostShareCardPreview(post: .preview, photo: nil, template: .mapOnly)
         .padding()
 }
 #endif

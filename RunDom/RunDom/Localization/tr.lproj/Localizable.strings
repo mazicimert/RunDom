@@ -3,6 +3,7 @@
 // MARK: - Common
 "common.ok" = "Tamam";
 "common.cancel" = "Vazgeç";
+"common.settings" = "Ayarlar";
 "common.done" = "Bitti";
 "common.error" = "Hata";
 "common.retry" = "Tekrar Dene";
@@ -15,6 +16,7 @@
 "common.skip" = "Atla";
 "common.continue" = "Devam";
 "common.dismiss" = "Kapat";
+"common.seeAll" = "Tümünü Gör";
 
 // MARK: - Tab Bar
 "tab.map" = "Harita";
@@ -224,6 +226,7 @@
 "run.distance" = "Mesafe";
 "run.duration" = "Süre";
 "run.pace" = "Tempo";
+"run.avgPace" = "Ort. Tempo";
 "run.avgSpeed" = "Ort. Hız";
 "run.maxSpeed" = "Maks. Hız";
 "run.uniqueZones" = "Tekil Bölge";
@@ -254,9 +257,15 @@
 "run.gallery.saved" = "Görsel galerine kaydedildi.";
 "run.gallery.savedButton" = "Kaydedildi";
 "run.gallery.saveFailed" = "Görsel galerine kaydedilemedi.";
-"run.gallery.permissionDenied" = "Görseli kaydetmek için Fotoğraflar erişimi gerekli.";
+"run.gallery.permissionDenied.title" = "Fotoğraflar Erişimi Gerekli";
+"run.gallery.permissionDenied" = "Görseli kaydetmek için Fotoğraflar erişimi gerekli. Ayarlar'dan izin verebilirsin.";
 "run.summary.reason.speedThreshold" = "%@ eşiğinin altında kaldığın için puan verilmedi.";
 "run.summary.reason.dailyCap" = "Bugünkü limite ulaştığın için bu koşudan puan alamadın.";
+"run.summary.breakdown.voided" = "Toplam puan 0 olduğu için bu çarpanların sonuca etkisi olmadı.";
+"run.summary.breakdown.voided.speed" = "Hız çarpanı 0 olduğu için puan sıfırlandı; diğer çarpanların etkisi kalmadı.";
+"run.summary.breakdown.cause" = "Sebep";
+"run.summary.voided.encourage" = "Bir sonraki koşunda eşiği geçersen bu çarpanlar devreye girer.";
+"run.route" = "Rota";
 "run.boostActive" = "Boost Aktif";
 "run.boostCancelled" = "Boost İptal";
 "run.selectMode" = "Mod Seç";
@@ -292,6 +301,8 @@
 "run.rivalOverlay.toggle" = "Rakip Alanlar";
 "run.rivalOverlay.accessibility.on" = "Rakip alanlar görünür";
 "run.rivalOverlay.accessibility.off" = "Rakip alanlar gizli";
+"run.tilt.accessibility.on" = "3B eğim açık";
+"run.tilt.accessibility.off" = "3B eğim kapalı";
 "run.rivalOverlay.entered" = "Rakip bölgeye girdin";
 "run.boostSafe" = "Boost güvende";
 "run.boostApproaching" = "Eşiğe yaklaşıyor";
@@ -350,10 +361,10 @@
 "challenge.duration.value" = "%d dk";
 "challenge.distance.value" = "%@ %@";
 "challenge.progress.value" = "%@ / %@";
-"challenge.reward.value" = "+%@ trail";
-"challenge.reward.granted" = "Günlük görev bonusu: +%@ trail";
+"challenge.reward.value" = "+%@ puan";
+"challenge.reward.granted" = "Günlük görev bonusu: +%@ puan";
 "challenge.prompt.title" = "Bugünün görevleri hazır";
-"challenge.prompt.body" = "Safe ve difficult görevlerden birini seçip bugün bonus trail kazanabilirsin.";
+"challenge.prompt.body" = "Safe ve difficult görevlerden birini seçip bugün bonus puan kazanabilirsin.";
 "challenge.prompt.action" = "Görevleri Gör";
 "challenge.compact.subtitle.pending" = "Koşudan önce tek bir hedef seçebilirsin.";
 "challenge.compact.subtitle.active" = "Bugün seçtiğin hedef burada takip edilir.";
@@ -465,6 +476,10 @@
 "leaderboard.weekly.remaining.minutes" = "%ddk";
 "leaderboard.empty" = "Henüz sıralama yok.";
 "leaderboard.empty.subtitle" = "Sıralamada yer almak için koşu tamamla.";
+"leaderboard.empty.cta" = "İlk koşunu yap, tahtaya çık";
+"leaderboard.territories" = "%d bölge";
+"leaderboard.gap.toPass" = "Üst sırayı geçmene %@";
+"leaderboard.champion" = "Şampiyon";
 
 // MARK: - Stats
 "stats.thisWeek" = "Bu Hafta";
@@ -535,24 +550,50 @@
 "badge.distance_5k.description" = "Tek bir koşuda %@ tamamla.";
 "badge.distance_10k.name" = "10K Koşucusu";
 "badge.distance_10k.description" = "Tek bir koşuda %@ tamamla.";
+"badge.distance_21k.name" = "Yarı Maraton";
+"badge.distance_21k.description" = "Tek bir koşuda %@ tamamla.";
+"badge.distance_42k.name" = "Maraton";
+"badge.distance_42k.description" = "Tek bir koşuda %@ tamamla.";
 "badge.total_distance_100k.name" = "Yüzlük Kulübü";
 "badge.total_distance_100k.description" = "Toplamda %@ koşu mesafesine ulaş.";
+"badge.runs_50.name" = "Azimli Koşucu";
+"badge.runs_50.description" = "Toplam 50 koşu tamamla.";
+"badge.runs_100.name" = "Yüzbaşı";
+"badge.runs_100.description" = "Toplam 100 koşu tamamla.";
+"badge.endurance_60.name" = "Dayanıklılık";
+"badge.endurance_60.description" = "Tek bir koşuda 60 dakikayı geç.";
 "badge.boost_5.name" = "Boost Pilotu";
 "badge.boost_5.description" = "Boost modunda 5 koşu bitir.";
+"badge.boost_25.name" = "Boost Ustası";
+"badge.boost_25.description" = "Boost modunda 25 koşu bitir.";
+"badge.points_10k.name" = "Puan Avcısı";
+"badge.points_10k.description" = "Toplam 10.000 puana ulaş.";
+"badge.points_50k.name" = "Puan Ustası";
+"badge.points_50k.description" = "Toplam 50.000 puana ulaş.";
+"badge.points_100k.name" = "Puan Efsanesi";
+"badge.points_100k.description" = "Toplam 100.000 puana ulaş.";
+"badge.level_10.name" = "Yükselen Yıldız";
+"badge.level_10.description" = "10. seviyeye ulaş.";
+"badge.level_25.name" = "Usta Koşucu";
+"badge.level_25.description" = "25. seviyeye ulaş.";
 "badge.first_territory.name" = "İlk Fetih";
 "badge.first_territory.description" = "İlk bölgeni fethet.";
 "badge.territory_25.name" = "Mahalle Hakimi";
 "badge.territory_25.description" = "Toplam 25 bölge fethet.";
 "badge.territory_100.name" = "Şehir Fatihi";
 "badge.territory_100.description" = "Toplam 100 bölge fethet.";
-"badge.first_dropzone.name" = "Dropzone Acemisi";
-"badge.first_dropzone.description" = "İlk dropzone'unu al.";
-"badge.dropzone_5.name" = "Dropzone Avcısı";
-"badge.dropzone_5.description" = "5 dropzone al.";
+"badge.early_bird.name" = "Erken Kuş";
+"badge.early_bird.description" = "Sabah 07.00'den önce bir koşu başlat.";
+"badge.night_owl.name" = "Gece Kuşu";
+"badge.night_owl.description" = "Gece 23.00'ten sonra bir koşu başlat.";
 "badge.streak_7.name" = "Sıcak Hafta";
 "badge.streak_7.description" = "7 günlük koşu serisine ulaş.";
+"badge.streak_14.name" = "Alev";
+"badge.streak_14.description" = "14 günlük koşu serisine ulaş.";
 "badge.streak_30.name" = "Durmak Yok";
 "badge.streak_30.description" = "30 günlük koşu serisine ulaş.";
+"badge.streak_100.name" = "Sönmez Ateş";
+"badge.streak_100.description" = "100 günlük koşu serisine ulaş.";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Bölgen ele geçirildi!";
@@ -851,3 +892,4 @@
 "social.externalShare.template.hero" = "Hero";
 "social.externalShare.template.card" = "Kart";
 "social.externalShare.template.stripe" = "Şerit";
+"social.externalShare.template.mapOnly" = "Harita";

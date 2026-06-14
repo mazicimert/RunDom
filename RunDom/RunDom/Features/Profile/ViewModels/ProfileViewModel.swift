@@ -41,9 +41,23 @@ final class ProfileViewModel: ObservableObject {
         badges.filter { !$0.isUnlocked && !$0.isSecret }
     }
 
+    /// The most meaningful badges to surface in the profile preview: unlocked
+    /// first (keeping their display order), then locked badges closest to
+    /// completion, then any remaining (incl. secret) ones.
+    var previewBadges: [Badge] {
+        let unlocked = badges.filter { $0.isUnlocked }
+        let inProgress = badges
+            .filter { !$0.isUnlocked && !$0.isSecret }
+            .sorted { $0.progressPercentage > $1.progressPercentage }
+        let remaining = badges.filter { !$0.isUnlocked && $0.isSecret }
+        return Array((unlocked + inProgress + remaining).prefix(Self.badgePreviewCount))
+    }
+
+    static let badgePreviewCount = 6
+
     var streakText: String {
         guard let user else { return "" }
-        return String(format: "profile.streakDays".localized, user.streakDays)
+        return String(format: "profile.streakDays".localized, user.effectiveStreakDays)
     }
 
     // MARK: - Data Loading
@@ -70,7 +84,7 @@ final class ProfileViewModel: ObservableObject {
 
         // Posts are loaded tolerantly — empty stays if rules deny or query fails.
         do {
-            let result = try await postService.getPosts(byUser: userId, limit: 5)
+            let result = try await postService.getPosts(byUser: userId, limit: 3)
             posts = result.posts
         } catch {
             AppLogger.firebase.warning("Failed to load posts: \(error.localizedDescription)")
@@ -90,18 +104,35 @@ final class ProfileViewModel: ObservableObject {
 
     private func sortBadges(_ badges: [Badge]) -> [Badge] {
         let displayOrder: [String] = [
-            "boost_5",
-            "distance_10k",
-            "distance_5k",
-            "dropzone_5",
-            "first_dropzone",
+            // Performance
             "first_run",
+            "distance_5k",
+            "distance_10k",
+            "distance_21k",
+            "distance_42k",
+            "total_distance_100k",
+            "runs_50",
+            "runs_100",
+            "endurance_60",
+            "boost_5",
+            "boost_25",
+            "points_10k",
+            "points_50k",
+            "points_100k",
+            "level_10",
+            "level_25",
+            // Territory
             "first_territory",
-            "streak_30",
-            "streak_7",
-            "territory_100",
             "territory_25",
-            "total_distance_100k"
+            "territory_100",
+            // Exploration
+            "early_bird",
+            "night_owl",
+            // Streak
+            "streak_7",
+            "streak_14",
+            "streak_30",
+            "streak_100"
         ]
         let indexById = Dictionary(uniqueKeysWithValues: displayOrder.enumerated().map { ($1, $0) })
 

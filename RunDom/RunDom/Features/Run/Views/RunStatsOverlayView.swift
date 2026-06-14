@@ -22,6 +22,7 @@ struct RunStatsOverlayView: View {
     @Binding var selectedDetent: PresentationDetent
 
     static let compactDetent: PresentationDetent = .fraction(0.35)
+    static let pausedCompactDetent: PresentationDetent = .fraction(0.43)
     static let expandedDetent: PresentationDetent = .fraction(0.85)
 
     private var isExpanded: Bool {
@@ -49,6 +50,9 @@ struct RunStatsOverlayView: View {
         VStack(spacing: 10) {
             gpsBadge
                 .frame(maxWidth: .infinity, alignment: .trailing)
+                .overlay(alignment: .leading) {
+                    territoryCountChip
+                }
 
             heroMetricCompact
             secondaryStatsCompact
@@ -89,8 +93,30 @@ struct RunStatsOverlayView: View {
         HStack(spacing: 12) {
             compactStat(value: elapsedTime, label: "run.timeShort".localized)
             compactStat(value: distanceText, label: "run.distanceShort".localized)
-            compactStat(value: "\(territories)", label: "run.zonesShort".localized)
+            compactStat(value: compactPaceText, label: "run.pace".localized)
         }
+    }
+
+    private var compactPaceText: String {
+        "\(pace) \(unitPreference.paceUnitLabel)"
+    }
+
+    private var territoryCountChip: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "map.fill")
+                .font(.caption.weight(.bold))
+            Text("\(territories)")
+                .font(.footnote.weight(.bold).monospacedDigit())
+        }
+        .foregroundStyle(sheetSecondaryText)
+        .padding(.horizontal, 11)
+        .padding(.vertical, 7)
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color(.systemGray6))
+        )
+        .accessibilityLabel("run.territoriesCaptured".localized)
+        .accessibilityValue("\(territories)")
     }
 
     @ViewBuilder

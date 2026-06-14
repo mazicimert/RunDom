@@ -16,6 +16,10 @@ struct ActiveRunView: View {
     @State private var recenterTrigger = 0
     @State private var isPlayingIntro = true
     @State private var introTimeoutTask: Task<Void, Never>?
+    // 3D camera tilt during the run. Off by default — the camera tracks the runner from
+    // a flat top-down framing. Users who prefer the cinematic tilt can opt in via the map
+    // toggle; the choice persists across runs.
+    @AppStorage(AppConstants.UserDefaultsKeys.runMapTiltEnabled) private var isTiltEnabled = false
 
     // Safety net: if no usable GPS fix arrives, start the run anyway after this
     // long so the screen never hangs on the space view. Comfortably longer than
@@ -36,6 +40,7 @@ struct ActiveRunView: View {
                 showsRivalOverlay: viewModel.isRivalOverlayEnabled,
                 isFollowingUser: $isFollowingUser,
                 recenterTrigger: recenterTrigger,
+                isTiltEnabled: isTiltEnabled,
                 initialUserCoordinate: viewModel.introStartCoordinate,
                 onIntroComplete: { finishIntro() }
             )
@@ -55,6 +60,8 @@ struct ActiveRunView: View {
             if !isPlayingIntro {
                 VStack(spacing: 12) {
                     rivalOverlayToggle
+
+                    tiltToggle
 
                     if !isFollowingUser {
                         recenterButton
@@ -130,10 +137,14 @@ struct ActiveRunView: View {
                 selectedDetent: $statsDetent
             )
             .presentationDetents(
-                [RunStatsOverlayView.compactDetent, RunStatsOverlayView.expandedDetent],
+                statsSheetDetents,
                 selection: $statsDetent
             )
-            .presentationBackgroundInteraction(.enabled(upThrough: RunStatsOverlayView.compactDetent))
+            .presentationBackgroundInteraction(
+                .enabled(upThrough: viewModel.runState == .paused
+                    ? RunStatsOverlayView.pausedCompactDetent
+                    : RunStatsOverlayView.compactDetent)
+            )
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(30)
             .interactiveDismissDisabled()
@@ -156,6 +167,9 @@ struct ActiveRunView: View {
             guard newValue > oldValue else { return }
             presentRivalTerritoryBanner()
         }
+        .onChange(of: viewModel.runState) { _, newState in
+            adjustStatsDetent(for: newState)
+        }
         .onDisappear {
             rivalTerritoryBannerTask?.cancel()
             introTimeoutTask?.cancel()
@@ -164,6 +178,20 @@ struct ActiveRunView: View {
     }
 
     // MARK: - Top Status
+
+    private var statsSheetDetents: Set<PresentationDetent> {
+        if viewModel.runState == .paused {
+            return [RunStatsOverlayView.pausedCompactDetent, RunStatsOverlayView.expandedDetent]
+        }
+        return [RunStatsOverlayView.compactDetent, RunStatsOverlayView.expandedDetent]
+    }
+
+    private func adjustStatsDetent(for runState: ActiveRunViewModel.RunState) {
+        guard statsDetent != RunStatsOverlayView.expandedDetent else { return }
+        statsDetent = runState == .paused
+            ? RunStatsOverlayView.pausedCompactDetent
+            : RunStatsOverlayView.compactDetent
+    }
 
     private var shouldShowTopStatusStack: Bool {
         viewModel.gpsSignalLost
@@ -249,6 +277,30 @@ struct ActiveRunView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("accessibility.run.recenter".localized)
+    }
+
+    private var tiltToggle: some View {
+        Button {
+            Haptics.selection()
+            isTiltEnabled.toggle()
+        } label: {
+            Image(systemName: isTiltEnabled ? "view.3d" : "view.2d")
+                .font(.body.bold())
+                .foregroundStyle(isTiltEnabled ? Color.accentColor : .primary)
+                .frame(width: 44, height: 44)
+                .background(.thinMaterial, in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.white.opacity(0.22), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: 4)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            isTiltEnabled
+                ? "run.tilt.accessibility.on".localized
+                : "run.tilt.accessibility.off".localized
+        )
     }
 
     private var rivalOverlayToggle: some View {
@@ -361,17 +413,38 @@ struct RunMapView: UIViewRepresentable {
     let showsRivalOverlay: Bool
     @Binding var isFollowingUser: Bool
     let recenterTrigger: Int
+    /// When true the follow camera holds a 3D tilt; when false it tracks the runner from a
+    /// flat top-down framing. User-controlled via the map's 2D/3D toggle.
+    let isTiltEnabled: Bool
     /// Already-known runner coordinate so the cinematic descent can start as soon as
     /// the map appears, rather than waiting on MapKit's own user-location callback.
     var initialUserCoordinate: CLLocationCoordinate2D?
     var onIntroComplete: (() -> Void)?
 
     // Camera presets
-    private static let introStartAltitude: CLLocationDistance = 11_000_000 // ~earth-from-space view
-    private static let followAltitude: CLLocationDistance = 1500           // close-up follow distance
-    private static let followPitch: CGFloat = 50                           // 3D tilt
-    private static let introHoldDuration: TimeInterval = 0.3               // beat in space before descending
-    private static let introDuration: TimeInterval = 4.6                   // space → follow altitude descent
+    // NOTE: the starting altitude is deliberately a regional view (~200 km), NOT a country
+    // (~2,000 km) or earth-from-space (~11,000 km) view. The black flashes during the approach
+    // were MapKit running out of loaded tiles: a continuous fly across ~10 zoom levels never
+    // lets the loader finish, and the coarse ancestor tile for the current view gets evicted
+    // before the finer tiles arrive — leaving nothing to draw (black). ~200 km → 1.5 km is
+    // only ~7 zoom levels, a span MapKit streams reliably with the ancestor always present
+    // (so worst case is a brief blur, never black). Raising this re-introduces the black risk.
+    private static let introStartAltitude: CLLocationDistance = 5_000_000  // continental view
+    private static let followAltitude: CLLocationDistance = 1300           // close-up follow distance
+    private static let followPitchTilted: CGFloat = 50                     // 3D tilt (when enabled)
+    /// Effective camera pitch for every framing below — the cinematic descent, touchdown, and
+    /// live follow all read this so toggling 2D/3D flows through a single value.
+    var followPitch: CGFloat { isTiltEnabled ? Self.followPitchTilted : 0 }
+    private static let introHoldDuration: TimeInterval = 0.3               // beat at altitude before descending
+    // The descent runs at an (almost) constant perceived zoom speed — geometric altitude
+    // interpolation paced over this duration. The duration is chosen so the per-second zoom
+    // factor stays within what MapKit can stream, so no frame ever outruns the tile loader
+    // (which is what produced black tiles). A drone-like, uninterrupted glide — no pause.
+    private static let introDuration: TimeInterval = 5.4                   // altitude → follow descent
+    // Fraction of the descent spent easing in / out of the constant-speed glide (each end).
+    // A trapezoidal velocity profile keeps a long constant-speed middle with soft start/stop,
+    // so peak zoom speed stays low (≈1/(1-2·ramp)× the average) and tiles always keep up.
+    private static let introVelocityRamp: Double = 0.22
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -382,16 +455,43 @@ struct RunMapView: UIViewRepresentable {
         mapView.isPitchEnabled = true
         mapView.isRotateEnabled = true
         mapView.showsCompass = false
+        // Trim tile-rendering work so MapKit can keep up with the rapidly changing zoom
+        // level during the descent — POI labels and 3D buildings are the heaviest tile
+        // content and the biggest contributors to black/unloaded frames. Kept off for the
+        // whole run too: re-enabling on intro completion would trigger a tile reload flash
+        // right as follow mode engages, and the H3 territory overlays are the focus anyway.
+        mapView.pointOfInterestFilter = .excludingAll
+        mapView.showsBuildings = false
+
+        // Detect user pan / pinch so we can drop manual follow (and reveal the recenter button)
+        // the moment the runner moves the map themselves. These run alongside MapKit's own
+        // gesture handling (see UIGestureRecognizerDelegate) without swallowing it.
+        let pan = UIPanGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.userInteractedWithMap(_:))
+        )
+        pan.delegate = context.coordinator
+        mapView.addGestureRecognizer(pan)
+        let pinch = UIPinchGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.userInteractedWithMap(_:))
+        )
+        pinch.delegate = context.coordinator
+        mapView.addGestureRecognizer(pinch)
 
         // Initial high-altitude camera. Center it on the runner if we already know
-        // where they are, so the very first frame is the "from space" view directly
-        // above them; otherwise fall back to a neutral point until a fix arrives.
+        // where they are; otherwise fall back to a neutral point until a fix arrives.
+        // Request the final follow pitch from the very first frame: MapKit clamps pitch to
+        // ~0 at high altitude and lets it grow as the camera descends, so the tilt eases in
+        // naturally *as part of the descent* instead of being a separate tilt-out step at the
+        // end (which both looked like a pull-back and flashed black as it revealed the
+        // horizon). Rendering the pitched view up front also pre-loads the horizon tiles.
         let initialCenter = initialUserCoordinate
             ?? CLLocationCoordinate2D(latitude: 39.0, longitude: 35.0)
         let initialCamera = MKMapCamera(
             lookingAtCenter: initialCenter,
             fromDistance: Self.introStartAltitude,
-            pitch: 0,
+            pitch: followPitch,
             heading: 0
         )
         mapView.setCamera(initialCamera, animated: false)
@@ -405,6 +505,12 @@ struct RunMapView: UIViewRepresentable {
 
         // Kick off the space→ground descent as soon as we have a coordinate to aim at.
         coordinator.startIntroIfReady(on: mapView)
+
+        // The user flipped the 2D/3D toggle mid-run — ease the live camera to the new pitch.
+        if isTiltEnabled != coordinator.lastAppliedTiltEnabled {
+            coordinator.lastAppliedTiltEnabled = isTiltEnabled
+            coordinator.applyTiltPreference(on: mapView)
+        }
 
         if recenterTrigger != coordinator.lastRecenterTrigger {
             coordinator.lastRecenterTrigger = recenterTrigger
@@ -486,7 +592,7 @@ struct RunMapView: UIViewRepresentable {
         coordinator.cancelIntro()
     }
 
-    final class Coordinator: NSObject, MKMapViewDelegate {
+    final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
         var parent: RunMapView
         var lastRenderedPointCount = 0
         var lastRivalOverlaySignature = ""
@@ -496,8 +602,16 @@ struct RunMapView: UIViewRepresentable {
         var wonCellColor: String = ""
         var currentUserId: String?
         var lastRecenterTrigger: Int = 0
+        var lastAppliedTiltEnabled: Bool
         private var hasPlayedIntro = false
         private var isApplyingProgrammaticChange = false
+        // Manual follow: we keep the camera locked onto the runner ourselves (centered, at the
+        // fixed follow altitude + pitch) instead of using MKMapView's `userTrackingMode`. The
+        // built-in tracking mode reframes the camera to MapKit's own default follow distance on
+        // entry — a visible zoom-out / pull-back — and it can't be overridden without a
+        // programmatic `setCamera`, which in turn drops tracking back to `.none`. Driving the
+        // follow ourselves keeps the exact close-up framing with no pull-back, ever.
+        private var isUserFollowActive = false
 
         // Cinematic intro animation state (driven frame-by-frame via CADisplayLink).
         private var introDisplayLink: CADisplayLink?
@@ -509,6 +623,7 @@ struct RunMapView: UIViewRepresentable {
         init(parent: RunMapView) {
             self.parent = parent
             self.lastRecenterTrigger = parent.recenterTrigger
+            self.lastAppliedTiltEnabled = parent.isTiltEnabled
         }
 
         // MARK: - User Location & Cinematic Intro
@@ -526,17 +641,29 @@ struct RunMapView: UIViewRepresentable {
             playCinematicIntro(on: mapView, target: target)
         }
 
-        /// Fallback trigger: if we had no cached coordinate, start the descent as soon
-        /// as MapKit hands us a usable user-location fix.
+        /// Fallback intro trigger + manual-follow driver. Before the intro plays this starts
+        /// the descent on the first usable fix; afterwards it keeps the camera locked onto the
+        /// runner (when follow is active and we aren't mid-animation).
         func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-            guard !hasPlayedIntro,
-                  let location = userLocation.location,
-                  location.horizontalAccuracy > 0,
-                  location.horizontalAccuracy < 200 else {
+            if !hasPlayedIntro {
+                guard let location = userLocation.location,
+                      location.horizontalAccuracy > 0,
+                      location.horizontalAccuracy < 200 else {
+                    return
+                }
+                hasPlayedIntro = true
+                playCinematicIntro(on: mapView, target: location.coordinate)
                 return
             }
-            hasPlayedIntro = true
-            playCinematicIntro(on: mapView, target: location.coordinate)
+
+            guard isUserFollowActive,
+                  !isApplyingProgrammaticChange,
+                  introDisplayLink == nil,
+                  let location = userLocation.location,
+                  CLLocationCoordinate2DIsValid(location.coordinate) else {
+                return
+            }
+            followCamera(on: mapView, location: location)
         }
 
         /// Drives the camera from a "from space" altitude straight down onto the runner.
@@ -552,11 +679,13 @@ struct RunMapView: UIViewRepresentable {
             introMapView = mapView
             introTarget = target
 
-            // Lock high above the runner so the first frame the user sees is space.
+            // Lock high above the runner. Request the final follow pitch up front (MapKit
+            // clamps it to ~0 at this altitude and grows it during the descent) so the tilt
+            // eases in as part of the approach rather than as a separate tilt-out at the end.
             let startCamera = MKMapCamera(
                 lookingAtCenter: target,
                 fromDistance: RunMapView.introStartAltitude,
-                pitch: 0,
+                pitch: parent.followPitch,
                 heading: 0
             )
             isApplyingProgrammaticChange = true
@@ -596,20 +725,25 @@ struct RunMapView: UIViewRepresentable {
             let elapsed = CACurrentMediaTime() - introStartTime
             let descentEnd = RunMapView.introHoldDuration + RunMapView.introDuration
 
-            let rawT = min(max((elapsed - RunMapView.introHoldDuration) / RunMapView.introDuration, 0), 1)
-            let t = Coordinator.easeInOut(rawT)
-            // Geometric (log-space) altitude interpolation → roughly constant perceived
-            // zoom speed across the huge space→ground range.
+            // Linear real-time fraction of the descent, shaped by a trapezoidal velocity
+            // profile: soft acceleration, a long constant-speed glide, soft deceleration.
+            // This bounds peak zoom speed so MapKit's tile loader never falls behind — a
+            // continuous, premium glide with no pause and no black frames.
+            let f = min(max((elapsed - RunMapView.introHoldDuration) / RunMapView.introDuration, 0), 1)
+            let t = Coordinator.trapezoidEase(f, ramp: RunMapView.introVelocityRamp)
+            // Geometric (log-space) altitude interpolation → constant perceived zoom speed
+            // across the descent range while `t` advances linearly through the glide.
             let altitude = RunMapView.introStartAltitude
                 * pow(RunMapView.followAltitude / RunMapView.introStartAltitude, t)
-            // Tilt the camera in over the final stretch of the descent.
-            let pitchT = Coordinator.easeInOut(min(max((rawT - 0.6) / 0.4, 0), 1))
-            let pitch = RunMapView.followPitch * CGFloat(pitchT)
 
+            // Hold the final follow pitch for the whole descent. MapKit clamps pitch toward 0
+            // while high and opens it up as the altitude drops, so the camera tilts in smoothly
+            // *during* the approach and arrives directly at the run framing — no separate
+            // tilt-out (which read as a pull-back and revealed un-loaded horizon tiles → black).
             mapView.camera = MKMapCamera(
                 lookingAtCenter: introTarget,
                 fromDistance: altitude,
-                pitch: pitch,
+                pitch: parent.followPitch,
                 heading: 0
             )
 
@@ -629,49 +763,107 @@ struct RunMapView: UIViewRepresentable {
             }
             introMapView = nil
 
-            // Pre-align the camera to exactly where MapKit's follow mode expects it:
-            // the user's *current* position and heading. This makes the tracking-mode
-            // entry a no-op so there is no visible zoom-out or pull-back.
-            let userLocation = mapView.userLocation.location
-            let center: CLLocationCoordinate2D = {
-                guard let coord = userLocation?.coordinate,
-                      CLLocationCoordinate2DIsValid(coord) else { return introTarget }
-                return coord
-            }()
-            let course = userLocation?.course ?? -1
-            let heading = course >= 0 ? course : 0.0
-
-            mapView.setCamera(
-                MKMapCamera(
-                    lookingAtCenter: center,
-                    fromDistance: RunMapView.followAltitude,
-                    pitch: RunMapView.followPitch,
-                    heading: heading
-                ),
-                animated: false
+            // Touchdown: the descent already arrived at the exact run framing (follow altitude
+            // AND pitch), so this is just a small animated recenter onto the live position — no
+            // tilt change and no altitude change, hence no pull-back. We also do NOT force a
+            // rotation to the runner's course here (a heading snap would swing to a new
+            // direction and expose un-loaded horizon tiles); we keep the current heading and
+            // let follow mode rotate gradually once the runner is actually moving.
+            let liveCoord = mapView.userLocation.location?.coordinate
+            let center = (liveCoord.map(CLLocationCoordinate2DIsValid) == true) ? liveCoord! : introTarget
+            let landed = MKMapCamera(
+                lookingAtCenter: center,
+                fromDistance: RunMapView.followAltitude,
+                pitch: parent.followPitch,
+                heading: mapView.camera.heading
             )
-            mapView.setUserTrackingMode(.followWithHeading, animated: false)
-            syncFollowingState(true)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            UIView.animate(
+                withDuration: 0.65,
+                delay: 0,
+                options: [.curveEaseInOut]
+            ) {
+                mapView.camera = landed
+            } completion: { [weak self] _ in
                 guard let self = self else { return }
-                self.isApplyingProgrammaticChange = false
-                self.parent.onIntroComplete?()
+                self.beginUserFollow(on: mapView)
+                // Hold the programmatic-change guard until the follow transition settles, so
+                // its region/tracking callbacks aren't mistaken for a user drag.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    self.isApplyingProgrammaticChange = false
+                }
+            }
+
+            // The camera has touched down above the runner — start the run clock now. The
+            // animated landing tilt continues underneath without delaying the run.
+            parent.onIntroComplete?()
+        }
+
+        /// Starts manual heading-up follow: from now on every location update keeps the camera
+        /// centered on the runner at the fixed follow altitude + pitch. No `userTrackingMode`,
+        /// so MapKit never reframes / pulls back.
+        private func beginUserFollow(on mapView: MKMapView) {
+            isUserFollowActive = true
+            syncFollowingState(true)
+            if let location = mapView.userLocation.location,
+               CLLocationCoordinate2DIsValid(location.coordinate) {
+                followCamera(on: mapView, location: location)
             }
         }
 
-        /// Forces the close-up follow framing (altitude + pitch) without animation,
-        /// overriding any altitude MapKit picks when entering tracking mode.
-        private func clampToFollowFraming(_ mapView: MKMapView) {
-            guard mapView.userTrackingMode != .none else { return }
-            let framed = mapView.camera.copy() as! MKMapCamera
-            framed.pitch = RunMapView.followPitch
-            framed.altitude = RunMapView.followAltitude
-            mapView.setCamera(framed, animated: false)
+        /// Moves the camera to keep the runner centered at the fixed close-up framing. Uses
+        /// MapKit's own animated camera move (interruptible by user gestures, and — since we
+        /// never enter tracking mode — it just goes to exactly the camera we ask for, with no
+        /// pull-back). Heading follows the course only when it's valid, so a stationary runner
+        /// doesn't make the map spin.
+        private func followCamera(on mapView: MKMapView, location: CLLocation) {
+            let heading = location.course >= 0 ? location.course : mapView.camera.heading
+            let camera = MKMapCamera(
+                lookingAtCenter: location.coordinate,
+                fromDistance: RunMapView.followAltitude,
+                pitch: parent.followPitch,
+                heading: heading
+            )
+            mapView.setCamera(camera, animated: true)
         }
 
-        private static func easeInOut(_ t: Double) -> Double {
-            t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2) / 2
+        /// User panned or pinched the map — stop following and surface the recenter button.
+        @objc func userInteractedWithMap(_ recognizer: UIGestureRecognizer) {
+            switch recognizer.state {
+            case .began, .changed:
+                guard isUserFollowActive else { return }
+                isUserFollowActive = false
+                syncFollowingState(false)
+            default:
+                break
+            }
+        }
+
+        // Let our pan/pinch recognizers fire alongside MapKit's built-in map gestures.
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+            true
+        }
+
+        /// Trapezoidal velocity profile over a normalized time fraction `f` ∈ [0, 1].
+        /// Velocity ramps up over `[0, ramp]`, stays constant over `[ramp, 1 - ramp]`, then
+        /// ramps down over `[1 - ramp, 1]`. Returns the integrated position (also in [0, 1])
+        /// and is C¹-continuous, so the camera accelerates and settles smoothly with no jolt.
+        /// Peak speed is only `1 / (1 - ramp)` × the average, keeping the zoom rate low enough
+        /// that MapKit's tile loader never falls behind during the close-up approach.
+        private static func trapezoidEase(_ f: Double, ramp: Double) -> Double {
+            let r = min(max(ramp, 0.0001), 0.5)
+            let vMax = 1.0 / (1.0 - r)            // peak velocity so the area under v(t) == 1
+            if f <= r {
+                return vMax * f * f / (2 * r)     // accelerating
+            } else if f < 1 - r {
+                return vMax * (f - r / 2)         // constant speed
+            } else {
+                let d = 1 - f
+                return 1 - vMax * d * d / (2 * r) // decelerating
+            }
         }
 
         /// Stops the descent without firing completion — used when the map view is torn
@@ -683,23 +875,55 @@ struct RunMapView: UIViewRepresentable {
             introMapView = nil
         }
 
+        // MARK: - Tilt
+
+        /// Animates the live camera to the current pitch preference, keeping the existing
+        /// center, distance and heading. If follow is active the next location update will
+        /// naturally hold the new pitch too (followCamera reads parent.followPitch).
+        func applyTiltPreference(on mapView: MKMapView) {
+            // Don't fight the cinematic descent — it already renders at the active pitch and
+            // the toggle isn't reachable until the intro completes.
+            guard introDisplayLink == nil, !introAwaitingTiles else { return }
+
+            let current = mapView.camera
+            let camera = MKMapCamera(
+                lookingAtCenter: current.centerCoordinate,
+                fromDistance: current.centerCoordinateDistance,
+                pitch: parent.followPitch,
+                heading: current.heading
+            )
+
+            isApplyingProgrammaticChange = true
+            UIView.animate(
+                withDuration: 0.45,
+                delay: 0,
+                options: [.curveEaseInOut]
+            ) {
+                mapView.camera = camera
+            } completion: { [weak self] _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self?.isApplyingProgrammaticChange = false
+                }
+            }
+        }
+
         // MARK: - Recenter
 
         func recenterOnUser(_ mapView: MKMapView) {
             let target = mapView.userLocation.location?.coordinate
                 ?? mapView.userLocation.coordinate
 
-            // If we still don't have a usable fix, just toggle tracking mode.
+            // If we still don't have a usable fix, just engage follow.
             guard CLLocationCoordinate2DIsValid(target),
                   target.latitude != 0 || target.longitude != 0 else {
-                mapView.setUserTrackingMode(.followWithHeading, animated: true)
+                beginUserFollow(on: mapView)
                 return
             }
 
             let camera = MKMapCamera(
                 lookingAtCenter: target,
                 fromDistance: RunMapView.followAltitude,
-                pitch: RunMapView.followPitch,
+                pitch: parent.followPitch,
                 heading: mapView.camera.heading
             )
 
@@ -712,24 +936,13 @@ struct RunMapView: UIViewRepresentable {
                 mapView.camera = camera
             } completion: { [weak self] _ in
                 guard let self = self else { return }
-                mapView.setUserTrackingMode(.followWithHeading, animated: true)
-                self.syncFollowingState(true)
+                // Engage follow without the pull-back (see beginUserFollow): entering tracking
+                // with `animated: true` here would zoom back out to MapKit's default framing.
+                self.beginUserFollow(on: mapView)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     self.isApplyingProgrammaticChange = false
                 }
             }
-        }
-
-        // MARK: - Tracking Mode Changes
-
-        func mapView(
-            _ mapView: MKMapView,
-            didChange mode: MKUserTrackingMode,
-            animated: Bool
-        ) {
-            guard hasPlayedIntro, !isApplyingProgrammaticChange else { return }
-            // User dragged the map — MapKit drops tracking to .none.
-            syncFollowingState(mode != .none)
         }
 
         private func syncFollowingState(_ following: Bool) {

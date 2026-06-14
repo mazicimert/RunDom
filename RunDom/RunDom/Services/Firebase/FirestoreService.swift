@@ -371,6 +371,13 @@ final class FirestoreService {
             .setData(from: badge, merge: true)
     }
 
+    func deleteBadge(badgeId: String, userId: String) async throws {
+        try await usersCollection.document(userId)
+            .collection("badges")
+            .document(badgeId)
+            .delete()
+    }
+
     // MARK: - Leaderboard
 
     func getLeaderboard(

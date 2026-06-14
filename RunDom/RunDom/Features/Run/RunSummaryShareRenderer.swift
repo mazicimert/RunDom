@@ -13,7 +13,7 @@ enum RunSummaryShareRenderer {
             modeText: viewModel.modeBadgeText,
             performanceText: viewModel.shareHeadlineText,
             subtitleText: viewModel.shareSubtitleText,
-            avgSpeedText: viewModel.avgSpeedText,
+            avgPaceText: viewModel.avgPaceText,
             brandText: viewModel.shareBrandText,
             dateText: viewModel.shareDateText,
             canvasSize: canvasSize

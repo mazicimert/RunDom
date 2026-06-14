@@ -262,7 +262,13 @@ struct UserProfileView: View {
             } else {
                 VStack(spacing: 8) {
                     ForEach(viewModel.posts) { post in
-                        postRow(post)
+                        NavigationLink {
+                            PostDetailView(postId: post.id)
+                                .environmentObject(appState)
+                        } label: {
+                            postRow(post)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -306,6 +312,7 @@ struct UserProfileView: View {
                 .foregroundStyle(.secondary)
         }
         .cardStyle()
+        .contentShape(Rectangle())
     }
 
     // MARK: - Block Overlays

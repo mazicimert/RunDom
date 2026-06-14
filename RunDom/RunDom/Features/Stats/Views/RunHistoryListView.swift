@@ -80,7 +80,7 @@ private struct RunHistoryRow: View {
                         .padding(.top, 8)
                 }
 
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     metricColumn(
                         value: run.distance.formattedCompactDistanceValueFromMeters,
                         title: "run.distance".localized
@@ -92,8 +92,9 @@ private struct RunHistoryRow: View {
                     )
 
                     metricColumn(
-                        value: run.avgSpeed.formattedCompactSpeedValue,
-                        title: "run.avgSpeed".localized
+                        value: run.avgSpeed.formattedPace,
+                        unit: UnitPreference.shared.paceUnitLabel,
+                        title: "run.avgPace".localized
                     )
                 }
             }
@@ -150,15 +151,24 @@ private struct RunHistoryRow: View {
         .accessibilityLabel("common.delete".localized)
     }
 
-    private func metricColumn(value: String, title: String) -> some View {
+    private func metricColumn(value: String, unit: String? = nil, title: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text(value)
-                .font(.system(size: 18, weight: .black, design: .rounded))
-                .foregroundStyle(.primary)
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.62)
-                .allowsTightening(true)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .monospacedDigit()
+                    .layoutPriority(1)
+
+                if let unit {
+                    Text(unit)
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.55)
+            .allowsTightening(true)
 
             Text(title)
                 .font(.caption.weight(.medium))

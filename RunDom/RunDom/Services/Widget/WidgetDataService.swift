@@ -69,7 +69,7 @@ final class WidgetDataService {
             totalTrail: Int(totalTrail.rounded()),
             totalDistanceMeters: totalDistance,
             runCount: thisWeekRuns.count,
-            streakDays: currentUser?.streakDays ?? 0,
+            streakDays: currentUser?.effectiveStreakDays ?? 0,
             userColorHex: userColorHex
         )
 

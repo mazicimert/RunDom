@@ -3,6 +3,7 @@
 // MARK: - Common
 "common.ok" = "OK";
 "common.cancel" = "Cancel";
+"common.settings" = "Settings";
 "common.done" = "Done";
 "common.error" = "Error";
 "common.retry" = "Retry";
@@ -15,6 +16,7 @@
 "common.skip" = "Skip";
 "common.continue" = "Continue";
 "common.dismiss" = "Dismiss";
+"common.seeAll" = "See All";
 
 // MARK: - Tab Bar
 "tab.map" = "Map";
@@ -224,6 +226,7 @@
 "run.distance" = "Distance";
 "run.duration" = "Duration";
 "run.pace" = "Pace";
+"run.avgPace" = "Avg Pace";
 "run.avgSpeed" = "Avg Speed";
 "run.maxSpeed" = "Max Speed";
 "run.uniqueZones" = "Unique Zones";
@@ -254,9 +257,15 @@
 "run.gallery.saved" = "The image was saved to your photo library.";
 "run.gallery.savedButton" = "Saved";
 "run.gallery.saveFailed" = "The image could not be saved.";
-"run.gallery.permissionDenied" = "Photo Library access is required to save the image.";
+"run.gallery.permissionDenied.title" = "Photos Access Required";
+"run.gallery.permissionDenied" = "Photo Library access is required to save the image. You can grant it from Settings.";
 "run.summary.reason.speedThreshold" = "No points awarded because you stayed below %@.";
 "run.summary.reason.dailyCap" = "No points awarded because you already reached today's limit.";
+"run.summary.breakdown.voided" = "Since the total is 0, these multipliers had no effect on the result.";
+"run.summary.breakdown.voided.speed" = "Your speed multiplier hit 0, which zeroed your points — the others had no effect.";
+"run.summary.breakdown.cause" = "Cause";
+"run.summary.voided.encourage" = "Clear the threshold on your next run and these multipliers kick in.";
+"run.route" = "Route";
 "run.boostActive" = "Boost Active";
 "run.boostCancelled" = "Boost Cancelled";
 "run.selectMode" = "Select Mode";
@@ -292,6 +301,8 @@
 "run.rivalOverlay.toggle" = "Rival Areas";
 "run.rivalOverlay.accessibility.on" = "Rival areas visible";
 "run.rivalOverlay.accessibility.off" = "Rival areas hidden";
+"run.tilt.accessibility.on" = "3D tilt on";
+"run.tilt.accessibility.off" = "3D tilt off";
 "run.rivalOverlay.entered" = "You entered rival territory";
 "run.boostSafe" = "Boost safe";
 "run.boostApproaching" = "Approaching threshold";
@@ -338,7 +349,7 @@
 // MARK: - Daily Challenge
 "challenge.loading" = "Loading daily challenges...";
 "challenge.sectionTitle" = "Daily Challenge";
-"challenge.sectionSubtitle" = "Choose one of today's two goals and earn bonus trail.";
+"challenge.sectionSubtitle" = "Choose one of today's two goals and earn bonus points.";
 "challenge.difficulty.safe" = "Safe";
 "challenge.difficulty.difficult" = "Difficult";
 "challenge.select" = "Choose This Goal";
@@ -350,10 +361,10 @@
 "challenge.duration.value" = "%d min";
 "challenge.distance.value" = "%@ %@";
 "challenge.progress.value" = "%@ / %@";
-"challenge.reward.value" = "+%@ trail";
-"challenge.reward.granted" = "Daily challenge bonus: +%@ trail";
+"challenge.reward.value" = "+%@ points";
+"challenge.reward.granted" = "Daily challenge bonus: +%@ points";
 "challenge.prompt.title" = "Today's challenges are ready";
-"challenge.prompt.body" = "Pick either the safe or difficult goal and earn bonus trail today.";
+"challenge.prompt.body" = "Pick either the safe or difficult goal and earn bonus points today.";
 "challenge.prompt.action" = "View Challenges";
 "challenge.compact.subtitle.pending" = "Choose one goal before your run.";
 "challenge.compact.subtitle.active" = "Your selected goal stays here while you run today.";
@@ -465,6 +476,10 @@
 "leaderboard.weekly.remaining.minutes" = "%dm";
 "leaderboard.empty" = "No rankings yet.";
 "leaderboard.empty.subtitle" = "Complete runs to appear on the leaderboard.";
+"leaderboard.empty.cta" = "Run first, claim the board";
+"leaderboard.territories" = "%d zones";
+"leaderboard.gap.toPass" = "%@ to pass the rank above";
+"leaderboard.champion" = "Champion";
 
 // MARK: - Stats
 "stats.thisWeek" = "This Week";
@@ -535,24 +550,50 @@
 "badge.distance_5k.description" = "Complete a single run of %@.";
 "badge.distance_10k.name" = "10K Runner";
 "badge.distance_10k.description" = "Complete a single run of %@.";
+"badge.distance_21k.name" = "Half Marathon";
+"badge.distance_21k.description" = "Complete a single run of %@.";
+"badge.distance_42k.name" = "Marathon";
+"badge.distance_42k.description" = "Complete a single run of %@.";
 "badge.total_distance_100k.name" = "Centurion";
 "badge.total_distance_100k.description" = "Reach %@ total running distance.";
+"badge.runs_50.name" = "Dedicated Runner";
+"badge.runs_50.description" = "Complete 50 runs in total.";
+"badge.runs_100.name" = "Century Runner";
+"badge.runs_100.description" = "Complete 100 runs in total.";
+"badge.endurance_60.name" = "Endurance";
+"badge.endurance_60.description" = "Run for over 60 minutes in a single run.";
 "badge.boost_5.name" = "Boost Pilot";
 "badge.boost_5.description" = "Finish 5 runs in Boost mode.";
+"badge.boost_25.name" = "Boost Master";
+"badge.boost_25.description" = "Finish 25 runs in Boost mode.";
+"badge.points_10k.name" = "Point Hunter";
+"badge.points_10k.description" = "Reach 10,000 total points.";
+"badge.points_50k.name" = "Point Master";
+"badge.points_50k.description" = "Reach 50,000 total points.";
+"badge.points_100k.name" = "Point Legend";
+"badge.points_100k.description" = "Reach 100,000 total points.";
+"badge.level_10.name" = "Rising Star";
+"badge.level_10.description" = "Reach level 10.";
+"badge.level_25.name" = "Master Runner";
+"badge.level_25.description" = "Reach level 25.";
 "badge.first_territory.name" = "First Capture";
 "badge.first_territory.description" = "Capture your first territory.";
 "badge.territory_25.name" = "District Controller";
 "badge.territory_25.description" = "Capture 25 territories in total.";
 "badge.territory_100.name" = "City Conqueror";
 "badge.territory_100.description" = "Capture 100 territories in total.";
-"badge.first_dropzone.name" = "Dropzone Initiate";
-"badge.first_dropzone.description" = "Claim your first dropzone.";
-"badge.dropzone_5.name" = "Dropzone Hunter";
-"badge.dropzone_5.description" = "Claim 5 dropzones.";
+"badge.early_bird.name" = "Early Bird";
+"badge.early_bird.description" = "Start a run before 7:00 AM.";
+"badge.night_owl.name" = "Night Owl";
+"badge.night_owl.description" = "Start a run after 11:00 PM.";
 "badge.streak_7.name" = "Hot Week";
 "badge.streak_7.description" = "Reach a 7-day running streak.";
+"badge.streak_14.name" = "Ablaze";
+"badge.streak_14.description" = "Reach a 14-day running streak.";
 "badge.streak_30.name" = "Unstoppable";
 "badge.streak_30.description" = "Reach a 30-day running streak.";
+"badge.streak_100.name" = "Eternal Flame";
+"badge.streak_100.description" = "Reach a 100-day running streak.";
 
 // MARK: - Notifications
 "notification.territoryCaptured" = "Your territory was captured!";
@@ -567,7 +608,7 @@
 "notification.streakWarning.title" = "Streak at Risk";
 "notification.streakWarning.body" = "You have a %d-day streak. Run today to keep it!";
 "notification.dailyChallenge.title" = "New Challenges Await!";
-"notification.dailyChallenge.body" = "Today's challenges are ready. Pick your path and earn bonus Trail!";
+"notification.dailyChallenge.body" = "Today's challenges are ready. Pick your path and earn bonus points!";
 
 // MARK: - Errors
 "error.locationDenied" = "Location access is required. Please enable it in Settings.";
@@ -851,3 +892,4 @@
 "social.externalShare.template.hero" = "Hero";
 "social.externalShare.template.card" = "Card";
 "social.externalShare.template.stripe" = "Stripe";
+"social.externalShare.template.mapOnly" = "Map";

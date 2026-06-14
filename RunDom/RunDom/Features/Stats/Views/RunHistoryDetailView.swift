@@ -100,9 +100,9 @@ struct RunHistoryDetailView: View {
                         iconColor: .blue
                     )
                     StatCardView(
-                        icon: "speedometer",
-                        value: run.avgSpeed.formattedSpeed,
-                        label: "run.avgSpeed".localized,
+                        icon: "stopwatch",
+                        value: "\(run.avgSpeed.formattedPace) \(UnitPreference.shared.paceUnitLabel)",
+                        label: "run.avgPace".localized,
                         iconColor: .purple
                     )
                     StatCardView(

@@ -227,6 +227,13 @@ struct PostCardView: View {
                 value: Self.formatDuration(post.duration),
                 tint: .blue
             )
+            if post.avgSpeed > 0 {
+                metricPill(
+                    icon: "stopwatch.fill",
+                    value: "\(post.avgSpeed.formattedPace) \(UnitPreference.shared.paceUnitLabel)",
+                    tint: .purple
+                )
+            }
             metricPill(
                 icon: "flame.fill",
                 value: post.trail.formattedTrail,

@@ -91,11 +91,15 @@ final class StreakService {
     }
 
     func streakInfo(streakDays: Int, lastRunDate: Date?) -> StreakInfo {
-        let tier = currentTier(streakDays: streakDays)
+        // Use the streak as it stands *right now*, not the stored value, which is
+        // only recomputed after a run completes and would otherwise show a stale
+        // (e.g. not-yet-broken) streak when the user has been away.
+        let effectiveDays = Self.effectiveStreakDays(streakDays: streakDays, lastRunDate: lastRunDate)
+        let tier = currentTier(streakDays: effectiveDays)
 
         let daysUntilNext: Int?
         if let nextTier = tier.nextTier {
-            daysUntilNext = nextTier.requiredDays - streakDays
+            daysUntilNext = nextTier.requiredDays - effectiveDays
         } else {
             daysUntilNext = nil
         }
@@ -103,12 +107,50 @@ final class StreakService {
         let isAtRisk = checkStreakAtRisk(lastRunDate: lastRunDate)
 
         return StreakInfo(
-            days: streakDays,
+            days: effectiveDays,
             tier: tier,
             multiplier: tier.multiplier,
             daysUntilNextTier: daysUntilNext,
             isAtRisk: isAtRisk
         )
+    }
+
+    // MARK: - Effective (Time-Decayed) Streak
+
+    /// The streak as it stands *right now*, decayed for whole days elapsed since
+    /// the last run. `streakDays` is only recomputed when a run completes, so
+    /// reading it directly shows a stale value after the user has been away.
+    /// This applies the same decay rules used after a run, without counting a
+    /// new run, and is the single source of truth for *displaying* a streak.
+    ///
+    /// - Ran today or yesterday → still alive at its stored value.
+    /// - Missed exactly one day → dropped one tier (does NOT reset to zero).
+    /// - Missed two or more days → streak broken (zero).
+    static func effectiveStreakDays(streakDays: Int, lastRunDate: Date?) -> Int {
+        guard let lastRun = lastRunDate else { return 0 }
+        let calendar = Calendar.current
+
+        if calendar.isDateInToday(lastRun) || calendar.isDateInYesterday(lastRun) {
+            return streakDays
+        }
+
+        // Count whole calendar days missed (boundary-based, not 24h spans).
+        let from = calendar.startOfDay(for: lastRun)
+        let to = calendar.startOfDay(for: Date())
+        let daysSinceLastRun = calendar.dateComponents([.day], from: from, to: to).day ?? 0
+
+        // Missed exactly one day → drop one tier.
+        if daysSinceLastRun == 2 {
+            if streakDays >= AppConstants.Streak.tier3Days {
+                return AppConstants.Streak.tier2Days
+            } else if streakDays >= AppConstants.Streak.tier2Days {
+                return AppConstants.Streak.tier1Days
+            }
+            return 0 // dropped below tier 1
+        }
+
+        // Missed two or more days → streak broken.
+        return 0
     }
 
     // MARK: - Streak Update After Run

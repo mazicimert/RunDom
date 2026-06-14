@@ -81,7 +81,7 @@ final class PostRunViewModel: ObservableObject {
 
         let result = trailCalculator.calculate(
             session: session,
-            streakDays: latestUser.streakDays,
+            streakDays: latestUser.effectiveStreakDays,
             hasDropzoneBoost: latestUser.hasActiveDropzoneBoost,
             todayTrail: todayTrail
         )
@@ -199,8 +199,8 @@ final class PostRunViewModel: ObservableObject {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 
-    var avgSpeedText: String {
-        session.avgSpeed.formattedSpeed
+    var avgPaceText: String {
+        "\(session.avgSpeed.formattedPace) \(UnitPreference.shared.paceUnitLabel)"
     }
 
     var trailText: String {

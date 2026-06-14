@@ -63,6 +63,8 @@ struct MainTabView: View {
                 }
                 .tag(AppRouter.Tab.profile)
             }
+            .toolbarBackground(Color(uiColor: .secondarySystemBackground), for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
 
             // Full-screen active run overlay
             if router.isRunActive, let userId = appState.currentUser?.id,

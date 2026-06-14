@@ -24,17 +24,21 @@ struct PreRunView: View {
                 VStack(alignment: .leading, spacing: 28) {
                     headerSection
                         .padding(.horizontal, AppConstants.UI.screenPadding)
+                        .appearTransition()
 
                     modesSection
+                        .appearTransition(delay: 0.08)
 
                     dailyChallengeSection
+                        .appearTransition(delay: 0.16)
 
                     if let reward = viewModel.dailyChallengeReward {
                         rewardBanner(reward)
                             .padding(.horizontal, AppConstants.UI.screenPadding)
+                            .appearTransition(delay: 0.24)
                     }
                 }
-                .padding(.top, 14)
+                .padding(.top, 8)
                 .padding(.bottom, 116)
             }
         }
@@ -48,18 +52,19 @@ struct PreRunView: View {
                 .padding(.bottom, 10)
                 .background {
                     Rectangle()
-                        .fill(.ultraThinMaterial)
+                        .fill(PreRunTheme.bottomChromeFill)
                         .overlay(alignment: .top) {
                             Rectangle()
-                                .fill(Color.primary.opacity(0.05))
-                                .frame(height: 1)
+                                .fill(PreRunTheme.bottomChromeDivider(for: colorScheme))
+                                .frame(height: 0.5)
                         }
                         .ignoresSafeArea()
                 }
         }
         .navigationTitle("tab.run".localized)
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(PreRunTheme.background, for: .navigationBar)
         .alert(
             "run.whenInUseUpgrade.title".localized,
             isPresented: $showWhenInUseUpgradePrompt
@@ -133,9 +138,8 @@ struct PreRunView: View {
             // Only meaningful status here is "searching" — permission states are
             // expressed by the primary button itself, so nothing competes with it.
             if viewModel.locationGate == .searching {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .controlSize(.small)
+                HStack(spacing: 9) {
+                    PulsingDot(color: .orange)
                     Text("run.waitingGPS".localized)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -210,15 +214,18 @@ struct PreRunView: View {
     // MARK: - Header
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("run.header.title".localized)
-                .font(.system(.title, design: .rounded, weight: .semibold))
-                .foregroundStyle(.primary.opacity(0.9))
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("run.header.title".localized)
+                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
 
-            Text("run.header.subtitle".localized)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .lineSpacing(3)
+                Text("run.header.subtitle".localized)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(3)
+            }
 
             if !headerBadges.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -228,8 +235,10 @@ struct PreRunView: View {
                         }
                     }
                 }
+                .padding(.top, 2)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var headerBadges: [RunHeaderBadge] {
@@ -294,29 +303,37 @@ struct PreRunView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("run.selectMode".localized)
                 .font(.system(.headline, design: .rounded))
-                .padding(.horizontal, AppConstants.UI.screenPadding)
 
-            VStack(spacing: 14) {
-                modeCard(
-                    mode: .normal,
-                    icon: "figure.run",
-                    title: "run.normalMode".localized,
-                    description: "run.normalMode.desc".localized,
-                    color: .blue
-                )
-
-                modeCard(
-                    mode: .boost,
-                    icon: "bolt.fill",
-                    title: "run.boostMode".localized,
-                    description: "run.boostMode.desc".localized(
-                        with: boostThresholdText,
-                        viewModel.boostMultiplierText
-                    ),
-                    color: .orange
-                )
+            HStack(spacing: 14) {
+                modeTile(mode: .normal, icon: "figure.run", title: "run.normalMode".localized, color: .blue, isBoost: false)
+                modeTile(mode: .boost, icon: "bolt.fill", title: "run.boostMode".localized, color: .orange, isBoost: true)
             }
-            .padding(.horizontal, AppConstants.UI.screenPadding)
+
+            // Description for the currently selected mode — one calm line,
+            // crossfading as the choice changes.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                Text(selectedModeDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+            .id(viewModel.selectedMode)
+            .transition(.opacity)
+            .animation(.easeInOut(duration: AppConstants.Animation.quick), value: viewModel.selectedMode)
+        }
+        .padding(.horizontal, AppConstants.UI.screenPadding)
+    }
+
+    private var selectedModeDescription: String {
+        switch viewModel.selectedMode {
+        case .normal:
+            return "run.normalMode.desc".localized
+        case .boost:
+            return "run.boostMode.desc".localized(with: boostThresholdText, viewModel.boostMultiplierText)
         }
     }
 
@@ -400,14 +417,16 @@ struct PreRunView: View {
     }
 
     private var compactUnselectedChallengeCard: some View {
-        HStack(spacing: 14) {
+        // Deliberately lighter than the selected card — a flat inset row so the
+        // eye stays on the modes and the Start button.
+        HStack(spacing: 12) {
             Image(systemName: "target")
-                .font(.subheadline.bold())
+                .font(.footnote.bold())
                 .foregroundStyle(.secondary)
-                .frame(width: 40, height: 40)
-                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .frame(width: 34, height: 34)
+                .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("challenge.compact.pendingTitle".localized)
                     .font(.subheadline.weight(.semibold))
 
@@ -422,13 +441,13 @@ struct PreRunView: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.tertiary)
         }
-        .padding(16)
-        .background(PreRunTheme.cardFill(for: colorScheme), in: RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(PreRunTheme.cardFill(for: colorScheme), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .stroke(PreRunTheme.cardBorder(for: colorScheme), lineWidth: 1)
         )
-        .shadow(color: PreRunTheme.cardShadow(for: colorScheme), radius: 20, x: 0, y: 10)
     }
 
     private func rewardBanner(_ reward: DailyChallengeReward) -> some View {
@@ -459,8 +478,12 @@ struct PreRunView: View {
     // MARK: - Mode Card
 
     @ViewBuilder
-    private func modeCard(mode: RunMode, icon: String, title: String, description: String, color: Color) -> some View {
+    private func modeTile(mode: RunMode, icon: String, title: String, color: Color, isBoost: Bool) -> some View {
         let isSelected = viewModel.selectedMode == mode
+        // Boost is the "exciting" mode: when selected it goes full-color with
+        // light content; otherwise it keeps a faint warm tint so it reads special.
+        let isBoostActive = isBoost && isSelected
+        let contentColor: Color = isBoostActive ? .white : color
 
         Button {
             Haptics.selection()
@@ -468,59 +491,92 @@ struct PreRunView: View {
                 viewModel.selectedMode = mode
             }
         } label: {
-            HStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(color)
-                    .frame(width: 52, height: 52)
-                    .background(
-                        color.opacity(isSelected ? 0.18 : 0.11),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    )
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: icon)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(contentColor)
+                        .frame(width: 46, height: 46)
+                        .background(
+                            (isBoostActive ? Color.white.opacity(0.22) : color.opacity(isSelected ? 0.18 : 0.12)),
+                            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        )
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(isBoostActive ? .white : (isSelected ? color : Color.secondary.opacity(0.4)))
+                }
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(modeTag(for: mode))
-                        .font(.caption.weight(.bold))
+                        .font(.caption2.weight(.bold))
                         .textCase(.uppercase)
-                        .foregroundStyle(color)
+                        .foregroundStyle(isBoostActive ? Color.white.opacity(0.9) : color)
 
                     Text(title)
                         .font(.system(.headline, design: .rounded, weight: .semibold))
-                        .foregroundStyle(.primary)
-
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(isBoostActive ? .white : .primary)
                 }
-
-                Spacer(minLength: 8)
-
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(isSelected ? color : Color.secondary.opacity(0.45))
-                    .frame(width: 28, height: 28)
             }
-            .padding(18)
+            .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
-                    .fill(isSelected ? PreRunTheme.selectedCardFill(color: color, for: colorScheme) : PreRunTheme.cardFill(for: colorScheme))
-            )
+            .background(tileBackground(color: color, isBoost: isBoost, isSelected: isSelected))
             .overlay(
                 RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
                     .stroke(
-                        isSelected ? color.opacity(0.22) : PreRunTheme.cardBorder(for: colorScheme),
+                        isBoostActive ? Color.clear : (isSelected ? color.opacity(0.3) : PreRunTheme.cardBorder(for: colorScheme)),
                         lineWidth: 1
                     )
             )
-            .shadow(color: isSelected ? color.opacity(0.12) : PreRunTheme.cardShadow(for: colorScheme), radius: isSelected ? 22 : 18, x: 0, y: 10)
+            .shadow(
+                color: tileShadowColor(color: color, isBoost: isBoost, isSelected: isSelected),
+                radius: isSelected ? 22 : 16,
+                x: 0,
+                y: 10
+            )
         }
         .buttonStyle(.plain)
         .contentShape(RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous))
         .accessibilityLabel(title)
         .accessibilityValue(isSelected ? "accessibility.selected".localized : "accessibility.notSelected".localized)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
+    @ViewBuilder
+    private func tileBackground(color: Color, isBoost: Bool, isSelected: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cardCornerRadius, style: .continuous)
+
+        if isBoost && isSelected {
+            shape.fill(
+                LinearGradient(
+                    colors: [Color.orange, Color.boostRed],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        } else if isBoost {
+            shape.fill(
+                LinearGradient(
+                    colors: [color.opacity(0.16), color.opacity(0.06)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        } else {
+            shape.fill(isSelected ? PreRunTheme.selectedCardFill(color: color, for: colorScheme) : PreRunTheme.cardFill(for: colorScheme))
+        }
+    }
+
+    private func tileShadowColor(color: Color, isBoost: Bool, isSelected: Bool) -> Color {
+        if isBoost && isSelected {
+            return Color.orange.opacity(colorScheme == .dark ? 0.32 : 0.28)
+        }
+        if isSelected {
+            return color.opacity(0.14)
+        }
+        return PreRunTheme.cardShadow(for: colorScheme)
     }
 
     private func modeTag(for mode: RunMode) -> String {
@@ -562,13 +618,7 @@ private struct StartRunButton: View {
             .padding(.vertical, 17)
             .background {
                 Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: buttonGradientColors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(buttonFill)
                     .shadow(color: buttonShadowColor, radius: 22, x: 0, y: 10)
             }
             .opacity(isEnabled ? 1 : 0.45)
@@ -577,19 +627,25 @@ private struct StartRunButton: View {
         .disabled(!isEnabled)
     }
 
-    private var buttonGradientColors: [Color] {
-        guard isEnabled else {
-            return [Color.secondary.opacity(0.35), Color.secondary.opacity(0.25)]
-        }
-
-        return colorScheme == .dark
-            ? [Color.boostGreen.opacity(0.95), Color.territoryBlue.opacity(0.95)]
-            : [Color.boostGreen, Color.territoryBlue]
+    /// Rich monochrome blue: bright at the top, deeper at the bottom. Fixed tones
+    /// (not the asset's lighter dark-mode variant) so it never washes out.
+    private var buttonFill: AnyShapeStyle {
+        guard isEnabled else { return AnyShapeStyle(Color.secondary.opacity(0.3)) }
+        return AnyShapeStyle(
+            LinearGradient(
+                colors: [
+                    Color(red: 0.27, green: 0.53, blue: 0.98),
+                    Color(red: 0.11, green: 0.38, blue: 0.88)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 
     private var buttonShadowColor: Color {
         isEnabled
-            ? Color.territoryBlue.opacity(colorScheme == .dark ? 0.22 : 0.16)
+            ? Color(red: 0.15, green: 0.40, blue: 0.90).opacity(colorScheme == .dark ? 0.30 : 0.24)
             : Color.clear
     }
 }
@@ -609,10 +665,69 @@ private struct RunHeaderBadge: Identifiable {
     let color: Color
 }
 
+// MARK: - Motion Helpers
+
+/// Subtle staggered entrance: fade + rise. Keeps the screen feeling alive
+/// without drawing attention to itself.
+private struct AppearTransition: ViewModifier {
+    let delay: Double
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 16)
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.45).delay(delay)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+private extension View {
+    func appearTransition(delay: Double = 0) -> some View {
+        modifier(AppearTransition(delay: delay))
+    }
+}
+
+/// A soft pulsing dot used for the "searching for GPS" state.
+private struct PulsingDot: View {
+    var color: Color
+    @State private var animating = false
+
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 9, height: 9)
+            .overlay {
+                Circle()
+                    .stroke(color, lineWidth: 2)
+                    .scaleEffect(animating ? 2.2 : 1)
+                    .opacity(animating ? 0 : 0.6)
+            }
+            .onAppear { animating = true }
+            .animation(
+                .easeOut(duration: 1.1).repeatForever(autoreverses: false),
+                value: animating
+            )
+    }
+}
+
 private enum PreRunTheme {
     /// Plain system background to match the other tabs.
     static var background: Color {
         Color(uiColor: .systemGroupedBackground)
+    }
+
+    static var bottomChromeFill: Color {
+        Color(uiColor: .secondarySystemBackground)
+    }
+
+    static func bottomChromeDivider(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.white.opacity(0.08)
+            : Color.black.opacity(0.08)
     }
 
     static func cardFill(for colorScheme: ColorScheme) -> Color {

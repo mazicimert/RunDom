@@ -80,6 +80,7 @@ enum AppConstants {
         static let unitPreference = "unitPreference"
         static let lastDailyChallengePromptDateKey = "lastDailyChallengePromptDateKey"
         static let mapStyle = "mapStyle"
+        static let runMapTiltEnabled = "runMapTiltEnabled"
         static let voiceFeedbackEnabled = "voiceFeedbackEnabled"
         static let aiAnalysisEnabled = "aiAnalysisEnabled"
         static let aiDisclosureAccepted = "aiDisclosureAccepted"
