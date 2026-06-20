@@ -56,78 +56,19 @@ private struct RunHistoryRow: View {
     let run: RunSession
     var onDelete: (() -> Void)? = nil
 
-    private let cardHeight: CGFloat = 124
-    private let thumbnailSize = CGSize(width: 114, height: 104)
-
     var body: some View {
-        HStack(spacing: 14) {
-            RunHistoryRouteThumbnail(run: run, size: thumbnailSize)
-                .frame(width: thumbnailSize.width, height: thumbnailSize.height)
-
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 10) {
-                    pointsBadge
-
-                    Spacer(minLength: 0)
-
-                    if let onDelete {
-                        deleteButton(action: onDelete)
-                    }
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary.opacity(0.5))
-                        .padding(.top, 8)
+        RunSummaryCard(run: run) {
+            HStack(spacing: 10) {
+                if let onDelete {
+                    deleteButton(action: onDelete)
                 }
 
-                HStack(spacing: 10) {
-                    metricColumn(
-                        value: run.distance.formattedCompactDistanceValueFromMeters,
-                        title: "run.distance".localized
-                    )
-
-                    metricColumn(
-                        value: run.duration.formattedDuration,
-                        title: "run.duration".localized
-                    )
-
-                    metricColumn(
-                        value: run.avgSpeed.formattedPace,
-                        unit: UnitPreference.shared.paceUnitLabel,
-                        title: "run.avgPace".localized
-                    )
-                }
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary.opacity(0.5))
+                    .padding(.top, 8)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, minHeight: cardHeight, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.cardBackground.opacity(0.96))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.primary.opacity(0.04), lineWidth: 1)
-        )
-    }
-
-    private var pointsBadge: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(run.trail.formattedTrail)
-                .font(.subheadline.bold().monospacedDigit())
-                .foregroundStyle(.primary)
-
-            Text("trail.unit".localized)
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
     }
 
     private func deleteButton(action: @escaping () -> Void) -> some View {
@@ -150,38 +91,9 @@ private struct RunHistoryRow: View {
         .buttonStyle(.plain)
         .accessibilityLabel("common.delete".localized)
     }
-
-    private func metricColumn(value: String, unit: String? = nil, title: String) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(value)
-                    .font(.system(size: 18, weight: .black, design: .rounded))
-                    .foregroundStyle(.primary)
-                    .monospacedDigit()
-                    .layoutPriority(1)
-
-                if let unit {
-                    Text(unit)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .lineLimit(1)
-            .minimumScaleFactor(0.55)
-            .allowsTightening(true)
-
-            Text(title)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .allowsTightening(true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
 }
 
-private struct RunHistoryRouteThumbnail: View {
+struct RunHistoryRouteThumbnail: View {
     let run: RunSession
     let size: CGSize
 

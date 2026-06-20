@@ -391,7 +391,7 @@ private struct ShareCardPreviewContainer: View {
             performanceText: performanceText,
             subtitleText: subtitleText,
             avgPaceText: avgPaceText,
-            brandText: "Runpire",
+            brandText: "RunPire",
             dateText: dateText,
             canvasSize: canvasSize
         )

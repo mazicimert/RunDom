@@ -3,9 +3,12 @@ import MapKit
 
 struct RunHistoryDetailView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var router: AppRouter
     let run: RunSession
     @State private var isGalleryPresented = false
     @State private var showReviewSheet = false
+    @State private var showCreatePost = false
+    @State private var sharedPostId: String?
     @State private var reviewBinding: RunReview?
     @State private var rating: Int?
     @State private var tags: [String]
@@ -21,6 +24,7 @@ struct RunHistoryDetailView: View {
         _rating = State(initialValue: run.rating)
         _tags = State(initialValue: run.tags)
         _note = State(initialValue: run.note)
+        _sharedPostId = State(initialValue: run.postId)
     }
 
     private var hasReview: Bool {
@@ -141,6 +145,9 @@ struct RunHistoryDetailView: View {
                 .cardStyle()
                 .screenPadding()
 
+                shareSection
+                    .screenPadding()
+
                 reviewSection
                     .screenPadding()
 
@@ -170,6 +177,59 @@ struct RunHistoryDetailView: View {
             RunReviewSheet(review: $reviewBinding) { review in
                 applyReview(review)
             }
+        }
+        .sheet(isPresented: $showCreatePost) {
+            if let user = appState.currentUser {
+                CreatePostSheet(
+                    session: run,
+                    author: user,
+                    onPublished: { post in
+                        sharedPostId = post.id
+                    }
+                )
+            }
+        }
+    }
+
+    // MARK: - Share Section
+
+    @ViewBuilder
+    private var shareSection: some View {
+        if let sharedPostId {
+            Button {
+                router.presentedSheet = .socialPostDetail(postId: sharedPostId)
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("social.share.shared".localized)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                        Text("social.share.viewPost".localized)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .cardStyle()
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button {
+                showCreatePost = true
+            } label: {
+                Label("social.share.history.button".localized, systemImage: "square.and.arrow.up")
+            }
+            .buttonStyle(SecondaryButtonStyle())
         }
     }
 
@@ -304,5 +364,6 @@ struct RunHistoryDetailView: View {
             territoriesCaptured: 12, uniqueZonesVisited: 10, totalZonesVisited: 14
         ))
         .environmentObject(AppState())
+        .environmentObject(AppRouter())
     }
 }

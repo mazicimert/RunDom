@@ -3,7 +3,9 @@ import SwiftUI
 struct SocialTabView: View {
     let locationManager: LocationManager
 
+    @EnvironmentObject private var appState: AppState
     @State private var segment: Segment = .feed
+    @State private var showSharePicker = false
 
     enum Segment: String, CaseIterable, Identifiable {
         case feed
@@ -42,5 +44,21 @@ struct SocialTabView: View {
         }
         .navigationTitle("tab.social".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if segment == .feed {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSharePicker = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("social.share.picker.open".localized)
+                }
+            }
+        }
+        .sheet(isPresented: $showSharePicker) {
+            SharePastRunPickerView()
+                .environmentObject(appState)
+        }
     }
 }

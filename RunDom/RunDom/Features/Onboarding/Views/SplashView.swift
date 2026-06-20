@@ -9,7 +9,7 @@ struct SplashView: View {
     private let characterSizeRatio: CGFloat = 0.36
     private let offscreenTravelPadding: CGFloat = 24
     private let movementDurationRatio: CGFloat = 0.90
-    private let title = "Runpire"
+    private let title = "RunPire"
 
     // Brand paint color for the conquered hexagon trail (dark-mode TerritoryBlue).
     private let paintColor = Color(red: 0.333, green: 0.533, blue: 0.967)

@@ -19,10 +19,19 @@ struct RunDomApp: App {
                 .environment(\.locale, localizationManager.locale)
                 .task {
                     WidgetDataService.shared.writeDiagnosticPing()
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("-RunDomStartOnRunTab") {
+                        router.selectedTab = .run
+                    }
+                    #endif
                 }
                 .onOpenURL { url in
                     if url.scheme == "rundom" {
-                        if url.host == "stats" {
+                        if url.host == "map" {
+                            router.selectedTab = .map
+                        } else if url.host == "run" {
+                            router.selectedTab = .run
+                        } else if url.host == "stats" {
                             router.selectedTab = .stats
                         }
                         return

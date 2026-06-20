@@ -3,7 +3,7 @@
 **Son güncelleme:** 28 Mayıs 2026
 **Versiyon:** 1
 
-Runpire, koşmayı seven insanları bir araya getiren bir topluluk. Herkesin kendini güvenli hissetmesi ve birbirine saygı duyması için aşağıdaki kurallara uymanı bekliyoruz.
+RunPire, koşmayı seven insanları bir araya getiren bir topluluk. Herkesin kendini güvenli hissetmesi ve birbirine saygı duyması için aşağıdaki kurallara uymanı bekliyoruz.
 
 ## 1. Saygılı ol
 
@@ -35,7 +35,7 @@ Tekrarlayan, alakasız, ticari veya manipülatif içerik paylaşma. Bir post'u d
 
 ## 6. Güvenli koş
 
-Runpire bir oyun olsa da gerçek hayatta koşuyorsun. Trafiğe dikkat et, tehlikeli alanlarda risk alma, başkalarının güvenliğini tehlikeye atma. Yaşına ve sağlık durumuna uygun olmayan koşular yapma.
+RunPire bir oyun olsa da gerçek hayatta koşuyorsun. Trafiğe dikkat et, tehlikeli alanlarda risk alma, başkalarının güvenliğini tehlikeye atma. Yaşına ve sağlık durumuna uygun olmayan koşular yapma.
 
 ## İhlal Sonucu
 

@@ -8,6 +8,7 @@ struct LegalAcceptanceSheet: View {
     @State private var isAgreed = false
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var activeLegalLink: LegalLink?
 
     private let firestoreService = FirestoreService()
 
@@ -53,6 +54,12 @@ struct LegalAcceptanceSheet: View {
                     .disabled(!isAgreed || isSubmitting)
                 }
             }
+            .sheet(item: $activeLegalLink) { link in
+                if let url = link.url(languageCode: LocalizationManager.shared.selectedLanguageCode) {
+                    SafariView(url: url)
+                        .ignoresSafeArea()
+                }
+            }
         }
     }
 
@@ -85,23 +92,23 @@ struct LegalAcceptanceSheet: View {
         }
     }
 
-    private func documentLinkRow(_ doc: LegalDocument) -> some View {
-        NavigationLink {
-            LegalDocumentView(document: doc)
+    private func documentLinkRow(_ link: LegalLink) -> some View {
+        Button {
+            activeLegalLink = link
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: doc == .communityGuidelines ? "person.3.fill" : "doc.text.fill")
+                Image(systemName: link.iconName)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.tint)
                     .frame(width: 28)
 
-                Text(doc.titleLocalizationKey.localized)
+                Text(link.titleLocalizationKey.localized)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.primary)
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "arrow.up.right")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.secondary)
             }

@@ -3,7 +3,7 @@
 **Son güncelleme:** 28 Mayıs 2026
 **Versiyon:** 1
 
-Runpire uygulamasını ("Uygulama") kullanmadan önce bu Kullanım Şartlarını dikkatlice oku. Uygulamayı kullanarak bu şartları kabul etmiş sayılırsın.
+RunPire uygulamasını ("Uygulama") kullanmadan önce bu Kullanım Şartlarını dikkatlice oku. Uygulamayı kullanarak bu şartları kabul etmiş sayılırsın.
 
 ## 1. Hesap Sorumluluğu
 
@@ -16,7 +16,7 @@ Runpire uygulamasını ("Uygulama") kullanmadan önce bu Kullanım Şartlarını
 
 - Uygulamaya yüklediğin her içerik (fotoğraf, koşu verisi, yorum, profil bilgisi) senin sorumluluğundadır.
 - Yüklediğin içeriğin yasal sahibi olmalı veya yayınlama hakkına sahip olmalısın.
-- Yüklediğin içerik için Runpire'a, Uygulama içinde göstermek ve fan-out etmek üzere dünya çapında, telifsiz, devredilebilir bir lisans veriyorsun. Bu lisans hesabını silmenle sona erer (Bölüm 9'a bakınız).
+- Yüklediğin içerik için RunPire'a, Uygulama içinde göstermek ve fan-out etmek üzere dünya çapında, telifsiz, devredilebilir bir lisans veriyorsun. Bu lisans hesabını silmenle sona erer (Bölüm 9'a bakınız).
 
 ## 3. Yasak Davranışlar — Sıfır Tolerans
 
@@ -35,17 +35,17 @@ Aşağıdakiler **kesinlikle yasaktır** ve hesabın derhal sonlandırılmasıyl
 
 ## 4. Sınırlı Kullanım Lisansı
 
-Bu Şartlara uyduğun sürece, Runpire sana Uygulamayı kişisel ve ticari olmayan amaçla kullanman için sınırlı, münhasır olmayan, devredilemez bir lisans verir.
+Bu Şartlara uyduğun sürece, RunPire sana Uygulamayı kişisel ve ticari olmayan amaçla kullanman için sınırlı, münhasır olmayan, devredilemez bir lisans verir.
 
-## 5. Konum ve Sağlık Verisi
+## 5. Konum ve Hareket Verisi
 
-- Uygulama koşu takibi için konum verini, isteğe bağlı olarak HealthKit verini ve hareket sensörü verini kullanır.
+- Uygulama koşu takibi için konum verini ve hareket sensörü verini kullanır.
 - Bu veriler koşu istatistikleri, harita üzerinde bölge ele geçirme ve liderlik tablosu için işlenir.
 - Verinin nasıl işlendiği Gizlilik Politikası'nda detaylandırılmıştır.
 
 ## 6. Garanti Reddi
 
-Uygulama "olduğu gibi" ve "mevcut olduğu şekliyle" sunulur. Runpire:
+Uygulama "olduğu gibi" ve "mevcut olduğu şekliyle" sunulur. RunPire:
 
 - Uygulamanın hatasız çalışacağına dair garanti vermez
 - Konum verisinin doğruluğunu garanti etmez
@@ -55,9 +55,9 @@ Uygulama "olduğu gibi" ve "mevcut olduğu şekliyle" sunulur. Runpire:
 
 ## 7. Sorumluluk Sınırlaması
 
-Yürürlükteki yasaların izin verdiği ölçüde, Runpire'ın toplam sorumluluğu, Uygulamayı kullanırken senin doğrudan uğradığın ve makul olarak öngörülebilir kayıplarla sınırlıdır.
+Yürürlükteki yasaların izin verdiği ölçüde, RunPire'ın toplam sorumluluğu, Uygulamayı kullanırken senin doğrudan uğradığın ve makul olarak öngörülebilir kayıplarla sınırlıdır.
 
-Runpire şunlardan sorumlu tutulamaz:
+RunPire şunlardan sorumlu tutulamaz:
 - Diğer kullanıcılar tarafından paylaşılan içerik
 - Koşu sırasında oluşan yaralanmalar veya kazalar
 - Üçüncü taraf hizmetlerin kesintileri

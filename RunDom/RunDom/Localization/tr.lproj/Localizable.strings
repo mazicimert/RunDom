@@ -1,4 +1,4 @@
-/* Localizable.strings (Turkish) — Runpire */
+/* Localizable.strings (Turkish) — RunPire */
 
 // MARK: - Common
 "common.ok" = "Tamam";
@@ -40,7 +40,7 @@
 // MARK: - Onboarding — Hook
 "onboarding.hook.title" = "Koş. Fethet. Savun.";
 "onboarding.hook.subtitle" = "Sokakların yeni sahibi sensin.";
-"onboarding.hook.cta" = "Başla";
+"onboarding.hook.cta" = "Varım";
 
 // MARK: - Onboarding — How It Works (TODO: bir sonraki aşamada doldurulacak)
 // onboarding.howItWorks.page1.*
@@ -104,25 +104,22 @@
 "runnerProfile.experience.regular" = "Düzenli";
 "runnerProfile.experience.competitive" = "Yarışlara katılırım";
 
-// MARK: - Onboarding (eski slaytlar — How It Works ile değiştirilecek)
-"onboarding.slide1.title" = "Şehrini Fethet";
-"onboarding.slide1.subtitle" = "Haritada gerçek bölgeleri gör, koşarak alanları kendi renginle kapla.";
-"onboarding.slide1.support" = "Harita ekranı canlı sahiplik durumunu anlık gösterir.";
-"onboarding.slide2.title" = "Koşuyu Başlat, Bölgeyi Al";
-"onboarding.slide2.subtitle" = "Koşuya başladığında rota ve geçtiğin hücreler otomatik kaydedilir.";
-"onboarding.slide2.support" = "Yeni bölgelere girdikçe daha fazla avantaj kazanırsın.";
-"onboarding.slide3.title" = "Puan ve Sıralama";
-"onboarding.slide3.subtitle" = "Koşularından puan topla, haftalık sıralamada yukarı çık.";
-"onboarding.slide3.support" = "Mahallede öne çıkmak için düzenli koşu ritmi kur.";
-"onboarding.slide4.title" = "Hemen Başla";
-"onboarding.slide4.subtitle" = "İzinleri tamamla ve ilk koşunu birkaç dokunuşla başlat.";
-"onboarding.slide4.support" = "İlk hedefin: yakınındaki ilk bölgeyi fethetmek.";
+// MARK: - Onboarding (Nasıl Çalışır — 3 ekran: koş/boya, sahiplen/savun, yarış/paylaş)
+"onboarding.slide1.title" = "Koş, Haritayı Boya";
+"onboarding.slide1.subtitle" = "Koştuğun her hücre otomatik olarak senin renginle fethedilir.";
+"onboarding.slide1.support" = "Koşun, haritada canlı.";
+"onboarding.slide2.title" = "Sahiplen ve Savun";
+"onboarding.slide2.subtitle" = "Bir bölgeye dokun; sahibini ve defans gücünü gör. Tekrar koşarak bölgeni elinde tut.";
+"onboarding.slide2.support" = "Bölgeni mi kaybettin? Haberin olur — geri alma zamanı.";
+"onboarding.slide3.title" = "Yarış ve Paylaş";
+"onboarding.slide3.subtitle" = "Haftalık sıralamada yüksel, fetihlerini toplulukla paylaş.";
+"onboarding.slide3.support" = "Yalnız koşmuyorsun.";
 "onboarding.placeholder" = "Ekran önizlemesi yakında";
 "onboarding.getStarted" = "Başla";
 
 // MARK: - Permissions
 "permission.location.title" = "Konum Erişimi";
-"permission.location.subtitle" = "Runpire, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
+"permission.location.subtitle" = "RunPire, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
 "permission.location.button" = "Konum Erişimine İzin Ver";
 "permission.notification.title" = "Oyunda Kal";
 "permission.notification.subtitle" = "Bölgelerin saldırı altındayken bildirim al.";
@@ -130,11 +127,11 @@
 
 // MARK: - Onboarding — Location Priming
 "onboarding.location.title" = "Koşunu kaybetmeyelim";
-"onboarding.location.subtitle" = "Telefon cebine atılırken bile bölgeleri boyamaya devam edebilmemiz için 'Her zaman izin ver' seçeneğine ihtiyacımız var.";
+"onboarding.location.subtitle" = "Arka planda bölge fethetmeye devam edebilmemiz için 'Her zaman izin ver' gerekiyor; konumunu koşu dışında asla kullanmayız.";
 "onboarding.location.deniedTitle" = "Konum kapalı";
 "onboarding.location.deniedSubtitle" = "Konum erişimi daha önce reddedilmiş. Açmak için iOS Ayarları'na git — sistem uygulama içinden tekrar sormaz.";
-"onboarding.location.bullet1" = "Telefon cebindeyken bile takip eder";
-"onboarding.location.bullet2" = "Sadece koşu sırasında aktif";
+"onboarding.location.bullet1" = "Ekranı açık tutmana gerek yok";
+"onboarding.location.bullet2" = "Yalnızca koşarken aktif";
 "onboarding.location.bullet3" = "Bölge fethetmek için zorunlu";
 "onboarding.location.allow" = "Konum Erişimine İzin Ver";
 "onboarding.location.openSettings" = "iOS Ayarları'nı Aç";
@@ -478,7 +475,7 @@
 "leaderboard.empty.subtitle" = "Sıralamada yer almak için koşu tamamla.";
 "leaderboard.empty.cta" = "İlk koşunu yap, tahtaya çık";
 "leaderboard.territories" = "%d bölge";
-"leaderboard.gap.toPass" = "Üst sırayı geçmene %@";
+"leaderboard.gap.toPass" = "Üst sırayı geçmene %@ kaldı";
 "leaderboard.champion" = "Şampiyon";
 
 // MARK: - Stats
@@ -643,7 +640,7 @@
 "settings.deleteAccount.reauth.warning.body" = "Onaylamak için Apple ile bir kez daha giriş yap. Bunu yaptığında hesabın ve tüm verilerin hemen silinecek.";
 "settings.deleteAccount.reauth.bullet1" = "Profilin, koşuların, paylaşımların, yorumların ve beğenilerin silinir.";
 "settings.deleteAccount.reauth.bullet2" = "Takipçi ve takip ettiklerin listesi kaldırılır.";
-"settings.deleteAccount.reauth.bullet3" = "Apple ile Runpire bağlantın iptal edilir.";
+"settings.deleteAccount.reauth.bullet3" = "Apple ile RunPire bağlantın iptal edilir.";
 "settings.deleteAccount.reauth.failed" = "Yeniden kimlik doğrulama başarısız oldu. Tekrar dene.";
 "settings.deleteAccount.deleting" = "Hesabın siliniyor... Bu işlem 30 saniye sürebilir.";
 "settings.deleteAccount.failed" = "Hesabın silinemedi. Daha sonra tekrar dene.";
@@ -773,6 +770,18 @@
 "social.share.title" = "Takipçilerle Paylaş";
 "social.share.subtitle" = "Bu koşunu seni takip edenlere göster.";
 "social.share.shared" = "Takipçilerinle paylaşıldı";
+"social.share.viewPost" = "Paylaşımını gör";
+"social.share.history.button" = "Bu koşuyu paylaş";
+"social.share.picker.title" = "Koşu Paylaş";
+"social.share.picker.open" = "Koşu paylaş";
+"social.share.picker.prompt" = "Takipçilerinle paylaşmak için bir koşu seç.";
+"social.share.picker.section.unshared" = "Henüz paylaşılmadı";
+"social.share.picker.section.shared" = "Paylaşıldı";
+"social.share.picker.shared" = "Zaten paylaşıldı";
+"social.share.picker.empty.title" = "Henüz koşu yok";
+"social.share.picker.empty.subtitle" = "Bir koşu tamamla, takipçilerinle paylaş.";
+"social.share.picker.error" = "Koşuların yüklenemedi";
+"social.share.picker.error.subtitle" = "Bağlantını kontrol edip tekrar dene.";
 "social.create.title" = "Yeni Paylaşım";
 "social.create.caption.placeholder" = "Bu koşu hakkında bir şeyler yaz...";
 "social.create.visibility.label" = "Görünürlük";
@@ -879,9 +888,12 @@
 "settings.legal" = "Yasal";
 "legal.communityGuidelines.title" = "Topluluk Kuralları";
 "legal.termsOfUse.title" = "Kullanım Şartları";
+"legal.privacyPolicy.title" = "Gizlilik Politikası";
+"legal.helpCenter.title" = "Yardım Merkezi";
+"settings.help" = "Yardım";
 "legal.acceptance.title" = "Paylaşmadan Önce";
 "legal.acceptance.heading" = "Herkes için güvenli bir topluluk";
-"legal.acceptance.body" = "Runpire, koşucuların bir araya geldiği bir topluluk. Deneyimi saygılı ve güvenli tutmak için paylaşım yapmadan önce Topluluk Kuralları ve Kullanım Şartlarımızı incele.";
+"legal.acceptance.body" = "RunPire, koşucuların bir araya geldiği bir topluluk. Deneyimi saygılı ve güvenli tutmak için paylaşım yapmadan önce Topluluk Kuralları ve Kullanım Şartlarımızı incele.";
 "legal.acceptance.checkbox" = "Topluluk Kurallarını ve Kullanım Şartlarını okudum, kabul ediyorum.";
 "legal.acceptance.continue" = "Kabul Et";
 

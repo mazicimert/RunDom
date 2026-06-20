@@ -3,9 +3,14 @@ import CoreLocation
 import SwiftUI
 import UIKit
 
-enum OnboardingMediaStyle: String, Codable {
-    case screenshotCard
-    case iconAccent
+/// Visual content of a "How it works" onboarding slide.
+enum OnboardingMedia {
+    /// A seamlessly-looping, muted video (Screen 1 — the run/paint wow moment).
+    case video(resource: String, fileExtension: String)
+    /// Two phone screenshots side by side, with an optional notification banner
+    /// floating over the top (Screen 2: map + attack notification, Screen 3:
+    /// feed + leaderboard).
+    case dualScreenshot(leading: String, trailing: String, topOverlay: String?)
 }
 
 @MainActor
@@ -60,8 +65,7 @@ final class OnboardingViewModel: ObservableObject {
     struct PageData {
         let titleKey: String
         let subtitleKey: String
-        let mediaAssetName: String
-        let mediaStyle: OnboardingMediaStyle
+        let media: OnboardingMedia
         let accentColor: Color
         let primaryCTAKey: String?
     }
@@ -70,36 +74,36 @@ final class OnboardingViewModel: ObservableObject {
 
     var pages: [PageData] {
         [
+            // Screen 1 — Run, paint the map (looping run video).
             PageData(
                 titleKey: "onboarding.slide1.title",
                 subtitleKey: "onboarding.slide1.subtitle",
-                mediaAssetName: "onboarding_map_mock",
-                mediaStyle: .screenshotCard,
+                media: .video(resource: "onboarding_run_loop", fileExtension: "mp4"),
                 accentColor: .blue,
                 primaryCTAKey: nil
             ),
+            // Screen 2 — Claim & defend (map overview + detail, attack banner).
             PageData(
                 titleKey: "onboarding.slide2.title",
                 subtitleKey: "onboarding.slide2.subtitle",
-                mediaAssetName: "onboarding_run_mock",
-                mediaStyle: .screenshotCard,
+                media: .dualScreenshot(
+                    leading: "onboarding_map_overview",
+                    trailing: "onboarding_map_detail",
+                    topOverlay: "onboarding_attack_notification"
+                ),
                 accentColor: .green,
                 primaryCTAKey: nil
             ),
+            // Screen 3 — Compete & share (feed + leaderboard).
             PageData(
                 titleKey: "onboarding.slide3.title",
                 subtitleKey: "onboarding.slide3.subtitle",
-                mediaAssetName: "onboarding_stats_mock",
-                mediaStyle: .screenshotCard,
+                media: .dualScreenshot(
+                    leading: "onboarding_feed",
+                    trailing: "onboarding_leaderboard",
+                    topOverlay: nil
+                ),
                 accentColor: .orange,
-                primaryCTAKey: nil
-            ),
-            PageData(
-                titleKey: "onboarding.slide4.title",
-                subtitleKey: "onboarding.slide4.subtitle",
-                mediaAssetName: "onboarding_start_mock",
-                mediaStyle: .screenshotCard,
-                accentColor: .mint,
                 primaryCTAKey: "onboarding.getStarted"
             ),
         ]

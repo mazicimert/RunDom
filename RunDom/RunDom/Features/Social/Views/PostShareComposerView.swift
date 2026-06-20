@@ -277,14 +277,19 @@ struct PostShareComposerView: View {
 
         let renderer = ImageRenderer(content: cardView)
         renderer.proposedSize = ProposedViewSize(canvas)
-        renderer.scale = 3
+        // 1080×1920 @ 2x (2160×3840) is ample for story/share quality while
+        // keeping the bitmap far below the @3x size that overran extensions.
+        renderer.scale = 2
 
         let rendered = renderer.uiImage
         isRendering = false
 
-        guard let image = rendered else { return }
+        guard let image = rendered,
+              let fileURL = ShareImageExporter.temporaryJPEGURL(for: image) else { return }
 
-        shareItems = [image]
+        // Share the JPEG file URL (not the raw UIImage) so memory-constrained
+        // share extensions like WhatsApp don't get jettisoned mid-share.
+        shareItems = [fileURL]
         AnalyticsService.logPostExternalShare(
             postId: post.id,
             hasPhoto: hasPhotos,

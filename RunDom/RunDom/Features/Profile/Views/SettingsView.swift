@@ -8,6 +8,9 @@ struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: SettingsViewModel
 
+    /// The legal/help document currently presented in the in-app browser.
+    @State private var activeLegalLink: LegalLink?
+
     init(authService: AuthService, locationManager: LocationManager) {
         _viewModel = StateObject(
             wrappedValue: SettingsViewModel(
@@ -107,17 +110,14 @@ struct SettingsView: View {
 
                 // Legal
                 Section("settings.legal".localized) {
-                    NavigationLink {
-                        LegalDocumentView(document: .communityGuidelines)
-                    } label: {
-                        Label("legal.communityGuidelines.title".localized, systemImage: "person.3.fill")
-                    }
+                    legalLinkRow(.communityGuidelines)
+                    legalLinkRow(.termsOfUse)
+                    legalLinkRow(.privacyPolicy)
+                }
 
-                    NavigationLink {
-                        LegalDocumentView(document: .termsOfUse)
-                    } label: {
-                        Label("legal.termsOfUse.title".localized, systemImage: "doc.text.fill")
-                    }
+                // Help
+                Section("settings.help".localized) {
+                    legalLinkRow(.helpCenter)
                 }
 
                 // Account
@@ -188,6 +188,12 @@ struct SettingsView: View {
             } message: {
                 Text("settings.deleteAccountConfirm".localized)
             }
+            .sheet(item: $activeLegalLink) { link in
+                if let url = link.url(languageCode: localizationManager.selectedLanguageCode) {
+                    SafariView(url: url)
+                        .ignoresSafeArea()
+                }
+            }
             .sheet(isPresented: $viewModel.showDeleteReauthSheet) {
                 DeleteAccountReauthSheet(
                     authService: viewModel.authServicePublic,
@@ -233,6 +239,24 @@ struct SettingsView: View {
 }
 
 private extension SettingsView {
+    /// A row that opens a Notion-hosted legal/help document in the in-app
+    /// browser, picking the language-appropriate page.
+    @ViewBuilder
+    func legalLinkRow(_ link: LegalLink) -> some View {
+        Button {
+            activeLegalLink = link
+        } label: {
+            HStack {
+                Label(link.titleLocalizationKey.localized, systemImage: link.iconName)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .tint(.primary)
+    }
+
     /// Toggle that doesn't update local state directly — taps trigger either a
     /// system prompt (notDetermined) or open iOS Settings (denied/authorized).
     /// The actual toggle visual updates via `checkNotificationStatus()` once

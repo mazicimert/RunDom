@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-RunDom (user-facing brand: **Runpire**) is a gamified running app where users conquer real-world territories on a map by running through them. It is NOT a fitness tracker — it's a competitive, territory-based game that uses GPS running as its core mechanic.
+RunDom (user-facing brand: **RunPire**) is a gamified running app where users conquer real-world territories on a map by running through them. It is NOT a fitness tracker — it's a competitive, territory-based game that uses GPS running as its core mechanic.
 
-> **Branding note:** The Xcode project, bundle ID, and source folder are named `RunDom`, but the app's display name and all user-facing copy use **Runpire**. Keep codebase identifiers as `RunDom`; only surface `Runpire` in localized strings, splash, share cards, and brand chrome.
+> **Branding note:** The Xcode project, bundle ID, and source folder are named `RunDom`, but the app's display name and all user-facing copy use **RunPire**. Keep codebase identifiers as `RunDom`; only surface `RunPire` in localized strings, splash, share cards, and brand chrome.
 
 > **Currency naming:** The in-game currency is called **Points** (English) / **Puan** (Turkish) in all user-facing copy. Internal code identifiers still use `trail` (e.g. `totalTrail`, `TrailCalculator`, `currentSeasonTrail`, `run.trailEarned` localization key). Don't rename code symbols — only the localized strings say "Points / Puan".
 
@@ -232,7 +232,7 @@ Points = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 
 - `RunGalleryMapSnapshotter` renders the run's polyline on a `MKMapSnapshotter` snapshot.
 - `RunGalleryPhotoLibrarySaver` saves to the user's photo library (requires `NSPhotoLibraryAddUsageDescription`).
-- `RunSummaryShareRenderer` + `PostRunShareCardView` produce a branded share image (Runpire watermark).
+- `RunSummaryShareRenderer` + `PostRunShareCardView` produce a branded share image (RunPire watermark).
 - `RunGalleryView` lists past run snapshots; `RunReviewSheet` collects rating/notes after a run.
 - `ShareSheet` is the SwiftUI wrapper for `UIActivityViewController`.
 
@@ -265,7 +265,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 
 ## Onboarding Flow
 
-1. Splash Screen (logo + Lottie animation, "Runpire" wordmark)
+1. Splash Screen (logo + Lottie animation, "RunPire" wordmark)
 2. Welcome screen (`WelcomeView`)
 3. 3 onboarding slides (full-screen, bold typography, mock images)
 4. Location permission screen (Always On with explanation)
@@ -331,7 +331,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 
 ## Important Notes
 
-- App brand is **Runpire** in user-facing copy; project + bundle keep the `RunDom` name.
+- App brand is **RunPire** in user-facing copy; project + bundle keep the `RunDom` name.
 - `FirebaseApp.configure()` is called in `AppDelegate` via `@UIApplicationDelegateAdaptor`
 - H3 grid uses custom pseudo-H3 coordinate quantization (not Uber's C library)
 - Territory sync uses Realtime Database transactions to prevent race conditions
@@ -423,12 +423,12 @@ Two widgets, both reading from the App Group `UserDefaults`:
 ### Step 6: Onboarding & Auth Flow ✅
 > First-time user experience
 
-- `Features/Onboarding/Views/SplashView.swift` — Logo + Lottie animation, Runpire wordmark
+- `Features/Onboarding/Views/SplashView.swift` — Logo + Lottie animation, RunPire wordmark
 - `Features/Onboarding/Views/WelcomeView.swift` — Post-splash welcome screen
 - `Features/Onboarding/Views/OnboardingPageView.swift` — Single slide (reusable)
 - `Features/Onboarding/Views/OnboardingContainerView.swift` — 3-slide TabView pager
 - `Features/Onboarding/Views/PermissionRequestView.swift` — Location + notification permissions
-- `Features/Onboarding/Views/AuthView.swift` — Apple Sign In + Google Sign In (Runpire branded)
+- `Features/Onboarding/Views/AuthView.swift` — Apple Sign In + Google Sign In (RunPire branded)
 - `Features/Onboarding/Views/CompleteProfileView.swift` — Post-auth display name completion
 - `Features/Onboarding/ViewModels/OnboardingViewModel.swift` — Page state, UserDefaults flag
 - `Features/Onboarding/ViewModels/AuthViewModel.swift` — Sign-in flow, Firebase Auth

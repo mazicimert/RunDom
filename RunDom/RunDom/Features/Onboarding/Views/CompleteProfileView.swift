@@ -136,7 +136,7 @@ struct CompleteProfileView: View {
             }
 
             VStack(spacing: 8) {
-                Text("Runpire")
+                Text("RunPire")
                     .font(.system(size: 34, weight: .black, design: .rounded))
                     .foregroundStyle(.primary)
 

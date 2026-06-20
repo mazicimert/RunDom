@@ -515,9 +515,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RunDom/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Runpire koşu sırasında konumunuzu kullanır.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Runpire haritada konumunuzu göstermek için kullanır.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Runpire hareket verilerinizi doğrulamak için kullanır.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "RunPire koşu sırasında konumunuzu kullanır.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RunPire haritada konumunuzu göstermek için kullanır.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "RunPire hareket verilerinizi doğrulamak için kullanır.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -549,9 +549,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RunDom/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Runpire koşu sırasında konumunuzu kullanır.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Runpire haritada konumunuzu göstermek için kullanır.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Runpire hareket verilerinizi doğrulamak için kullanır.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "RunPire koşu sırasında konumunuzu kullanır.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RunPire haritada konumunuzu göstermek için kullanır.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "RunPire hareket verilerinizi doğrulamak için kullanır.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

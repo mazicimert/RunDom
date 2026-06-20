@@ -216,7 +216,7 @@ final class PostRunViewModel: ObservableObject {
     }
 
     var shareBrandText: String {
-        "Runpire"
+        "RunPire"
     }
 
     var shareDateText: String {

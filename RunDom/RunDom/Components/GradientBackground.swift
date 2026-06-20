@@ -29,7 +29,7 @@ extension View {
 }
 
 #Preview {
-    Text("Runpire")
+    Text("RunPire")
         .font(.largeTitle.bold())
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .gradientBackground()

@@ -3,7 +3,7 @@
 **Last updated:** May 28, 2026
 **Version:** 1
 
-Please read these Terms of Use ("Terms") carefully before using the Runpire application ("App"). By using the App, you agree to these Terms.
+Please read these Terms of Use ("Terms") carefully before using the RunPire application ("App"). By using the App, you agree to these Terms.
 
 ## 1. Account Responsibility
 
@@ -16,7 +16,7 @@ Please read these Terms of Use ("Terms") carefully before using the Runpire appl
 
 - All content you upload to the App (photos, run data, comments, profile info) is your responsibility.
 - You must be the legal owner of any content you upload, or have permission to publish it.
-- For content you upload, you grant Runpire a worldwide, royalty-free, sublicensable license to display and fan out that content within the App. This license terminates when you delete your account (see Section 9).
+- For content you upload, you grant RunPire a worldwide, royalty-free, sublicensable license to display and fan out that content within the App. This license terminates when you delete your account (see Section 9).
 
 ## 3. Prohibited Conduct — Zero Tolerance
 
@@ -35,17 +35,17 @@ To report violating content, use the "..." menu on each post. Our team reviews a
 
 ## 4. Limited Use License
 
-As long as you comply with these Terms, Runpire grants you a limited, non-exclusive, non-transferable license to use the App for personal and non-commercial purposes.
+As long as you comply with these Terms, RunPire grants you a limited, non-exclusive, non-transferable license to use the App for personal and non-commercial purposes.
 
-## 5. Location and Health Data
+## 5. Location and Motion Data
 
-- The App uses your location data, and optionally HealthKit and motion sensor data, to track your runs.
+- The App uses your location data and motion sensor data to track your runs.
 - This data is processed for run statistics, territory capture on the map and leaderboards.
 - How your data is processed is detailed in our Privacy Policy.
 
 ## 6. Warranty Disclaimer
 
-The App is provided "as is" and "as available". Runpire:
+The App is provided "as is" and "as available". RunPire:
 
 - Does not warrant that the App will be error-free
 - Does not guarantee the accuracy of location data
@@ -55,9 +55,9 @@ The App is provided "as is" and "as available". Runpire:
 
 ## 7. Limitation of Liability
 
-To the maximum extent permitted by applicable law, Runpire's total liability is limited to direct, reasonably foreseeable losses you incur while using the App.
+To the maximum extent permitted by applicable law, RunPire's total liability is limited to direct, reasonably foreseeable losses you incur while using the App.
 
-Runpire is not responsible for:
+RunPire is not responsible for:
 - Content shared by other users
 - Injuries or accidents that occur during runs
 - Outages of third-party services

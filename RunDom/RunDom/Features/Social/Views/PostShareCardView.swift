@@ -382,7 +382,7 @@ struct PostShareCardView: View {
                 .scaledToFill()
                 .frame(width: iconSize, height: iconSize)
                 .clipShape(RoundedRectangle(cornerRadius: iconSize * 0.23, style: .continuous))
-            Text("Runpire")
+            Text("RunPire")
                 .font(.system(size: textSize, weight: .black))
                 .foregroundStyle(textColor)
         }

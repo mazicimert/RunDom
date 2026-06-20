@@ -11,6 +11,10 @@ final class PostService {
         db.collection("posts")
     }
 
+    private var runsCollection: CollectionReference {
+        db.collection("runs")
+    }
+
     // MARK: - Create
 
     @discardableResult
@@ -71,6 +75,17 @@ final class PostService {
 
         try postsCollection.document(id).setData(from: post)
         AppLogger.firebase.info("Post created: \(id) for run: \(run.id) photos: \(photoURLs.count)")
+
+        // Back-link the run to this post so every share entry point (post-run
+        // summary, run history detail, feed picker) sees it as already shared
+        // and a run can only be posted once. A failure here doesn't invalidate
+        // the post — log and move on; worst case the run can be shared again.
+        do {
+            try await runsCollection.document(run.id).updateData(["postId": id])
+        } catch {
+            AppLogger.firebase.warning("Failed to link run \(run.id) to post \(id): \(error.localizedDescription)")
+        }
+
         return post
     }
 

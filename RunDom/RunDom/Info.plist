@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Runpire</string>
+	<string>RunPire</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save run gallery images to your photo library.</string>
 	<key>CFBundleURLTypes</key>

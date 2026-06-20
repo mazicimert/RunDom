@@ -1,4 +1,4 @@
-/* Localizable.strings (English) — Runpire */
+/* Localizable.strings (English) — RunPire */
 
 // MARK: - Common
 "common.ok" = "OK";
@@ -40,7 +40,7 @@
 // MARK: - Onboarding — Hook
 "onboarding.hook.title" = "Run. Conquer. Defend.";
 "onboarding.hook.subtitle" = "The streets have a new owner — you.";
-"onboarding.hook.cta" = "Start";
+"onboarding.hook.cta" = "I'm In";
 
 // MARK: - Onboarding — How It Works (TODO: filled in next iteration)
 // onboarding.howItWorks.page1.*
@@ -104,25 +104,22 @@
 "runnerProfile.experience.regular" = "Regularly";
 "runnerProfile.experience.competitive" = "I race";
 
-// MARK: - Onboarding (legacy slides — will be replaced by How It Works)
-"onboarding.slide1.title" = "Conquer Your City";
-"onboarding.slide1.subtitle" = "See real zones on the map and paint them with your color by running.";
-"onboarding.slide1.support" = "Map ownership updates live as territories change hands.";
-"onboarding.slide2.title" = "Start Running, Capture Zones";
-"onboarding.slide2.subtitle" = "When you start a run, your route and visited cells are tracked automatically.";
-"onboarding.slide2.support" = "Entering new zones gives you stronger progression momentum.";
-"onboarding.slide3.title" = "Points & Rankings";
-"onboarding.slide3.subtitle" = "Collect points from runs and climb the weekly leaderboard.";
-"onboarding.slide3.support" = "Build a steady running rhythm to lead your neighborhood.";
-"onboarding.slide4.title" = "Start Now";
-"onboarding.slide4.subtitle" = "Complete permissions and launch your first run in a few taps.";
-"onboarding.slide4.support" = "First objective: capture the closest zone around you.";
+// MARK: - Onboarding (How It Works — 3 screens: run/paint, claim/defend, compete/share)
+"onboarding.slide1.title" = "Run, Paint the Map";
+"onboarding.slide1.subtitle" = "Every cell you run through is captured automatically in your color.";
+"onboarding.slide1.support" = "Your run, live on the map.";
+"onboarding.slide2.title" = "Claim & Defend";
+"onboarding.slide2.subtitle" = "Tap any zone to see who owns it and how strong its defense is. Run again to keep it yours.";
+"onboarding.slide2.support" = "Lose a zone? You'll know — time to fight back.";
+"onboarding.slide3.title" = "Compete & Share";
+"onboarding.slide3.subtitle" = "Climb the weekly leaderboard and share your conquests with the community.";
+"onboarding.slide3.support" = "You're not running alone.";
 "onboarding.placeholder" = "Screen preview coming soon";
 "onboarding.getStarted" = "Get Started";
 
 // MARK: - Permissions
 "permission.location.title" = "Enable Location";
-"permission.location.subtitle" = "Runpire needs your location to track runs and conquer territories in real time.";
+"permission.location.subtitle" = "RunPire needs your location to track runs and conquer territories in real time.";
 "permission.location.button" = "Allow Location Access";
 "permission.notification.title" = "Stay in the Game";
 "permission.notification.subtitle" = "Get notified when your territories are under attack.";
@@ -130,11 +127,11 @@
 
 // MARK: - Onboarding — Location Priming
 "onboarding.location.title" = "Don't lose your run";
-"onboarding.location.subtitle" = "We need 'Always allow' so we can keep painting territory while your phone is in your pocket.";
+"onboarding.location.subtitle" = "RunPire needs 'Always Allow' to keep capturing territory in the background — it never uses your location outside a run.";
 "onboarding.location.deniedTitle" = "Location is off";
 "onboarding.location.deniedSubtitle" = "Location access was turned down before. Open iOS Settings to enable it — the system won't ask again from inside the app.";
-"onboarding.location.bullet1" = "Tracks even when your phone is in your pocket";
-"onboarding.location.bullet2" = "Active only during your runs";
+"onboarding.location.bullet1" = "No need to keep your screen on";
+"onboarding.location.bullet2" = "Active only while you run";
 "onboarding.location.bullet3" = "Required to capture territory";
 "onboarding.location.allow" = "Allow Location Access";
 "onboarding.location.openSettings" = "Open iOS Settings";
@@ -643,7 +640,7 @@
 "settings.deleteAccount.reauth.warning.body" = "Sign in with Apple one more time to confirm. Once you do, your account and all data will be deleted immediately.";
 "settings.deleteAccount.reauth.bullet1" = "Your profile, runs, posts, comments and likes will be deleted.";
 "settings.deleteAccount.reauth.bullet2" = "Your followers and following lists will be removed.";
-"settings.deleteAccount.reauth.bullet3" = "Your Apple Sign In with Runpire will be revoked.";
+"settings.deleteAccount.reauth.bullet3" = "Your Apple Sign In with RunPire will be revoked.";
 "settings.deleteAccount.reauth.failed" = "Re-authentication failed. Try again.";
 "settings.deleteAccount.deleting" = "Deleting your account... This may take up to 30 seconds.";
 "settings.deleteAccount.failed" = "Could not delete your account. Try again later.";
@@ -773,6 +770,18 @@
 "social.share.title" = "Share with Followers";
 "social.share.subtitle" = "Show this run to people who follow you.";
 "social.share.shared" = "Shared with your followers";
+"social.share.viewPost" = "View your post";
+"social.share.history.button" = "Share this run";
+"social.share.picker.title" = "Share a Run";
+"social.share.picker.open" = "Share a run";
+"social.share.picker.prompt" = "Pick a run to share with your followers.";
+"social.share.picker.section.unshared" = "Not shared yet";
+"social.share.picker.section.shared" = "Shared";
+"social.share.picker.shared" = "Already shared";
+"social.share.picker.empty.title" = "No runs yet";
+"social.share.picker.empty.subtitle" = "Finish a run to share it with your followers.";
+"social.share.picker.error" = "Couldn't load your runs";
+"social.share.picker.error.subtitle" = "Check your connection and try again.";
 "social.create.title" = "New Post";
 "social.create.caption.placeholder" = "Say something about this run...";
 "social.create.visibility.label" = "Visibility";
@@ -879,9 +888,12 @@
 "settings.legal" = "Legal";
 "legal.communityGuidelines.title" = "Community Guidelines";
 "legal.termsOfUse.title" = "Terms of Use";
+"legal.privacyPolicy.title" = "Privacy Policy";
+"legal.helpCenter.title" = "Help Center";
+"settings.help" = "Help";
 "legal.acceptance.title" = "Before You Post";
 "legal.acceptance.heading" = "A safe community for everyone";
-"legal.acceptance.body" = "Runpire is a community of runners. To keep the experience respectful and safe, please review our Community Guidelines and Terms of Use before posting.";
+"legal.acceptance.body" = "RunPire is a community of runners. To keep the experience respectful and safe, please review our Community Guidelines and Terms of Use before posting.";
 "legal.acceptance.checkbox" = "I have read and accept the Community Guidelines and Terms of Use.";
 "legal.acceptance.continue" = "Accept";
 

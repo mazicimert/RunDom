@@ -12,6 +12,9 @@ struct MainTabView: View {
     @State private var showTerritoryLossPrompt = false
     @State private var showTerritoryLossMapBrowser = false
     @State private var skipTerritoryLossPromptDismissHandling = false
+    #if DEBUG
+    @State private var didAutoStartTrophyRun = false
+    #endif
 
     var body: some View {
         ZStack {
@@ -161,6 +164,11 @@ struct MainTabView: View {
             .presentationDragIndicator(.visible)
         }
         .task(id: appState.currentUser?.id) {
+            #if DEBUG
+            if autoStartTrophyRunIfNeeded() {
+                return
+            }
+            #endif
             await refreshPromptQueue(initialLossEventId: consumePendingNotificationLossEventId())
         }
         .onReceive(NotificationCenter.default.publisher(for: .notificationTapped)) { notification in
@@ -201,6 +209,26 @@ struct MainTabView: View {
         )
         router.isRunActive = true
     }
+
+    #if DEBUG
+    private func autoStartTrophyRunIfNeeded() -> Bool {
+        guard ProcessInfo.processInfo.arguments.contains("-RunDomAutoStartTrophyRun") else {
+            return false
+        }
+        guard !didAutoStartTrophyRun, let user = appState.currentUser else {
+            return false
+        }
+        didAutoStartTrophyRun = true
+        activeRunSession = RunSession(
+            id: UUID().uuidString,
+            userId: user.id,
+            mode: .normal,
+            startDate: Date()
+        )
+        router.isRunActive = true
+        return true
+    }
+    #endif
 
     private var canPresentOverlayPrompts: Bool {
         !router.isRunActive

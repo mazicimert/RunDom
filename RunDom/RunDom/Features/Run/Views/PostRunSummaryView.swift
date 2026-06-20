@@ -19,6 +19,7 @@ struct PostRunSummaryView: View {
 
     init(session: RunSession, onDismiss: @escaping () -> Void) {
         _viewModel = StateObject(wrappedValue: PostRunViewModel(session: session))
+        _hasSharedToFollowers = State(initialValue: session.postId != nil)
         self.onDismiss = onDismiss
     }
 

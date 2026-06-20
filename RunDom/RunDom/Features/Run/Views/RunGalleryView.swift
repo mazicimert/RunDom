@@ -278,7 +278,8 @@ struct RunGalleryView: View {
         guard canExport else { return }
         isRendering = true
 
-        guard let image = renderedPreviewImage() else {
+        guard let image = renderedPreviewImage(),
+              let fileURL = ShareImageExporter.temporaryJPEGURL(for: image) else {
             isRendering = false
             galleryAlert = GalleryAlert(
                 title: "common.error".localized,
@@ -287,7 +288,9 @@ struct RunGalleryView: View {
             return
         }
 
-        shareItems = [image]
+        // Share the JPEG file URL (not the raw UIImage) so memory-constrained
+        // share extensions like WhatsApp don't get jettisoned mid-share.
+        shareItems = [fileURL]
         isRendering = false
         isShareSheetPresented = true
     }
@@ -348,7 +351,9 @@ struct RunGalleryView: View {
 
         let renderer = ImageRenderer(content: preview)
         renderer.proposedSize = ProposedViewSize(previewRenderSize)
-        renderer.scale = 3
+        // 1080×1920 @ 2x (2160×3840) is ample for story/share quality while
+        // keeping the bitmap far below the @3x size that overran extensions.
+        renderer.scale = 2
         return renderer.uiImage
     }
 
@@ -356,7 +361,7 @@ struct RunGalleryView: View {
         Post(
             id: session.id,
             authorId: session.userId,
-            authorDisplayName: "Runpire",
+            authorDisplayName: "RunPire",
             authorPhotoURL: nil,
             authorColor: appState.currentUser?.color ?? "#4ECDC4",
             runId: session.id,

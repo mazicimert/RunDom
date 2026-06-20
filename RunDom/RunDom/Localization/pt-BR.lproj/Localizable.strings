@@ -1,4 +1,4 @@
-/* Localizable.strings (Brazilian Portuguese) — Runpire */
+/* Localizable.strings (Brazilian Portuguese) — RunPire */
 
 // MARK: - Common
 "common.ok" = "OK";
@@ -102,25 +102,22 @@
 "runnerProfile.experience.regular" = "Com regularidade";
 "runnerProfile.experience.competitive" = "Eu compito";
 
-// MARK: - Onboarding (legacy slides — will be replaced by How It Works)
-"onboarding.slide1.title" = "Conquiste Sua Cidade";
-"onboarding.slide1.subtitle" = "Veja zonas reais no mapa e pinte-as com a sua cor enquanto corre.";
-"onboarding.slide1.support" = "O mapa atualiza a posse ao vivo conforme os territórios trocam de mãos.";
-"onboarding.slide2.title" = "Comece a Correr, Capture Zonas";
-"onboarding.slide2.subtitle" = "Quando você inicia uma corrida, seu trajeto e as células visitadas são registrados automaticamente.";
-"onboarding.slide2.support" = "Entrar em novas zonas dá um impulso ainda maior à sua progressão.";
-"onboarding.slide3.title" = "Pontos & Rankings";
-"onboarding.slide3.subtitle" = "Acumule pontos nas corridas e suba no ranking semanal.";
-"onboarding.slide3.support" = "Crie um ritmo constante para liderar o seu bairro.";
-"onboarding.slide4.title" = "Comece Agora";
-"onboarding.slide4.subtitle" = "Conceda as permissões e inicie sua primeira corrida em poucos toques.";
-"onboarding.slide4.support" = "Primeiro objetivo: conquistar a zona mais próxima de você.";
+// MARK: - Onboarding (Como funciona — 3 telas: correr/pintar, conquistar/defender, competir/compartilhar)
+"onboarding.slide1.title" = "Corra, Pinte o Mapa";
+"onboarding.slide1.subtitle" = "Cada célula por onde você corre é conquistada automaticamente na sua cor.";
+"onboarding.slide1.support" = "Sua corrida, ao vivo no mapa.";
+"onboarding.slide2.title" = "Conquiste e Defenda";
+"onboarding.slide2.subtitle" = "Toque em qualquer zona para ver o dono e o nível de defesa. Corra de novo para mantê-la.";
+"onboarding.slide2.support" = "Perdeu uma zona? Você vai saber — hora de revidar.";
+"onboarding.slide3.title" = "Compita e Compartilhe";
+"onboarding.slide3.subtitle" = "Suba no ranking semanal e compartilhe suas conquistas com a comunidade.";
+"onboarding.slide3.support" = "Você não corre sozinho.";
 "onboarding.placeholder" = "Pré-visualização da tela em breve";
 "onboarding.getStarted" = "Vamos Começar";
 
 // MARK: - Permissions
 "permission.location.title" = "Ativar Localização";
-"permission.location.subtitle" = "O Runpire precisa da sua localização para registrar corridas e conquistar territórios em tempo real.";
+"permission.location.subtitle" = "O RunPire precisa da sua localização para registrar corridas e conquistar territórios em tempo real.";
 "permission.location.button" = "Permitir Acesso à Localização";
 "permission.notification.title" = "Continue no Jogo";
 "permission.notification.subtitle" = "Receba avisos quando seus territórios estiverem sob ataque.";
@@ -788,3 +785,136 @@
 "social.comments.empty" = "Sem comentários ainda. Seja o primeiro.";
 "social.comments.placeholder" = "Adicionar um comentário...";
 "social.comments.delete" = "Excluir";
+
+
+// MARK: - Localization completion (de/es/pt-BR parity)
+
+// Common
+"common.seeAll" = "Ver tudo";
+"common.settings" = "Configurações";
+
+// Leaderboard
+"leaderboard.champion" = "Campeão";
+"leaderboard.empty.cta" = "Corra primeiro, conquiste o ranking";
+"leaderboard.gap.toPass" = "%@ para passar a posição acima";
+"leaderboard.territories" = "%d zonas";
+
+// Legal (Phase A.3)
+"legal.acceptance.body" = "O RunPire é uma comunidade de corredores. Para manter a experiência respeitosa e segura, leia nossas Diretrizes da comunidade e Termos de uso antes de publicar.";
+"legal.acceptance.checkbox" = "Li e aceito as Diretrizes da comunidade e os Termos de uso.";
+"legal.acceptance.continue" = "Aceitar";
+"legal.acceptance.heading" = "Uma comunidade segura para todos";
+"legal.acceptance.title" = "Antes de publicar";
+"legal.communityGuidelines.title" = "Diretrizes da comunidade";
+"legal.helpCenter.title" = "Central de ajuda";
+"legal.privacyPolicy.title" = "Política de privacidade";
+"legal.termsOfUse.title" = "Termos de uso";
+
+// Privacy Zones (Phase B)
+"privacy.zones.add" = "Adicionar zona";
+"privacy.zones.add.title" = "Nova zona de privacidade";
+"privacy.zones.banner.subtitle" = "Os pontos da rota dentro das suas zonas não serão mostrados aos outros nesta publicação.";
+"privacy.zones.banner.title" = "%@ zona(s) de privacidade ativa(s)";
+"privacy.zones.delete.confirm" = "Excluir %@?";
+"privacy.zones.edit.title" = "Editar zona de privacidade";
+"privacy.zones.empty.subtitle" = "Adicione zonas para manter sua casa e seu trabalho fora do mapa.";
+"privacy.zones.empty.title" = "Ainda não há zonas de privacidade";
+"privacy.zones.explainer" = "Oculte o início e o fim das suas corridas perto de lugares como casa e trabalho. Você continuará vendo sua rota completa — apenas o que os outros veem é mascarado.";
+"privacy.zones.maxHint" = "Até %@ zonas.";
+"privacy.zones.maxReached" = "Você atingiu o limite de %@ zonas. Remova uma para adicionar outra.";
+"privacy.zones.name.label" = "Nome";
+"privacy.zones.name.placeholder" = "Casa, trabalho, etc.";
+"privacy.zones.radius" = "Raio de %@ m";
+"privacy.zones.radius.label" = "Raio";
+"privacy.zones.unnamed" = "Zona sem nome";
+"privacy.zones.useMyLocation" = "Usar minha localização atual";
+
+// Report
+"report.error.duplicate" = "Você já denunciou isso. Estamos cuidando disso.";
+"report.error.generic" = "Não foi possível enviar sua denúncia. Tente novamente.";
+"report.note.hint" = "Adicione detalhes (opcional, mas ajuda a agirmos mais rápido).";
+"report.note.placeholder" = "Descreva o problema...";
+"report.prompt" = "Conte-nos por que este conteúdo é um problema. Nossa equipe vai analisá-lo.";
+"report.reason.harassment" = "Assédio ou discurso de ódio";
+"report.reason.inappropriate" = "Conteúdo impróprio (nudez, violência)";
+"report.reason.misinformation" = "Falso ou enganoso";
+"report.reason.other" = "Outro";
+"report.reason.spam" = "Spam";
+"report.submit" = "Denunciar";
+"report.title.comment" = "Denunciar comentário";
+"report.title.post" = "Denunciar publicação";
+"report.title.user" = "Denunciar usuário";
+
+// Run
+"run.gallery.permissionDenied.title" = "Acesso às Fotos necessário";
+"run.route" = "Rota";
+"run.summary.breakdown.cause" = "Causa";
+"run.summary.breakdown.voided" = "Como o total é 0, esses multiplicadores não afetaram o resultado.";
+"run.summary.breakdown.voided.speed" = "Seu multiplicador de velocidade chegou a 0, o que zerou seus pontos — os outros não tiveram efeito.";
+"run.summary.voided.encourage" = "Supere o limite na próxima corrida e esses multiplicadores entram em ação.";
+
+// Settings — Privacy & Safety
+"settings.blockedUsers" = "Usuários bloqueados";
+"settings.blockedUsers.empty.subtitle" = "Quando você bloquear alguém, a pessoa aparecerá aqui.";
+"settings.blockedUsers.empty.title" = "Nenhum usuário bloqueado";
+"settings.deleteAccount.deleting" = "Excluindo sua conta... Isso pode levar até 30 segundos.";
+"settings.deleteAccount.failed" = "Não foi possível excluir sua conta. Tente novamente mais tarde.";
+"settings.deleteAccount.reauth.bullet1" = "Seu perfil, corridas, publicações, comentários e curtidas serão excluídos.";
+"settings.deleteAccount.reauth.bullet2" = "Suas listas de seguidores e seguindo serão removidas.";
+"settings.deleteAccount.reauth.bullet3" = "Seu login com a Apple no RunPire será revogado.";
+"settings.deleteAccount.reauth.failed" = "Falha na reautenticação. Tente novamente.";
+"settings.deleteAccount.reauth.title" = "Confirmar exclusão";
+"settings.deleteAccount.reauth.warning.body" = "Faça login com a Apple mais uma vez para confirmar. Depois disso, sua conta e todos os dados serão excluídos imediatamente.";
+"settings.deleteAccount.reauth.warning.title" = "Isto é permanente";
+"settings.help" = "Ajuda";
+"settings.legal" = "Jurídico";
+"settings.privacy" = "Privacidade e segurança";
+"settings.privacyZones" = "Zonas de privacidade";
+
+// Social — Block (Phase A.2)
+"social.block.action" = "Bloquear";
+"social.block.confirm.message" = "Vocês não verão as publicações nem o perfil um do outro. Você pode desbloquear a qualquer momento nas Configurações.";
+"social.block.confirm.title" = "Bloquear %@?";
+"social.block.overlay.byme" = "Você bloqueou este usuário";
+"social.block.overlay.byme.subtitle" = "Publicações e estatísticas estão ocultas. Toque em desbloquear se foi um engano.";
+"social.block.overlay.byother" = "O conteúdo deste usuário não está disponível";
+"social.comments.report" = "Denunciar comentário";
+
+// Social — Create post photos
+"social.create.photos.add" = "Adicionar";
+"social.create.photos.hint" = "Até 4 fotos. Os dados de localização são removidos antes do envio.";
+"social.create.photos.label" = "Fotos";
+"social.create.photos.remove" = "Remover foto";
+
+// Social — External Share (Phase C)
+"social.externalShare.preparing" = "Preparando...";
+"social.externalShare.selectPhoto" = "Escolher foto";
+"social.externalShare.template" = "Modelo";
+"social.externalShare.template.card" = "Cartão";
+"social.externalShare.template.hero" = "Hero";
+"social.externalShare.template.mapOnly" = "Mapa";
+"social.externalShare.template.stripe" = "Faixa";
+
+// Social — Post actions
+"social.post.delete" = "Excluir publicação";
+"social.post.delete.confirm.action" = "Excluir";
+"social.post.delete.confirm.message" = "Esta publicação será removida do seu feed e do feed dos seus seguidores. Isso não pode ser desfeito.";
+"social.post.delete.confirm.title" = "Excluir publicação?";
+"social.post.report" = "Denunciar publicação";
+
+// Social — Share run
+"social.share.history.button" = "Compartilhar esta corrida";
+"social.share.picker.empty.subtitle" = "Termine uma corrida para compartilhá-la com seus seguidores.";
+"social.share.picker.empty.title" = "Ainda não há corridas";
+"social.share.picker.error" = "Não foi possível carregar suas corridas";
+"social.share.picker.error.subtitle" = "Verifique sua conexão e tente novamente.";
+"social.share.picker.open" = "Compartilhar uma corrida";
+"social.share.picker.prompt" = "Escolha uma corrida para compartilhar com seus seguidores.";
+"social.share.picker.section.shared" = "Compartilhadas";
+"social.share.picker.section.unshared" = "Ainda não compartilhadas";
+"social.share.picker.shared" = "Já compartilhada";
+"social.share.picker.title" = "Compartilhar uma corrida";
+"social.share.viewPost" = "Ver sua publicação";
+"social.unblock.action" = "Desbloquear";
+"social.unblock.confirm.title" = "Desbloquear %@?";
+"social.user.report" = "Denunciar usuário";

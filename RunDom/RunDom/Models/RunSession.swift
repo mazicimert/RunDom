@@ -32,6 +32,11 @@ struct RunSession: Codable, Identifiable, Equatable, Hashable {
     var rating: Int?
     var tags: [String] = []
     var note: String?
+    /// Id of the social `Post` this run was shared as, if any.
+    /// Set once when the run is published to the feed; gates re-sharing
+    /// and drives the "already shared" state across the summary, run
+    /// history detail, and the feed run picker.
+    var postId: String?
 
     var duration: TimeInterval {
         let end = endDate ?? Date()

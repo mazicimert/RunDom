@@ -24,6 +24,18 @@ struct LeaderboardListView: View {
                             isCurrentUser: isCurrentUser,
                             pointsToPass: isCurrentUser ? gapToRankAbove(at: index) : nil
                         )
+                        .background {
+                            // Report the current user's row frame so the parent can
+                            // hide the pinned card while this row is on-screen.
+                            if isCurrentUser {
+                                GeometryReader { proxy in
+                                    Color.clear.preference(
+                                        key: LeaderboardCurrentUserFrameKey.self,
+                                        value: proxy.frame(in: .named(leaderboardScrollSpace))
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 .screenPadding()

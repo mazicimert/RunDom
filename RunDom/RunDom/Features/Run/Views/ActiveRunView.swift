@@ -196,12 +196,12 @@ struct ActiveRunView: View {
     private var shouldShowTopStatusStack: Bool {
         viewModel.gpsSignalLost
             || showRivalTerritoryBanner
-            || !viewModel.hasAlwaysLocationPermission
+            || (!viewModel.hasAlwaysLocationPermission && !isTrophyRunDemo)
     }
 
     private var topStatusStack: some View {
         VStack(spacing: 10) {
-            if !viewModel.hasAlwaysLocationPermission {
+            if !viewModel.hasAlwaysLocationPermission && !isTrophyRunDemo {
                 whenInUseWarningBanner
             }
 
@@ -213,6 +213,14 @@ struct ActiveRunView: View {
                 rivalTerritoryBanner
             }
         }
+    }
+
+    private var isTrophyRunDemo: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-RunDomAutoStartTrophyRun")
+        #else
+        false
+        #endif
     }
 
     private var whenInUseWarningBanner: some View {
@@ -430,7 +438,7 @@ struct RunMapView: UIViewRepresentable {
     // only ~7 zoom levels, a span MapKit streams reliably with the ancestor always present
     // (so worst case is a brief blur, never black). Raising this re-introduces the black risk.
     private static let introStartAltitude: CLLocationDistance = 5_000_000  // continental view
-    private static let followAltitude: CLLocationDistance = 1300           // close-up follow distance
+    private static let followAltitude: CLLocationDistance = 8500           // follow distance
     private static let followPitchTilted: CGFloat = 50                     // 3D tilt (when enabled)
     /// Effective camera pitch for every framing below — the cinematic descent, touchdown, and
     /// live follow all read this so toggling 2D/3D flows through a single value.

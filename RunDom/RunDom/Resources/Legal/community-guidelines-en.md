@@ -3,7 +3,7 @@
 **Last updated:** May 28, 2026
 **Version:** 1
 
-Runpire is a community of people who love running. To keep everyone safe and respected, we ask all users to follow these guidelines.
+RunPire is a community of people who love running. To keep everyone safe and respected, we ask all users to follow these guidelines.
 
 ## 1. Be respectful
 
@@ -35,7 +35,7 @@ Don't post repetitive, irrelevant, commercial or manipulative content. Reposting
 
 ## 6. Run safely
 
-Runpire is a game, but you're running in the real world. Watch for traffic, don't take risks in dangerous areas, don't put others' safety at risk. Don't attempt runs that aren't appropriate for your age or health condition.
+RunPire is a game, but you're running in the real world. Watch for traffic, don't take risks in dangerous areas, don't put others' safety at risk. Don't attempt runs that aren't appropriate for your age or health condition.
 
 ## Consequences for violations
 

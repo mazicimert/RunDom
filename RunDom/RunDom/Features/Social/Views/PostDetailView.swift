@@ -332,7 +332,7 @@ struct PostDetailView: View {
     }
 
     private func metricsRow(_ post: Post) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             metricPill(
                 icon: "point.topleft.down.to.point.bottomright.curvepath.fill",
                 value: post.distance.formattedDistanceFromMeters,
@@ -362,16 +362,17 @@ struct PostDetailView: View {
     }
 
     private func metricPill(icon: String, value: String, tint: Color) -> some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(tint)
             Text(value)
                 .font(.caption.weight(.semibold))
                 .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .minimumScaleFactor(0.7)
         }
-        .padding(.horizontal, 9)
+        .layoutPriority(1)
+        .padding(.horizontal, 8)
         .padding(.vertical, 6)
         .background(Capsule(style: .continuous).fill(tint.opacity(0.12)))
     }

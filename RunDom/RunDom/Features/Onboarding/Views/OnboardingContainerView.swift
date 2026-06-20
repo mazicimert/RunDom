@@ -21,8 +21,7 @@ struct OnboardingContainerView: View {
             TabView(selection: $viewModel.currentPage) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.offset) { index, page in
                     OnboardingPageView(
-                        mediaAssetName: page.mediaAssetName,
-                        mediaStyle: page.mediaStyle,
+                        media: page.media,
                         title: page.titleKey.localized,
                         subtitle: page.subtitleKey.localized,
                         supportingText: viewModel.supportingText(for: index),

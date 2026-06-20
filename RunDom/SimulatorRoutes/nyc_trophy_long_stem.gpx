@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="RunDom Simulator Trophy Route" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>NYC Trophy Long Stem</name>
+    <desc>Manhattan trophy outline route with a long stem, centered around Chelsea, NoMad, and Midtown.</desc>
+  </metadata>
+  <trk>
+    <name>NYC Trophy Long Stem</name>
+    <trkseg>
+      <trkpt lat="40.7441065" lon="-73.9956382"><time>2026-06-14T18:00:00Z</time><name>start bottom center - 7th Avenue / West 23rd Street</name></trkpt>
+      <trkpt lat="40.7429103" lon="-73.9927979"><time>2026-06-14T18:01:01Z</time><name>base left - 6th Avenue / West 23rd Street</name></trkpt>
+      <trkpt lat="40.7448186" lon="-73.9914085"><time>2026-06-14T18:01:55Z</time><name>base up left - 6th Avenue / West 26th Street</name></trkpt>
+      <trkpt lat="40.7460176" lon="-73.9942525"><time>2026-06-14T18:02:56Z</time><name>inner base right - 7th Avenue / West 26th Street</name></trkpt>
+      <trkpt lat="40.7503422" lon="-73.9910985"><time>2026-06-14T18:04:58Z</time><name>long stem left edge - 7th Avenue / West 33rd Street</name></trkpt>
+      <trkpt lat="40.7491217" lon="-73.9882353"><time>2026-06-14T18:05:59Z</time><name>cup neck left - 6th Avenue / West 33rd Street</name></trkpt>
+      <trkpt lat="40.7504511" lon="-73.9872327"><time>2026-06-14T18:06:37Z</time><name>left bowl wall up - 6th Avenue / West 35th Street</name></trkpt>
+      <trkpt lat="40.7491045" lon="-73.9840705"><time>2026-06-14T18:07:45Z</time><name>left handle outer - 5th Avenue / West 35th Street</name></trkpt>
+      <trkpt lat="40.7509597" lon="-73.9827265"><time>2026-06-14T18:08:37Z</time><name>left handle top - 5th Avenue / West 38th Street</name></trkpt>
+      <trkpt lat="40.7523170" lon="-73.9859470"><time>2026-06-14T18:09:46Z</time><name>left rim return - 6th Avenue / West 38th Street</name></trkpt>
+      <trkpt lat="40.7535585" lon="-73.9850397"><time>2026-06-14T18:10:21Z</time><name>left rim rise - 6th Avenue / West 40th Street</name></trkpt>
+      <trkpt lat="40.7571536" lon="-73.9935785"><time>2026-06-14T18:13:24Z</time><name>top rim right - 9th Avenue / West 40th Street</name></trkpt>
+      <trkpt lat="40.7559045" lon="-73.9944753"><time>2026-06-14T18:13:59Z</time><name>right rim drop - 9th Avenue / West 38th Street</name></trkpt>
+      <trkpt lat="40.7570936" lon="-73.9973219"><time>2026-06-14T18:15:00Z</time><name>right handle outer - 10th Avenue / West 38th Street</name></trkpt>
+      <trkpt lat="40.7552565" lon="-73.9986588"><time>2026-06-14T18:15:52Z</time><name>right handle lower - 10th Avenue / West 35th Street</name></trkpt>
+      <trkpt lat="40.7540713" lon="-73.9958428"><time>2026-06-14T18:16:52Z</time><name>right bowl return - 9th Avenue / West 35th Street</name></trkpt>
+      <trkpt lat="40.7527418" lon="-73.9968169"><time>2026-06-14T18:17:30Z</time><name>right bowl bottom - 9th Avenue / West 33rd Street</name></trkpt>
+      <trkpt lat="40.7515320" lon="-73.9939428"><time>2026-06-14T18:18:31Z</time><name>cup neck right - 8th Avenue / West 33rd Street</name></trkpt>
+      <trkpt lat="40.7472165" lon="-73.9970852"><time>2026-06-14T18:20:33Z</time><name>long stem right edge - 8th Avenue / West 26th Street</name></trkpt>
+      <trkpt lat="40.7484299" lon="-73.9999571"><time>2026-06-14T18:21:35Z</time><name>base right out - 9th Avenue / West 26th Street</name></trkpt>
+      <trkpt lat="40.7465212" lon="-74.0013497"><time>2026-06-14T18:22:29Z</time><name>base right down - 9th Avenue / West 23rd Street</name></trkpt>
+      <trkpt lat="40.7441065" lon="-73.9956382"><time>2026-06-14T18:24:31Z</time><name>close bottom center - 7th Avenue / West 23rd Street</name></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

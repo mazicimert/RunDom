@@ -5,6 +5,11 @@ struct LeaderboardTabView: View {
     @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel: LeaderboardViewModel
 
+    /// Height of the scroll viewport, used to test row visibility.
+    @State private var viewportHeight: CGFloat = 0
+    /// Whether the current user's own row is currently visible in the list.
+    @State private var isCurrentUserRowVisible = true
+
     init(locationManager: LocationManager) {
         _viewModel = StateObject(wrappedValue: LeaderboardViewModel(locationManager: locationManager))
     }
@@ -43,6 +48,19 @@ struct LeaderboardTabView: View {
                     )
                     .padding(.bottom)
                 }
+                .coordinateSpace(name: leaderboardScrollSpace)
+                .background {
+                    GeometryReader { proxy in
+                        Color.clear
+                            .onAppear { viewportHeight = proxy.size.height }
+                            .onChange(of: proxy.size.height) { _, newValue in
+                                viewportHeight = newValue
+                            }
+                    }
+                }
+                .onPreferenceChange(LeaderboardCurrentUserFrameKey.self) { frame in
+                    updateCurrentUserRowVisibility(frame)
+                }
             }
         }
         .task {
@@ -57,18 +75,38 @@ struct LeaderboardTabView: View {
                     .screenPadding()
                     .padding(.top, 8)
                     .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: pinnedCurrentUserEntry?.id)
+        .animation(.easeInOut(duration: 0.25), value: isCurrentUserRowVisible)
     }
 
+    /// Pinned card surfaces only when the user is out of the podium AND their own
+    /// row isn't currently on-screen — otherwise it's redundant chrome.
     private var pinnedCurrentUserEntry: LeaderboardEntry? {
         guard !viewModel.isLoading,
               let entry = viewModel.currentUserEntry,
-              entry.rank > 3 else {
+              entry.rank > 3,
+              !isCurrentUserRowVisible else {
             return nil
         }
 
         return entry
+    }
+
+    private func updateCurrentUserRowVisibility(_ frame: CGRect?) {
+        guard let frame, viewportHeight > 0 else {
+            // No frame reported → the row isn't laid out (e.g. user is far beyond
+            // the loaded page), so treat it as off-screen and show the pinned card.
+            isCurrentUserRowVisible = false
+            return
+        }
+
+        // Consider the row "visible" only when a meaningful slice sits inside the
+        // viewport, so the pinned card hands off cleanly as it scrolls past edges.
+        let margin: CGFloat = 28
+        isCurrentUserRowVisible = frame.maxY > margin && frame.minY < viewportHeight - margin
     }
 }
 
@@ -270,10 +308,6 @@ private struct WeeklySeasonCountdownPill: View {
 private struct LeaderboardPinnedCurrentUserCard: View {
     let entry: LeaderboardEntry
 
-    private var userColor: Color {
-        Color(hex: entry.color) ?? .accentColor
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -288,22 +322,15 @@ private struct LeaderboardPinnedCurrentUserCard: View {
                     .foregroundStyle(.secondary)
             }
 
-            LeaderboardRowView(entry: entry, isCurrentUser: true)
+            LeaderboardRowView(entry: entry, isCurrentUser: true, isEmbedded: true)
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(
-                    LinearGradient(
-                        colors: [Color.accentColor.opacity(0.5), userColor.opacity(0.3)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ),
-                    lineWidth: 1.5
-                )
+                .stroke(Color.accentColor.opacity(0.28), lineWidth: 1)
         )
-        .shadow(color: Color.accentColor.opacity(0.22), radius: 18, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.18), radius: 12, x: 0, y: 6)
     }
 }
 

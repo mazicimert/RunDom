@@ -140,13 +140,20 @@ struct StatsTabView: View {
 
     // MARK: - Summary Section
 
+    /// The signed-in user's personal color (used to paint territories), falling
+    /// back to the app accent color when unavailable.
+    private var userColor: Color {
+        guard let hex = appState.currentUser?.color else { return .accentColor }
+        return Color(hex: hex) ?? .accentColor
+    }
+
     private var summarySection: some View {
         VStack(spacing: 12) {
             StatCardView(
                 icon: "flame.fill",
                 value: statsVM.heroTrailText,
                 label: "stats.totalTrail".localized,
-                iconColor: .orange,
+                iconColor: userColor,
                 variant: .hero,
                 supportingText: statsVM.period.localized,
                 detailText: statsVM.trailDeltaText,
