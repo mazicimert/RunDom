@@ -1,10 +1,12 @@
 import SwiftUI
 import MapKit
+import StoreKit
 import UIKit
 
 struct PostRunSummaryView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var router: AppRouter
+    @Environment(\.requestReview) private var requestReview
     @StateObject private var viewModel: PostRunViewModel
     @State private var showConfetti = false
     @State private var showStreakFire = false
@@ -136,7 +138,10 @@ struct PostRunSummaryView: View {
                     } else {
                         showConfetti = true
                     }
-                    scheduleNotificationPromptIfNeeded()
+                    let didScheduleNotificationPrompt = scheduleNotificationPromptIfNeeded()
+                    if !didScheduleNotificationPrompt, let user = appState.currentUser {
+                        scheduleAppReviewRequestIfNeeded(currentUserBeforeSave: user)
+                    }
                 }
             }
             .onChange(of: viewModel.errorMessage) { _, message in
@@ -827,15 +832,37 @@ struct PostRunSummaryView: View {
         isGalleryPresented = true
     }
 
-    private func scheduleNotificationPromptIfNeeded() {
+    @discardableResult
+    private func scheduleNotificationPromptIfNeeded() -> Bool {
         let alreadyAsked = UserDefaults.standard.bool(
             forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission
         )
-        guard !alreadyAsked else { return }
+        guard !alreadyAsked else { return false }
 
         // Let confetti / streak / level-up animations play first
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
             showNotificationPrompt = true
+        }
+        return true
+    }
+
+    private func scheduleAppReviewRequestIfNeeded(currentUserBeforeSave: User) {
+        let reviewService = AppReviewRequestService.shared
+        guard reviewService.shouldRequestAfterSuccessfulRun(
+            session: viewModel.session,
+            currentUserBeforeSave: currentUserBeforeSave
+        ) else {
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            guard !showReviewSheet,
+                  !isGalleryPresented,
+                  !showCreatePost else {
+                return
+            }
+            reviewService.recordRequestAttempt()
+            requestReview()
         }
     }
 }

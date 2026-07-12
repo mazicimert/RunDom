@@ -7,7 +7,9 @@ struct AIRunAnalysisCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            AIAnalysisHeaderView(source: source, fallbackMessage: fallbackMessage)
+            if source != .ai || fallbackMessage != nil {
+                AIAnalysisHeaderView(source: source, fallbackMessage: fallbackMessage)
+            }
 
             AIAnalysisSection(
                 title: "ai.run.section.summary".localized,
@@ -72,7 +74,9 @@ struct AIWeeklyAnalysisCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            AIAnalysisHeaderView(source: source, fallbackMessage: fallbackMessage)
+            if source != .ai || fallbackMessage != nil {
+                AIAnalysisHeaderView(source: source, fallbackMessage: fallbackMessage)
+            }
 
             AIAnalysisSection(
                 title: "ai.weekly.section.trend".localized,
@@ -126,25 +130,25 @@ private struct AIAnalysisHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Image(systemName: source == .ai ? "sparkles" : "doc.text.magnifyingglass")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(source == .ai ? Color.accentColor : .secondary)
+            if source == .template {
+                HStack(spacing: 8) {
+                    Image(systemName: "doc.text.magnifyingglass")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.secondary)
 
-                Text(source == .ai
-                     ? "ai.badge.gemini".localized
-                     : "ai.badge.template".localized)
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(source == .ai ? Color.accentColor : .secondary)
+                    Text("ai.badge.template".localized)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
 
-                Spacer()
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.10))
+                )
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    .fill((source == .ai ? Color.accentColor : Color.secondary).opacity(0.10))
-            )
 
             if let fallbackMessage {
                 HStack(spacing: 8) {

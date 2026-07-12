@@ -623,8 +623,6 @@
 "settings.deleteAccountRecentLogin" = "Por seguridad, debes iniciar sesión de nuevo antes de eliminar tu cuenta.";
 "settings.about" = "Acerca de";
 "settings.version" = "Versión";
-"settings.testing" = "Pruebas";
-"settings.restartOnboarding" = "Reiniciar Tutorial";
 
 // MARK: - Runner
 "runner.defaultName" = "Corredor";
@@ -681,7 +679,6 @@
 "ai.weekly.section.top" = "Mayor Logro";
 "ai.weekly.section.weak" = "Punto Débil";
 "ai.weekly.section.focus" = "Foco de la Próxima Semana";
-"ai.badge.gemini" = "Gemini AI";
 "ai.badge.template" = "Plantilla de Insight";
 "ai.disclaimer" = "Generado como pista de estrategia. Las decisiones de juego siguen siendo tuyas.";
 "ai.error.minThresholds" = "La corrida debe tener al menos 3 minutos y 300 m para el análisis con IA.";

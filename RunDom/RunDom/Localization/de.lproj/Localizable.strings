@@ -623,8 +623,6 @@
 "settings.deleteAccountRecentLogin" = "Aus Sicherheitsgründen musst du dich vor dem Löschen deines Kontos erneut anmelden.";
 "settings.about" = "Über";
 "settings.version" = "Version";
-"settings.testing" = "Tests";
-"settings.restartOnboarding" = "Einführung Neu Starten";
 
 // MARK: - Runner
 "runner.defaultName" = "Läufer";
@@ -681,7 +679,6 @@
 "ai.weekly.section.top" = "Größter Erfolg";
 "ai.weekly.section.weak" = "Schwachstelle";
 "ai.weekly.section.focus" = "Fokus Der Nächsten Woche";
-"ai.badge.gemini" = "Gemini AI";
 "ai.badge.template" = "Insight-Vorlage";
 "ai.disclaimer" = "Erstellt als Strategie-Hinweis. Spiel-Entscheidungen bleiben bei dir.";
 "ai.error.minThresholds" = "Der Lauf muss für die KI-Analyse mindestens 3 Minuten und 300 m haben.";

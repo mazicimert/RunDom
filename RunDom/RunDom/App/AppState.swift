@@ -179,25 +179,6 @@ final class AppState: ObservableObject {
         UserDefaults.standard.set(true, forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete)
     }
 
-    func resetOnboardingForTesting() {
-        // Sign out so the user has to go through the auth step again.
-        // Otherwise the .auth case in onboardingFlow calls completeOnboarding()
-        // on appear and the still-authenticated user falls straight into MainTabView.
-        if isAuthenticated {
-            signOut()
-        }
-
-        isOnboardingComplete = false
-        shouldShowWelcome = false
-        requiresProfileCompletion = false
-
-        UserDefaults.standard.set(false, forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete)
-        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.hasRequestedLocationPermission)
-        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.hasRequestedNotificationPermission)
-        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.pendingRunnerProfile)
-        UserDefaults.standard.removeObject(forKey: AppConstants.UserDefaultsKeys.pendingUserColor)
-    }
-
     func dismissWelcome() {
         shouldShowWelcome = false
     }

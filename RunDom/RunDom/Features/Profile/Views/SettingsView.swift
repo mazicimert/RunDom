@@ -144,15 +144,6 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-
-                Section("settings.testing".localized) {
-                    Button(role: .destructive) {
-                        appState.resetOnboardingForTesting()
-                        dismiss()
-                    } label: {
-                        Label("settings.restartOnboarding".localized, systemImage: "arrow.counterclockwise")
-                    }
-                }
             }
             .navigationTitle("settings.title".localized)
             .navigationBarTitleDisplayMode(.inline)

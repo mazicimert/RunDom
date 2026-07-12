@@ -646,8 +646,6 @@
 "settings.deleteAccount.failed" = "Could not delete your account. Try again later.";
 "settings.about" = "About";
 "settings.version" = "Version";
-"settings.testing" = "Testing";
-"settings.restartOnboarding" = "Restart Onboarding";
 
 // MARK: - Runner
 "runner.defaultName" = "Runner";
@@ -704,7 +702,6 @@
 "ai.weekly.section.top" = "Top Achievement";
 "ai.weekly.section.weak" = "Weak Point";
 "ai.weekly.section.focus" = "Next Week's Focus";
-"ai.badge.gemini" = "Gemini AI";
 "ai.badge.template" = "Insight Template";
 "ai.disclaimer" = "Generated as a strategy hint. Game decisions are still yours.";
 "ai.error.minThresholds" = "Run must be at least 3 minutes and 300 m for AI analysis.";

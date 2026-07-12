@@ -13,7 +13,7 @@ RunDom (user-facing brand: **RunPire**) is a gamified running app where users co
 ## Tech Stack
 
 - **Language:** Swift (SwiftUI)
-- **Min Deployment Target:** iOS 17.0 (Xcode project) — note: B (Privacy Zones) uses iOS 17+ Map API (`MapCameraPosition`, `MapCircle`, `onMapCameraChange`); lowering below iOS 17 requires rewriting `AddPrivacyZoneView` with an MKMapView wrapper
+- **Min Deployment Target:** iOS 17.0 (Xcode project) — note: Privacy Zones uses iOS 17+ Map API (`MapCameraPosition`, `MapCircle`, `onMapCameraChange`); lowering below iOS 17 requires rewriting `AddPrivacyZoneView` with an MKMapView wrapper
 - **UI Framework:** SwiftUI
 - **Maps:** MapKit (territory overlays, animations, snapshotter for share cards)
 - **Location:** CoreLocation (real-time GPS, background tracking)
@@ -41,9 +41,9 @@ RunDom (user-facing brand: **RunPire**) is a gamified running app where users co
 | Service | Usage |
 |---------|-------|
 | Authentication | Apple Sign In (required), Google Sign In (optional) |
-| Cloud Firestore | User profiles, badges, leaderboards, run history, territory loss events |
+| Cloud Firestore | User profiles, badges, leaderboards, run history, territory loss events, social posts, follows, blocks |
 | Realtime Database | Live territory changes (URL: `https://rundom-e7aad-default-rtdb.europe-west1.firebasedatabase.app`) |
-| Cloud Functions (Node.js) | Anti-cheat, point calculation, weekly season reset |
+| Cloud Functions (Node.js, europe-west1) | `deleteAccount`, `analyzeRun`, `analyzeWeek` |
 | Cloud Messaging (FCM) | Push notifications |
 | Storage | Profile photos, generated avatars |
 | Remote Config | Game parameters (speed thresholds, multipliers, zone sizes) without app update |
@@ -65,35 +65,46 @@ RunDom/
 │   ├── RunDomApp.swift            # @main entry, AppDelegate adaptor, environment injection
 │   ├── ContentView.swift          # Onboarding state machine → MainTabView
 │   ├── App/                       # AppDelegate, AppState, AppRouter, MainTabView, Territory loss prompt/bar/VM
-│   ├── Models/                    # Codable/Identifiable structs (User, RunSession, Territory, PlayerLevel, …)
+│   ├── Models/                    # Codable/Identifiable structs (User, RunSession, Territory, PlayerLevel, Post, PrivacyZone, …)
 │   ├── Components/                # Reusable UI (Lottie, ShareSheet, buttons, cards, image cache)
 │   ├── Extensions/                # String+Localization, Color+Theme, Color+Hex, Date, Double, H3, MKPolygon, View
 │   ├── Utilities/                 # Constants, Logger, Haptics, AppGroup
-│   ├── Localization/              # en.lproj + tr.lproj Localizable.strings
-│   ├── Resources/Lottie/          # Animation JSON files
-│   ├── Services/
-│   │   ├── Firebase/              # Auth, Firestore, RealtimeDB, Storage, RemoteConfig, Analytics, Crashlytics, Messaging
-│   │   ├── Game/                  # TrailCalculator, Territory, TerritoryLoss, Streak, Season, AntiCheat, Badge, DailyChallenge
-│   │   ├── H3/                    # H3GridService
-│   │   ├── Location/              # LocationManager
-│   │   ├── Motion/                # MotionManager
-│   │   ├── Run/                   # RunAudioService (AVSpeechSynthesizer kilometer announcer)
-│   │   ├── Localization/          # LocalizationManager (runtime language), UnitPreference (km / mi)
-│   │   ├── Geocoding/             # GeocodingService (CLGeocoder + cache)
-│   │   ├── Notification/          # NotificationService (FCM + local + deep linking)
-│   │   ├── Offline/               # OfflineStorageService (CoreData), SyncService (NWPathMonitor)
-│   │   └── Widget/                # WidgetDataService (App Group write-through + WidgetCenter reload)
-│   └── Features/
-│       ├── Onboarding/            # Splash, Welcome, slides, permissions, auth, profile completion
-│       ├── Map/                   # Territory overlays, detail sheets, CellInspectorBar
-│       ├── Run/                   # PreRun, ActiveRun, PostRun, share card, gallery, review sheet
-│       ├── Profile/               # Avatar, badges, level breakdown, settings, edit profile
-│       ├── Leaderboard/           # Global/neighborhood rankings
-│       └── Stats/                 # Run history, charts, weekly reports, calendar heatmap
-└── RunDomWidget/                  # Widget extension target
-    ├── RunDomWidgetBundle.swift   # @main bundle (WeeklySummary + ActivityHeatmap)
-    ├── RunDomWidget.swift         # Weekly summary widget
-    ├── ActivityHeatmapWidget.swift# 84-day activity heatmap widget
+│   ├── Localization/              # en.lproj + tr.lproj + es.lproj + de.lproj + pt-BR.lproj Localizable.strings
+│   ├── Resources/
+│   │   ├── Lottie/                # Animation JSON files
+│   │   ├── Legal/                 # Terms + community guidelines (en/tr .md files)
+│   │   └── Video/                 # onboarding_run_loop.mp4 (hook screen background)
+│   └── Services/
+│       ├── Firebase/              # Auth, Firestore, RealtimeDB, Storage, RemoteConfig, Analytics, Crashlytics, Messaging,
+│       │                          #   PostService, FeedService, FollowService, LikeService, CommentService,
+│       │                          #   BlockService, ReportService, UserSearchService, PrivacyZoneService
+│       ├── AI/                    # AIAnalysisService (Cloud Functions), TemplateInsightService (offline fallback)
+│       ├── Game/                  # TrailCalculator, Territory, TerritoryLoss, Streak, Season, AntiCheat, Badge, DailyChallenge
+│       ├── H3/                    # H3GridService
+│       ├── Location/              # LocationManager
+│       ├── Motion/                # MotionManager
+│       ├── Run/                   # RunAudioService (AVSpeechSynthesizer kilometer announcer)
+│       ├── Localization/          # LocalizationManager (runtime language), UnitPreference (km / mi)
+│       ├── Geocoding/             # GeocodingService (CLGeocoder + cache)
+│       ├── Notification/          # NotificationService (FCM + local + deep linking)
+│       ├── Offline/               # OfflineStorageService (CoreData), SyncService (NWPathMonitor)
+│       ├── Widget/                # WidgetDataService (App Group write-through + WidgetCenter reload)
+│       ├── BlockedUsersStore.swift  # Global block-list cache (ObservableObject)
+│       ├── HiddenContentStore.swift # Hidden posts/content cache (ObservableObject)
+│       └── PrivacyZonesStore.swift  # User privacy zones cache (ObservableObject)
+└── Features/
+    ├── Onboarding/            # Splash, Hook (video), Pages (pager), Quiz, ColorReveal, LocationPriming, Auth, FirstMission, CompleteProfile
+    ├── Map/                   # Territory overlays, detail sheets, CellInspectorBar
+    ├── Social/                # Feed, PostCard, PostDetail, CreatePost, UserProfile, UserSearch, FollowList, Report
+    ├── Run/                   # PreRun, ActiveRun, PostRun, share card, gallery, review sheet, daily challenge picker
+    ├── Profile/               # Avatar, badges, level, settings, edit, privacy zones, blocked users, my posts
+    ├── Stats/                 # Run history, charts, weekly reports, calendar heatmap
+    ├── AIAnalysis/            # AI run/week analysis card + sheet + disclosure
+    └── Legal/                 # LegalAcceptanceSheet, LegalDocumentView, LegalLink
+└── RunDomWidget/              # Widget extension target
+    ├── RunDomWidgetBundle.swift
+    ├── RunDomWidget.swift          # Weekly summary widget
+    ├── ActivityHeatmapWidget.swift # 84-day activity heatmap widget
     ├── Info.plist
     └── Assets.xcassets/
 ```
@@ -127,8 +138,8 @@ RunDom/
 - Use Swift Concurrency (async/await) where applicable
 
 ### Localization
-- Supported languages: Turkish (`tr`), English (`en`)
-- Device language = Turkish → app in Turkish; all others → English
+- Supported languages: English (`en`), Turkish (`tr`), Spanish (`es`), German (`de`), Brazilian Portuguese (`pt-BR`) — 5 languages, ~809 keys each
+- Device language = Turkish → app in Turkish; all others → English (Spanish/German/pt-BR handled by the `en` fallback until language-specific overrides are added)
 - Runtime language switching via `LocalizationManager` (ObservableObject)
 - All strings via `Localizable.strings` — never hardcode user-facing text
 - Currency unit (user-facing): "Puan" (tr) / "Points" (en) — keys: `trail.unit`, `trail.points`
@@ -221,6 +232,56 @@ Points = (Base × Speed × Duration × Zone) × Streak × Mode × Anti-Farm
 - Include `isPremium: Bool = true` flag (everyone gets true for now)
 - No StoreKit integration — monetization deferred
 
+## Social System
+
+### Feed
+- Activity feed: fan-out writes (following feed) merged with public recent posts
+- Hydrated via `FeedService` — `FeedViewModel` owns real-time listener
+- `PostCardView` renders each post with lite-mode route map snapshot
+
+### Posts
+- Posts created from `CreatePostSheet` (run picker → composer) or from `PostShareComposerView` after a run
+- Posts include: run reference, photos, visibility (public / followers-only), privacy-zone masking on route
+- `PostService` handles CRUD; `LikeService` handles like toggles
+- `PostShareCardView` renders sharable card image
+
+### Social Graph
+- Follow/unfollow via `FollowService`; `FollowListViewModel` backs followers/following lists
+- Block/unblock via `BlockService`; global `BlockedUsersStore` caches blocked IDs
+- `HiddenContentStore` tracks posts the user has hidden from their feed
+- Report content/users via `ReportService` + `ReportReasonSheet`
+
+### User Discovery
+- `UserSearchService` — prefix-scan Firestore for username search
+- `UserProfileView` + `UserProfileViewModel` — other user's public profile (follow/block actions)
+
+### Leaderboard (inside Social tab)
+- `SocialTabView` uses a segmented `SegmentedPill`-style control: **Feed** | **Leaderboard**
+- Leaderboard is `LeaderboardTabView` (unchanged) embedded in the Social tab
+
+## AI Analysis
+
+- `AIAnalysisService` calls the `analyzeRun` and `analyzeWeek` Cloud Functions (europe-west1)
+- `TemplateInsightService` provides deterministic fallback insights when the function call fails or user has no AI toggle
+- `AIAnalysisCardView` embeds analysis teaser in PostRun / Stats; tapping opens `AIAnalysisSheetView`
+- `AIDisclosureView` shows the AI disclosure before showing results for the first time
+- User can toggle AI analysis in Settings (`AppConstants.UserDefaultsKeys.aiAnalysisEnabled`)
+
+## Privacy Zones
+
+- User-defined circular zones where GPS data is masked in posts and map overlays
+- `PrivacyZone` model stored in Firestore (per-user subcollection) via `PrivacyZoneService`
+- `PrivacyZonesStore` (global ObservableObject) caches the current user's zones
+- `PrivacyZonesView` (Settings → Privacy) lists zones; `AddPrivacyZoneView` uses iOS 17 MapKit to place and size a new zone
+- Post route preview (`RoutePreviewMap`) clips any route points inside the user's zones before rendering
+
+## Legal Gate
+
+- `LegalDocument` model describes in-app terms & community guidelines
+- Legal documents bundled as Markdown in `Resources/Legal/` (en/tr for terms-of-use and community-guidelines)
+- `LegalAcceptanceSheet` is presented the first time a user attempts to create a post (`CreatePostSheet`); acceptance is recorded to Firestore on the user document
+- `LegalDocumentView` renders the Markdown document; `LegalLink` is a tappable link row
+
 ## Run Voice Feedback
 
 - `RunAudioService` (singleton, `AVSpeechSynthesizer`) announces each kilometer with current pace.
@@ -251,7 +312,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 
 ## Navigation
 
-- Bottom Tab Bar: Map | Run (center, large button) | Profile | Leaderboard | Stats
+- Bottom Tab Bar: **Map** | **Social** (Feed + Leaderboard segmented) | **Run** (center, large button) | **Stats** | **Profile**
 - Tab bar always visible except during active run
 - Run screen opens as full-screen modal
 - Gesture-based navigation preferred over back buttons
@@ -262,17 +323,19 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - Past runs list + per-run detail (distance, duration, Points, territories)
 - Weekly/monthly summary charts (`ChartView`)
 - 84-day calendar heatmap (`RunCalendarHeatmapView` + `CalendarHeatmapCell` + `CalendarHeatmapViewModel`) — same data backing the widget
+- `WeeklyReportView` — weekly summary with route art + share
 
 ## Onboarding Flow
 
-1. Splash Screen (logo + Lottie animation, "RunPire" wordmark)
-2. Welcome screen (`WelcomeView`)
-3. 3 onboarding slides (full-screen, bold typography, mock images)
-4. Location permission screen (Always On with explanation)
-5. Notification permission screen
-6. Sign Up / Sign In (Apple required, Google optional)
-7. Complete Profile (if display name missing from Apple Sign In)
-- Only shown on first launch (UserDefaults flag)
+1. **Splash** (`SplashView`) — logo + Lottie animation, "RunPire" wordmark
+2. **Hook** (`HookView`) — full-screen looping video (`onboarding_run_loop.mp4` in `Resources/Video/`) with strong value prop copy
+3. **Pages** (`OnboardingContainerView`) — 3-slide pager (mock screenshots: `onboarding_map_overview`, `onboarding_attack_notification`, `onboarding_feed`, `onboarding_map_detail`, `onboarding_leaderboard`)
+4. **Quiz** (`QuizContainerView`) — 4 personalization questions: weekly goal / motivation / experience / preferred mode (answers stored in `RunnerProfile` / `pendingProfile` on `OnboardingViewModel`)
+5. **ColorReveal** (`ColorRevealView`) — animated reveal of the user's assigned territory color
+6. **LocationPermission** (`LocationPrimingView`) — foreground location ask with explanation
+7. **Auth** (`AuthView`) — Apple Sign In (required) + Google Sign In (optional)
+8. **CompleteProfile** (`CompleteProfileView`) — shown only if display name missing after sign-in; also FirstMission gateway on new accounts
+- State machine driven by `OnboardingViewModel.Step` enum; persisted in UserDefaults via `AppState.isOnboardingComplete`
 
 ## Avatar System
 
@@ -291,6 +354,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - "Defense level dropping"
 - "Streak about to break" (local, calendar trigger at 20:00)
 - "Daily challenge available"
+- Post-run notification permission priming: `NotificationPostRunPromptSheet` shown after first run
 - Deep-link destinations: map, territory detail, profile badges, stats, run history (`AppRouter` still defines a `dropzoneDetail` case — legacy, do not surface)
 
 ## Error Handling
@@ -339,12 +403,14 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - All game parameters should be server-configurable without app updates
 - Every user model includes `isPremium: Bool = true` (everyone gets true for now, StoreKit deferred)
 - Offline mode uses programmatic CoreData model (no `.xcdatamodeld` file)
-- Lottie animations bundled: `Running_character.json`, `Streak_fire.json`, `Unlocked.json`, `confetti.json`, `run_countdown.json`, `level_up.json`
+- Lottie animations bundled: `Running_character.json`, `Streak_fire.json`, `Unlocked.json`, `confetti.json`, `run_countdown.json`, `level_up.json`, `loading.json`
 - Widgets read from App Group `UserDefaults`; always go through `WidgetDataService` so timelines reload.
+- `BlockedUsersStore` and `HiddenContentStore` are global `@EnvironmentObject` stores wired in `AppState` — inject at app root, not per-view.
+- `PrivacyZonesStore` is similarly global; route masking in posts reads from it before rendering.
 
 ## Development Roadmap
 
-17-step implementation plan ordered by dependency chain. Steps 1–17 are complete; the project has since added widgets, share cards, run gallery, voice feedback, unit preferences, level breakdown, territory loss flow, and daily challenge selection on top of the original plan.
+All phases complete. The project is feature-complete; remaining work is polish/release prep.
 
 ### Step 1: Foundation ✅
 > Shared infrastructure everything depends on
@@ -359,8 +425,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Extensions/Date+Formatting.swift` — Locale-aware date formatting
 - `Extensions/Double+Formatting.swift` — Distance, speed, Trail formatters
 - `Extensions/View+Modifiers.swift` — Common view modifiers
-- `Localization/en.lproj/Localizable.strings`
-- `Localization/tr.lproj/Localizable.strings`
+- `Localization/{en,tr,es,de,pt-BR}.lproj/Localizable.strings` (5 languages)
 - `Assets.xcassets/Colors/` — 7 color sets (BoostGreen, BoostRed, BoostYellow, CardBackground, SurfacePrimary, TerritoryBlue, TerritoryRed)
 - `Services/Localization/LocalizationManager.swift` — Runtime language switcher
 - `Services/Localization/UnitPreference.swift` — km / mi user preference
@@ -382,6 +447,16 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Models/HeatmapWidgetData.swift` — 84-day intensity array + user color (widget payload)
 - `Models/PlayerLevel.swift` — Level, current/next thresholds, fraction (computed from totalTrail)
 - `Models/DailyChallenge.swift` — Templates, user progress, state, rewards
+- `Models/Post.swift` — Social post (run ref, photos, visibility, likeCount, commentCount)
+- `Models/Comment.swift` — Post comment (authorId, body, createdAt)
+- `Models/FollowRelationship.swift` — follower/following uid pair
+- `Models/BlockRelationship.swift` — blocker/blocked uid pair
+- `Models/Report.swift` — content/user report (reason, reportedId, type)
+- `Models/PrivacyZone.swift` — circular privacy zone (center, radiusMeters, label)
+- `Models/LegalDocument.swift` — legal doc metadata (type, version, url)
+- `Models/AIRunAnalysis.swift` — AI run analysis result (insights, suggestions)
+- `Models/AIWeeklyAnalysis.swift` — AI weekly analysis result
+- `Models/RunnerProfile.swift` — Quiz answer model (`WeeklyRunGoal`, `RunnerMotivation`, `RunnerExperience`, `preferredMode`)
 
 ### Step 3: Firebase Integration & Auth ✅
 > Backend connection and user authentication
@@ -396,13 +471,25 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Services/Firebase/AnalyticsService.swift` — Event logging
 - `Services/Firebase/CrashlyticsService.swift` — Non-fatal error logging
 - `Services/Firebase/MessagingService.swift` — FCM token, topic subscriptions
+- `Services/Firebase/PostService.swift` — Post CRUD
+- `Services/Firebase/FeedService.swift` — Fan-out feed read (following + public)
+- `Services/Firebase/LikeService.swift` — Like toggle
+- `Services/Firebase/CommentService.swift` — Comment CRUD
+- `Services/Firebase/FollowService.swift` — Follow/unfollow
+- `Services/Firebase/BlockService.swift` — Block/unblock
+- `Services/Firebase/ReportService.swift` — Content/user report submission
+- `Services/Firebase/UserSearchService.swift` — Prefix-scan user search
+- `Services/Firebase/PrivacyZoneService.swift` — Privacy zone CRUD
+- `Services/BlockedUsersStore.swift` — Global block-list cache
+- `Services/HiddenContentStore.swift` — Hidden content cache
+- `Services/PrivacyZonesStore.swift` — Privacy zones cache
 
 ### Step 4: App Shell & Navigation ✅
 > Tab bar, routing, global state
 
-- `App/AppState.swift` — ObservableObject: isAuthenticated, isOnboardingComplete, currentUser
+- `App/AppState.swift` — ObservableObject: isAuthenticated, isOnboardingComplete, currentUser, BlockedUsersStore, HiddenContentStore, PrivacyZonesStore
 - `App/AppRouter.swift` — NavigationPath, sheet management
-- `App/MainTabView.swift` — Bottom Tab Bar: Map | Run (center) | Profile | Leaderboard | Stats
+- `App/MainTabView.swift` — Bottom Tab Bar: **Map | Social | Run (center) | Stats | Profile**
 - `App/TerritoryLossPromptSheet.swift` + `App/TerritoryLossPromptViewModel.swift` + `App/TerritoryLossMapBrowserBar.swift` — Cross-tab "you lost a cell" surfacing
 - `ContentView.swift` — Onboarding/Auth check → MainTabView or OnboardingFlow
 
@@ -424,13 +511,16 @@ Two widgets, both reading from the App Group `UserDefaults`:
 > First-time user experience
 
 - `Features/Onboarding/Views/SplashView.swift` — Logo + Lottie animation, RunPire wordmark
-- `Features/Onboarding/Views/WelcomeView.swift` — Post-splash welcome screen
+- `Features/Onboarding/Views/HookView.swift` — Looping MP4 video (`onboarding_run_loop.mp4`) + value prop copy
 - `Features/Onboarding/Views/OnboardingPageView.swift` — Single slide (reusable)
 - `Features/Onboarding/Views/OnboardingContainerView.swift` — 3-slide TabView pager
-- `Features/Onboarding/Views/PermissionRequestView.swift` — Location + notification permissions
+- `Features/Onboarding/Views/QuizContainerView.swift` — 4-question personalization quiz
+- `Features/Onboarding/Views/ColorRevealView.swift` — Animated territory color reveal
+- `Features/Onboarding/Views/LocationPrimingView.swift` — Foreground location permission priming
 - `Features/Onboarding/Views/AuthView.swift` — Apple Sign In + Google Sign In (RunPire branded)
+- `Features/Onboarding/Views/FirstMissionView.swift` — First-run mission briefing (new accounts)
 - `Features/Onboarding/Views/CompleteProfileView.swift` — Post-auth display name completion
-- `Features/Onboarding/ViewModels/OnboardingViewModel.swift` — Page state, UserDefaults flag
+- `Features/Onboarding/ViewModels/OnboardingViewModel.swift` — Step state machine, quiz answers (`RunnerProfile`), UserDefaults flag
 - `Features/Onboarding/ViewModels/AuthViewModel.swift` — Sign-in flow, Firebase Auth
 
 ### Step 7: Location & Motion Services ✅
@@ -484,6 +574,7 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Features/Run/Views/PostRunShareCardView.swift` — Branded share card layout
 - `Features/Run/Views/RunReviewSheet.swift` — Post-run rating / notes
 - `Features/Run/Views/RunGalleryView.swift` — Saved run snapshots gallery
+- `Features/Run/Views/NotificationPostRunPromptSheet.swift` — Post-run notification permission priming
 - `Features/Run/RunGalleryMapSnapshotter.swift` — `MKMapSnapshotter` route renderer
 - `Features/Run/RunGalleryPhotoLibrarySaver.swift` — Photos library saver
 - `Features/Run/RunSummaryShareRenderer.swift` — Image renderer for share card
@@ -493,26 +584,48 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Services/Run/RunAudioService.swift` — Kilometer voice announcements (AVSpeechSynthesizer)
 
 ### Step 12: Profile Screen ✅
-> User info, avatar, badges, level
+> User info, avatar, badges, level, settings, privacy
 
-- `Features/Profile/Views/ProfileTabView.swift` — Avatar, name, total Points, streak, level, badges
+- `Features/Profile/Views/ProfileTabView.swift` — Avatar, name, total Points, streak, level, badges, my posts
 - `Features/Profile/Views/AvatarView.swift` — Static placeholder
 - `Features/Profile/Views/LevelBreakdownView.swift` — Level + progress to next level
-- `Features/Profile/Views/BadgeGridView.swift` — Badge grid
+- `Features/Profile/Views/BadgeGridView.swift` — Badge grid (summary)
+- `Features/Profile/Views/AllBadgesView.swift` — Full badge collection screen
 - `Features/Profile/Views/BadgeDetailView.swift` — Badge detail
-- `Features/Profile/Views/SettingsView.swift` — Language, units, voice feedback, notifications, sign out, about
+- `Features/Profile/Views/SettingsView.swift` — Language, units, voice feedback, AI toggle, notifications, privacy zones, blocked users, delete account, sign out
 - `Features/Profile/Views/EditProfileView.swift` — Name, photo editing
+- `Features/Profile/Views/PrivacyZonesView.swift` — List + delete privacy zones
+- `Features/Profile/Views/AddPrivacyZoneView.swift` — iOS 17 MapKit map to add a zone
+- `Features/Profile/Views/BlockedUsersView.swift` — Manage blocked users
+- `Features/Profile/Views/MyPostsListView.swift` + `ProfilePostRowView.swift` — User's own posts
+- `Features/Profile/Views/DeleteAccountReauthSheet.swift` — Re-auth before account deletion
 - `Features/Profile/ViewModels/ProfileViewModel.swift` — User data, badge loading, level calc
 - `Features/Profile/ViewModels/BadgeViewModel.swift` — Badge unlock, progress
 - `Features/Profile/ViewModels/SettingsViewModel.swift` — Sign out, notification toggle, unit toggle
+- `Features/Profile/ViewModels/MyPostsViewModel.swift` — User's post history
 
-### Step 13: Leaderboard Screen ✅
-> Rankings and competition
+### Step 13: Social Screen ✅
+> Feed, user discovery, leaderboard, social graph
 
-- `Features/Leaderboard/Views/LeaderboardTabView.swift` — Global / Neighborhood segment
-- `Features/Leaderboard/Views/LeaderboardListView.swift` — Ranked list with podium top-3
-- `Features/Leaderboard/Views/LeaderboardRowView.swift` — Single row: rank, avatar, name, Points
-- `Features/Leaderboard/ViewModels/LeaderboardViewModel.swift` — Fetch rankings, season filter
+- `Features/Social/Views/SocialTabView.swift` — Segmented: Feed | Leaderboard
+- `Features/Social/Views/FeedView.swift` — Activity feed list
+- `Features/Social/Views/PostCardView.swift` — Post card with lite-mode route map
+- `Features/Social/Views/PostDetailView.swift` — Post detail + comments
+- `Features/Social/Views/CreatePostSheet.swift` — Run picker → composer; gates on legal acceptance
+- `Features/Social/Views/PostShareComposerView.swift` — Full post composer (text, photos, visibility)
+- `Features/Social/Views/PostShareCardView.swift` — Shareable post card image
+- `Features/Social/Views/SharePastRunPickerView.swift` — Pick a past run to share
+- `Features/Social/Views/RoutePreviewMap.swift` — Route map in post (privacy-zone masked)
+- `Features/Social/Views/UserProfileView.swift` — Other user's public profile
+- `Features/Social/Views/UserSearchView.swift` — User search
+- `Features/Social/Views/FollowListView.swift` — Followers / following list
+- `Features/Social/Views/ReportReasonSheet.swift` — Report reason picker
+- `Features/Social/ViewModels/FeedViewModel.swift`
+- `Features/Social/ViewModels/PostDetailViewModel.swift`
+- `Features/Social/ViewModels/UserProfileViewModel.swift`
+- `Features/Social/ViewModels/UserSearchViewModel.swift`
+- `Features/Social/ViewModels/FollowListViewModel.swift`
+- `Features/Social/ViewModels/SharePastRunPickerViewModel.swift`
 
 ### Step 14: Stats Screen ✅
 > Run history, charts, weekly report, calendar heatmap
@@ -528,53 +641,64 @@ Two widgets, both reading from the App Group `UserDefaults`:
 - `Features/Stats/ViewModels/WeeklyReportViewModel.swift` — Report generation, sharing
 - `Features/Stats/ViewModels/CalendarHeatmapViewModel.swift` — Heatmap intensity computation
 
-### Step 15: Notifications ✅
+### Step 15: AI Analysis ✅
+> Per-run and weekly AI insights
+
+- `Services/AI/AIAnalysisService.swift` — `analyzeRun` / `analyzeWeek` Cloud Function calls
+- `Services/AI/TemplateInsightService.swift` — Deterministic fallback insights
+- `Features/AIAnalysis/Views/AIAnalysisCardView.swift` — Summary card embedded in PostRun/Stats
+- `Features/AIAnalysis/Views/AIAnalysisSheetView.swift` — Full analysis sheet
+- `Features/AIAnalysis/Views/AIDisclosureView.swift` — One-time AI disclosure
+- `Features/AIAnalysis/ViewModels/AIAnalysisViewModel.swift`
+
+### Step 16: Privacy Zones ✅
+> User-defined GPS masking zones
+
+- `Models/PrivacyZone.swift`
+- `Services/Firebase/PrivacyZoneService.swift`
+- `Services/PrivacyZonesStore.swift`
+- `Features/Profile/Views/PrivacyZonesView.swift`
+- `Features/Profile/Views/AddPrivacyZoneView.swift` — iOS 17 MapKit (`MapCameraPosition`, `MapCircle`, `onMapCameraChange`)
+
+### Step 17: Legal Gate ✅
+> Terms of Use + Community Guidelines acceptance
+
+- `Models/LegalDocument.swift`
+- `Features/Legal/LegalAcceptanceSheet.swift` — Shown before first post creation
+- `Features/Legal/LegalDocumentView.swift`
+- `Features/Legal/LegalLink.swift`
+- `Resources/Legal/` — `terms-of-use-{en,tr}.md`, `community-guidelines-{en,tr}.md`
+
+### Step 18: Notifications ✅
 > Push notification system
 
 - `Services/Notification/NotificationService.swift` — FCM + local notification
 - `Services/Geocoding/GeocodingService.swift` — Coordinate → neighborhood name
 
-### Step 16: Offline Mode & Sync ✅
+### Step 19: Offline Mode & Sync ✅
 > Offline support
 
 - `Services/Offline/OfflineStorageService.swift` — Programmatic CoreData model, save/load (no .xcdatamodeld file)
 - `Services/Offline/SyncService.swift` — NWPathMonitor, auto-sync on reconnect, retry up to 5 times
 
-### Step 17: Polish & Release Prep ⏳
+### Step 20: Polish & Release Prep ⏳
 > Final touches
 
 - ~~Empty state designs for all screens~~ ✅
 - ~~Lottie animations (splash, run start/complete, territory captured, level up)~~ ✅
 - ~~Haptic feedback~~ ✅
 - ~~App icon design~~ ✅
-- ~~Complete all localization strings~~ ✅
+- ~~Complete all localization strings (5 languages)~~ ✅
 - ~~Info.plist permission descriptions~~ ✅
 - ~~Widgets (weekly summary + activity heatmap)~~ ✅
 - ~~Branded share cards + run gallery~~ ✅
 - ~~Voice feedback per kilometer~~ ✅
 - ~~Imperial unit support (km / mi)~~ ✅
 - ~~Player level system~~ ✅
+- ~~Social feed / follow / block~~ ✅
+- ~~AI analysis (run + weekly)~~ ✅
+- ~~Privacy zones~~ ✅
+- ~~Legal gate~~ ✅
 - Accessibility audit (VoiceOver, Dynamic Type)
 - Performance and memory optimizations
-
-### Dependency Table
-
-| Step | Area | Depends On |
-|------|------|-----------|
-| 1 | Foundation | — |
-| 2 | Data Models | Step 1 |
-| 3 | Firebase & Auth | Step 2 |
-| 4 | App Shell & Nav | Step 3 |
-| 5 | UI Components | Step 1 |
-| 6 | Onboarding & Auth Flow | Steps 3, 4, 5 |
-| 7 | Location & Motion | Step 1 |
-| 8 | H3 Grid | Step 7 |
-| 9 | Map Screen | Steps 4, 8 |
-| 10 | Game Services | Steps 2, 3, 8 |
-| 11 | Run Feature ⭐ | Steps 7, 8, 9, 10 |
-| 12 | Profile | Steps 3, 4, 5 |
-| 13 | Leaderboard | Steps 3, 4 |
-| 14 | Stats | Steps 3, 4, 11 |
-| 15 | Notifications | Step 3 |
-| 16 | Offline Mode | Step 11 |
-| 17 | Polish & Release | All |
+- App Store submission prep

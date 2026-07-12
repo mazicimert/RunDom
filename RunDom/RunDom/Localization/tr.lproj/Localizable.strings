@@ -646,8 +646,6 @@
 "settings.deleteAccount.failed" = "Hesabın silinemedi. Daha sonra tekrar dene.";
 "settings.about" = "Hakkında";
 "settings.version" = "Sürüm";
-"settings.testing" = "Test";
-"settings.restartOnboarding" = "Onboarding’i Baştan Başlat";
 
 // MARK: - Runner
 "runner.defaultName" = "Koşucu";
@@ -704,7 +702,6 @@
 "ai.weekly.section.top" = "Öne Çıkan Başarı";
 "ai.weekly.section.weak" = "Zayıf Nokta";
 "ai.weekly.section.focus" = "Sonraki Hafta Odağı";
-"ai.badge.gemini" = "Gemini AI";
 "ai.badge.template" = "Şablon Analiz";
 "ai.disclaimer" = "Strateji önerisi olarak üretilmiştir. Karar yine senin.";
 "ai.error.minThresholds" = "AI analizi için koşu en az 3 dk ve 300 m olmalı.";

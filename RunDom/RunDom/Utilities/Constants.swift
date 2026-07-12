@@ -84,6 +84,8 @@ enum AppConstants {
         static let voiceFeedbackEnabled = "voiceFeedbackEnabled"
         static let aiAnalysisEnabled = "aiAnalysisEnabled"
         static let aiDisclosureAccepted = "aiDisclosureAccepted"
+        static let appReviewLastRequestDate = "appReviewLastRequestDate"
+        static let appReviewLastRequestVersion = "appReviewLastRequestVersion"
         static let pendingRunnerProfile = "pendingRunnerProfile"
         static let pendingUserColor = "pendingUserColor"
         static let acceptedCommunityGuidelinesAt = "acceptedCommunityGuidelinesAt"
