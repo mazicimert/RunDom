@@ -77,6 +77,7 @@ enum AppConstants {
         static let lastKnownLatitude = "lastKnownLatitude"
         static let lastKnownLongitude = "lastKnownLongitude"
         static let appLanguageCode = "appLanguageCode"
+        static let appLanguageManuallySelected = "appLanguageManuallySelected"
         static let unitPreference = "unitPreference"
         static let lastDailyChallengePromptDateKey = "lastDailyChallengePromptDateKey"
         static let mapStyle = "mapStyle"

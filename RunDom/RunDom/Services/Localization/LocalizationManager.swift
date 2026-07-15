@@ -35,6 +35,10 @@ final class LocalizationManager: ObservableObject {
                 selectedLanguageCode,
                 forKey: AppConstants.UserDefaultsKeys.appLanguageCode
             )
+            UserDefaults.standard.set(
+                true,
+                forKey: AppConstants.UserDefaultsKeys.appLanguageManuallySelected
+            )
         }
     }
 
@@ -71,7 +75,16 @@ final class LocalizationManager: ObservableObject {
     }
 
     private static func resolveInitialLanguageCode(savedCode: String?) -> String {
-        if let savedCode, AppLanguage(rawValue: savedCode) != nil {
+        let hasManualSelection = UserDefaults.standard.bool(
+            forKey: AppConstants.UserDefaultsKeys.appLanguageManuallySelected
+        )
+        let hasCompletedOnboarding = UserDefaults.standard.bool(
+            forKey: AppConstants.UserDefaultsKeys.isOnboardingComplete
+        )
+
+        if let savedCode,
+           AppLanguage(rawValue: savedCode) != nil,
+           hasManualSelection || hasCompletedOnboarding {
             return savedCode
         }
 

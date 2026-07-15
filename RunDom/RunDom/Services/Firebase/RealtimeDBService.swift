@@ -33,6 +33,18 @@ final class RealtimeDBService {
         return territory
     }
 
+    /// One-shot season read used by aggregate surfaces such as the leaderboard.
+    func getTerritories(seasonId: String) async throws -> [Territory] {
+        let snapshot = try await territoriesRef(seasonId: seasonId).getData()
+        return snapshot.children.compactMap { child -> Territory? in
+            guard let childSnapshot = child as? DataSnapshot,
+                  let dict = childSnapshot.value as? [String: Any] else {
+                return nil
+            }
+            return decodeTerritory(from: dict)
+        }
+    }
+
     // MARK: - Write Territory
 
     func updateTerritory(_ territory: Territory, seasonId: String) async throws {
@@ -52,30 +64,41 @@ final class RealtimeDBService {
         userColor: String,
         distance: Double
     ) async throws -> Bool {
+        let appliedDistance = sanitizedCellDistance(distance)
+        guard appliedDistance > 0 else { return false }
+
         let ref = territoryRef(seasonId: seasonId, h3Index: h3Index)
 
         let result = try await ref.runTransactionBlock { currentData in
             if var existingDict = currentData.value as? [String: Any] {
                 let currentOwner = existingDict["ownerId"] as? String ?? ""
-                let currentDefense = existingDict["defenseLevel"] as? Double ?? 0
+                let storedDefense = self.numberAsDouble(existingDict["defenseLevel"]) ?? 0
+                let lastRunDate = self.parseDate(existingDict["lastRunDate"]) ?? Date()
+                let now = Date()
+                let decayFactor = self.defenseDecayFactor(lastRunDate: lastRunDate, asOf: now)
+                let effectiveDefense = storedDefense * decayFactor
 
                 if currentOwner == userId {
-                    // Own territory — increase defense
-                    existingDict["defenseLevel"] = currentDefense + distance
-                    existingDict["totalDistance"] = (existingDict["totalDistance"] as? Double ?? 0) + distance
-                    existingDict["lastRunDate"] = ISO8601DateFormatter().string(from: Date())
+                    // Reinforcement starts a fresh decay window from the already
+                    // decayed defense instead of reviving the stale raw value.
+                    existingDict["defenseLevel"] = effectiveDefense + appliedDistance
+                    existingDict["totalDistance"] = (self.numberAsDouble(existingDict["totalDistance"]) ?? 0) + appliedDistance
+                    existingDict["lastRunDate"] = ISO8601DateFormatter().string(from: now)
                 } else {
-                    // Enemy territory — attempt capture
-                    let newDefense = currentDefense - distance
-                    if newDefense <= 0 {
+                    // Attack the effective (time-decayed) defense. If the cell
+                    // survives, convert the remaining effective value back to
+                    // the original decay baseline so future reads/attacks apply
+                    // decay exactly once.
+                    let remainingEffectiveDefense = effectiveDefense - appliedDistance
+                    if remainingEffectiveDefense <= 0 || decayFactor <= 0 {
                         // Captured!
                         existingDict["ownerId"] = userId
                         existingDict["ownerColor"] = userColor
-                        existingDict["defenseLevel"] = abs(newDefense)
-                        existingDict["totalDistance"] = distance
-                        existingDict["lastRunDate"] = ISO8601DateFormatter().string(from: Date())
+                        existingDict["defenseLevel"] = abs(remainingEffectiveDefense)
+                        existingDict["totalDistance"] = appliedDistance
+                        existingDict["lastRunDate"] = ISO8601DateFormatter().string(from: now)
                     } else {
-                        existingDict["defenseLevel"] = newDefense
+                        existingDict["defenseLevel"] = remainingEffectiveDefense / decayFactor
                     }
                 }
                 currentData.value = existingDict
@@ -85,8 +108,8 @@ final class RealtimeDBService {
                     "h3Index": h3Index,
                     "ownerId": userId,
                     "ownerColor": userColor,
-                    "defenseLevel": distance,
-                    "totalDistance": distance,
+                    "defenseLevel": appliedDistance,
+                    "totalDistance": appliedDistance,
                     "lastRunDate": ISO8601DateFormatter().string(from: Date())
                 ]
             }
@@ -293,5 +316,17 @@ final class RealtimeDBService {
             return n.doubleValue
         }
         return nil
+    }
+
+    private func sanitizedCellDistance(_ distance: Double) -> Double {
+        guard distance.isFinite, distance > 0 else { return 0 }
+        return min(distance, AppConstants.Game.maxCellDistancePerRun)
+    }
+
+    private func defenseDecayFactor(lastRunDate: Date, asOf date: Date) -> Double {
+        let hoursSinceLastRun = max(date.timeIntervalSince(lastRunDate) / 3600, 0)
+        let decayHours = hoursSinceLastRun - Double(AppConstants.Game.defenseDecayHours)
+        guard decayHours > 0 else { return 1 }
+        return max(0, 1 - (decayHours / 168))
     }
 }

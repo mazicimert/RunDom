@@ -5,12 +5,17 @@ import CoreLocation
 /// using Apple's CLGeocoder.
 final class GeocodingService {
 
+    struct AreaIdentity: Equatable {
+        let displayName: String
+        let areaId: String
+    }
+
     // MARK: - Singleton
 
     static let shared = GeocodingService()
 
     private let geocoder = CLGeocoder()
-    private var cache: [String: String] = [:]
+    private var cache: [String: AreaIdentity] = [:]
 
     private init() {}
 
@@ -19,6 +24,13 @@ final class GeocodingService {
     /// Returns the neighborhood or locality name for a coordinate.
     /// Results are cached in memory to reduce API calls.
     func neighborhoodName(for coordinate: CLLocationCoordinate2D) async -> String? {
+        await areaIdentity(for: coordinate)?.displayName
+    }
+
+    /// Returns a display label plus a locale-independent grouping key. The key
+    /// uses country/city/neighborhood placemark components and falls back to a
+    /// deterministic coarse grid when geocoding lacks sufficient metadata.
+    func areaIdentity(for coordinate: CLLocationCoordinate2D) async -> AreaIdentity? {
         let cacheKey = "\(String(format: "%.4f", coordinate.latitude)),\(String(format: "%.4f", coordinate.longitude))"
 
         if let cached = cache[cacheKey] {
@@ -32,13 +44,15 @@ final class GeocodingService {
             guard let placemark = placemarks.first else { return nil }
 
             // Prefer subLocality (neighborhood), fall back to locality (city)
-            let name = placemark.subLocality ?? placemark.locality
-            if let name {
-                cache[cacheKey] = name
-            }
+            guard let name = placemark.subLocality ?? placemark.locality else { return nil }
+            let identity = AreaIdentity(
+                displayName: name,
+                areaId: stableAreaId(for: placemark, coordinate: coordinate)
+            )
+            cache[cacheKey] = identity
 
-            AppLogger.notification.info("Geocoded (\(coordinate.latitude), \(coordinate.longitude)) → \(name ?? "unknown")")
-            return name
+            AppLogger.notification.info("Geocoded (\(coordinate.latitude), \(coordinate.longitude)) → \(name)")
+            return identity
         } catch {
             AppLogger.notification.error("Geocoding failed: \(error.localizedDescription)")
             return nil
@@ -70,5 +84,31 @@ final class GeocodingService {
     /// Clears the in-memory geocoding cache.
     func clearCache() {
         cache.removeAll()
+    }
+
+    private func stableAreaId(for placemark: CLPlacemark, coordinate: CLLocationCoordinate2D) -> String {
+        var components: [String] = []
+        if let countryCode = placemark.isoCountryCode { components.append(countryCode) }
+        if let city = placemark.locality ?? placemark.administrativeArea { components.append(city) }
+        if let neighborhood = placemark.subLocality, neighborhood != placemark.locality {
+            components.append(neighborhood)
+        }
+
+        let normalized = components.map(normalizedAreaComponent).filter { !$0.isEmpty }
+        if !normalized.isEmpty {
+            return normalized.joined(separator: "-")
+        }
+
+        let factor = 145.0
+        return "geo-7-\(Int(floor(coordinate.latitude * factor)))-\(Int(floor(coordinate.longitude * factor)))"
+    }
+
+    private func normalizedAreaComponent(_ value: String) -> String {
+        let folded = value.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+        let lowercase = folded.lowercased(with: Locale(identifier: "en_US_POSIX"))
+        return lowercase
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: "-")
     }
 }

@@ -155,12 +155,14 @@ final class FirestoreService {
         ])
     }
 
-    func updateUserNeighborhood(userId: String, neighborhood: String) async throws {
+    func updateUserNeighborhood(userId: String, neighborhood: String, areaId: String? = nil) async throws {
         let normalized = neighborhood.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return }
-        try await usersCollection.document(userId).updateData([
-            "neighborhood": normalized
-        ])
+        var updates: [String: Any] = ["neighborhood": normalized]
+        if let areaId = areaId?.trimmingCharacters(in: .whitespacesAndNewlines), !areaId.isEmpty {
+            updates["areaId"] = areaId
+        }
+        try await usersCollection.document(userId).updateData(updates)
     }
 
     func syncUserSeasonState(_ user: User) async throws -> User {
@@ -385,13 +387,15 @@ final class FirestoreService {
         period: LeaderboardPeriod,
         seasonId: String,
         neighborhood: String? = nil,
+        areaId: String? = nil,
         limit: Int = 50
     ) async throws -> [LeaderboardEntry] {
         let entries = try await buildDerivedLeaderboardEntries(
             scope: scope,
             period: period,
             seasonId: seasonId,
-            neighborhood: neighborhood
+            neighborhood: neighborhood,
+            areaId: areaId
         )
         return Array(entries.prefix(limit))
     }
@@ -401,13 +405,15 @@ final class FirestoreService {
         scope: LeaderboardScope,
         period: LeaderboardPeriod,
         seasonId: String,
-        neighborhood: String? = nil
+        neighborhood: String? = nil,
+        areaId: String? = nil
     ) async throws -> LeaderboardEntry? {
         let entries = try await buildDerivedLeaderboardEntries(
             scope: scope,
             period: period,
             seasonId: seasonId,
-            neighborhood: neighborhood
+            neighborhood: neighborhood,
+            areaId: areaId
         )
         return entries.first(where: { $0.userId == userId })
     }
@@ -416,10 +422,12 @@ final class FirestoreService {
         scope: LeaderboardScope,
         period: LeaderboardPeriod,
         seasonId: String,
-        neighborhood: String?
+        neighborhood: String?,
+        areaId: String?
     ) async throws -> [LeaderboardEntry] {
         let normalizedNeighborhood = neighborhood?
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedAreaId = areaId?.trimmingCharacters(in: .whitespacesAndNewlines)
         let snapshot = try await usersCollection.getDocuments()
         let users = try snapshot.documents.compactMap { try $0.data(as: User.self) }
         let effectiveSeasonId = seasonId.isEmpty ? generatedSeasonIdForCurrentWeek() : seasonId
@@ -434,6 +442,9 @@ final class FirestoreService {
                 }
 
                 if scope == .neighborhood {
+                    if let normalizedAreaId, !normalizedAreaId.isEmpty {
+                        return user.areaId?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedAreaId
+                    }
                     return user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNeighborhood
                 }
                 return true
@@ -446,6 +457,9 @@ final class FirestoreService {
                 }
 
                 if scope == .neighborhood {
+                    if let normalizedAreaId, !normalizedAreaId.isEmpty {
+                        return user.areaId?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedAreaId
+                    }
                     return user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNeighborhood
                 }
                 return true
@@ -473,6 +487,7 @@ final class FirestoreService {
                 trail: period == .weekly ? user.currentSeasonTrail : user.totalTrail,
                 rank: index + 1,
                 neighborhood: user.neighborhood,
+                areaId: user.areaId,
                 seasonId: effectiveSeasonId,
                 territoriesOwned: 0
             )
@@ -546,6 +561,7 @@ final class FirestoreService {
                     trail: entry.trail,
                     rank: index + 1,
                     neighborhood: entry.neighborhood,
+                    areaId: entry.areaId,
                     seasonId: entry.seasonId,
                     territoriesOwned: entry.territoriesOwned
                 )
@@ -654,7 +670,13 @@ final class FirestoreService {
 
     // MARK: - Batch Updates
 
-    func incrementUserTrail(userId: String, trail: Double, distance: Double, neighborhood: String? = nil) async throws {
+    func incrementUserTrail(
+        userId: String,
+        trail: Double,
+        distance: Double,
+        neighborhood: String? = nil,
+        areaId: String? = nil
+    ) async throws {
         let currentSeasonId = generatedSeasonIdForCurrentWeek()
         let currentUser = try await getUser(id: userId)
         let isCurrentSeason = currentUser?.currentSeasonId == currentSeasonId
@@ -672,6 +694,10 @@ final class FirestoreService {
         if let neighborhood = neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines),
            !neighborhood.isEmpty {
             updates["neighborhood"] = neighborhood
+        }
+        if let areaId = areaId?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !areaId.isEmpty {
+            updates["areaId"] = areaId
         }
 
         try await usersCollection.document(userId).updateData(updates)

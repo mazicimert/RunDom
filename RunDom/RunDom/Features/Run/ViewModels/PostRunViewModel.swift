@@ -26,6 +26,7 @@ final class PostRunViewModel: ObservableObject {
     private let firestoreService: FirestoreService
     private let streakService: StreakService
     private let antiCheatService: AntiCheatService
+    private let h3Service: H3GridService
     private let geocodingService: GeocodingService
     private let badgeService: BadgeService
     private let dailyChallengeService: DailyChallengeService
@@ -38,6 +39,7 @@ final class PostRunViewModel: ObservableObject {
         firestoreService: FirestoreService = FirestoreService(),
         streakService: StreakService = StreakService(),
         antiCheatService: AntiCheatService = AntiCheatService(),
+        h3Service: H3GridService = .shared,
         geocodingService: GeocodingService = .shared,
         badgeService: BadgeService = BadgeService(),
         dailyChallengeService: DailyChallengeService = DailyChallengeService()
@@ -47,6 +49,7 @@ final class PostRunViewModel: ObservableObject {
         self.firestoreService = firestoreService
         self.streakService = streakService
         self.antiCheatService = antiCheatService
+        self.h3Service = h3Service
         self.geocodingService = geocodingService
         self.badgeService = badgeService
         self.dailyChallengeService = dailyChallengeService
@@ -65,9 +68,10 @@ final class PostRunViewModel: ObservableObject {
         let previousLevel = PlayerLevel(totalTrail: latestUser.totalTrail).level
 
         // 1. Anti-cheat validation
+        let routeZones = session.route.map { h3Service.h3Index(for: $0.coordinate) }
         let validation = antiCheatService.validateRoute(
             points: session.route,
-            visitedZones: Array(repeating: "", count: session.totalZonesVisited) // Simplified
+            visitedZones: routeZones
         )
 
         guard validation.isValid else {
@@ -92,7 +96,7 @@ final class PostRunViewModel: ObservableObject {
         session.tags = review?.tags ?? []
         session.note = review?.note
 
-        let detectedNeighborhood = await detectedNeighborhoodFromRun()
+        let detectedArea = await detectedAreaFromRun()
 
         // 3. Save to Firebase
         isSaving = true
@@ -102,7 +106,8 @@ final class PostRunViewModel: ObservableObject {
                 userId: user.id,
                 trail: result.totalTrail,
                 distance: session.distance,
-                neighborhood: detectedNeighborhood
+                neighborhood: detectedArea?.displayName,
+                areaId: detectedArea?.areaId
             )
 
             // 4. Update streak
@@ -173,13 +178,12 @@ final class PostRunViewModel: ObservableObject {
         }
     }
 
-    private func detectedNeighborhoodFromRun() async -> String? {
+    private func detectedAreaFromRun() async -> GeocodingService.AreaIdentity? {
         guard let coordinate = session.route.last?.coordinate ?? session.route.first?.coordinate else {
             return nil
         }
 
-        return await geocodingService.neighborhoodName(for: coordinate)?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return await geocodingService.areaIdentity(for: coordinate)
     }
 
     // MARK: - Computed

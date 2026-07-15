@@ -14,12 +14,24 @@ struct User: Codable, Identifiable, Equatable {
     var currentSeasonTrail: Double = 0
     var currentSeasonId: String?
     var neighborhood: String?
+    /// Stable, normalized neighborhood key used for grouping. The localized
+    /// `neighborhood` string remains display-only and supports legacy docs.
+    var areaId: String?
     var dropzoneMultiplierExpiry: Date?
     var lastRunDate: Date?
     var fcmToken: String?
     var languageCode: String?
     var runnerProfile: RunnerProfile?
     var createdAt: Date = Date()
+
+    // Operator-managed synthetic accounts. Optional fields keep existing user
+    // documents backward compatible; nil is always treated as a real user.
+    var isBot: Bool?
+    var botProfileId: String?
+    var botCity: String?
+    var botCountryCode: String?
+    var botVersion: Int?
+    var botStatus: String?
 
     // Social (Phase 1) — optional until backfilled, treat nil as 0 / unset.
     var displayNameLowercased: String?
@@ -37,6 +49,8 @@ struct User: Codable, Identifiable, Equatable {
         guard let expiry = dropzoneMultiplierExpiry else { return false }
         return expiry > Date()
     }
+
+    var isBotAccount: Bool { isBot == true }
 
     /// The streak as it stands *right now*, decayed for days elapsed since the
     /// last run. The stored `streakDays` is only recomputed when a run completes,

@@ -3,6 +3,11 @@ import SwiftUI
 @MainActor
 final class LeaderboardViewModel: ObservableObject {
 
+    private struct AreaContext {
+        let neighborhood: String?
+        let areaId: String?
+    }
+
     // MARK: - Published State
 
     @Published var scope: LeaderboardScope = .global
@@ -16,6 +21,7 @@ final class LeaderboardViewModel: ObservableObject {
 
     private let locationManager: LocationManager
     private let firestoreService: FirestoreService
+    private let realtimeDB: RealtimeDBService
     private let geocodingService: GeocodingService
 
     // MARK: - Init
@@ -23,10 +29,12 @@ final class LeaderboardViewModel: ObservableObject {
     init(
         locationManager: LocationManager,
         firestoreService: FirestoreService = FirestoreService(),
+        realtimeDB: RealtimeDBService = RealtimeDBService(),
         geocodingService: GeocodingService = .shared
     ) {
         self.locationManager = locationManager
         self.firestoreService = firestoreService
+        self.realtimeDB = realtimeDB
         self.geocodingService = geocodingService
     }
 
@@ -92,22 +100,31 @@ final class LeaderboardViewModel: ObservableObject {
                 seasonId = ""
             }
 
-            let neighborhood = scope == .neighborhood ? await resolveNeighborhood(for: currentUser) : nil
+            let areaContext = scope == .neighborhood ? await resolveAreaContext(for: currentUser) : nil
 
-            entries = try await firestoreService.getLeaderboard(
+            let loadedEntries = try await firestoreService.getLeaderboard(
                 scope: scope,
                 period: period,
                 seasonId: seasonId,
-                neighborhood: neighborhood
+                neighborhood: areaContext?.neighborhood,
+                areaId: areaContext?.areaId
             )
+            let territoryCounts = await loadTerritoryCounts(seasonId: loadedEntries.first?.seasonId ?? seasonId)
+            entries = loadedEntries.map {
+                $0.withTerritoriesOwned(territoryCounts[$0.userId, default: 0])
+            }
             if let currentUserId = currentUser?.id {
-                currentUserEntry = try await firestoreService.getCurrentUserLeaderboardEntry(
+                let loadedCurrentUserEntry = try await firestoreService.getCurrentUserLeaderboardEntry(
                     userId: currentUserId,
                     scope: scope,
                     period: period,
                     seasonId: seasonId,
-                    neighborhood: neighborhood
+                    neighborhood: areaContext?.neighborhood,
+                    areaId: areaContext?.areaId
                 )
+                currentUserEntry = loadedCurrentUserEntry.map {
+                    $0.withTerritoriesOwned(territoryCounts[$0.userId, default: 0])
+                }
             } else {
                 currentUserEntry = nil
             }
@@ -120,6 +137,19 @@ final class LeaderboardViewModel: ObservableObject {
         isLoading = false
     }
 
+    private func loadTerritoryCounts(seasonId: String) async -> [String: Int] {
+        guard !seasonId.isEmpty else { return [:] }
+        do {
+            let territories = try await realtimeDB.getTerritories(seasonId: seasonId)
+            return territories.reduce(into: [:]) { counts, territory in
+                counts[territory.ownerId, default: 0] += 1
+            }
+        } catch {
+            AppLogger.firebase.warning("Failed to load leaderboard territory counts: \(error.localizedDescription)")
+            return [:]
+        }
+    }
+
     func switchScope(to newScope: LeaderboardScope, currentUser: User? = nil) async {
         scope = newScope
         await loadLeaderboard(currentUser: currentUser)
@@ -130,29 +160,32 @@ final class LeaderboardViewModel: ObservableObject {
         await loadLeaderboard(currentUser: currentUser)
     }
 
-    private func resolveNeighborhood(for currentUser: User?) async -> String? {
-        if let currentNeighborhood = currentUser?.neighborhood?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-           !currentNeighborhood.isEmpty {
-            return currentNeighborhood
+    private func resolveAreaContext(for currentUser: User?) async -> AreaContext? {
+        let storedNeighborhood = currentUser?.neighborhood?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if let storedAreaId = currentUser?.areaId?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !storedAreaId.isEmpty {
+            return AreaContext(neighborhood: storedNeighborhood, areaId: storedAreaId)
         }
 
         guard let coordinate = locationManager.currentLocation?.coordinate ?? locationManager.lastKnownCoordinate,
-            let geocoded = await geocodingService.neighborhoodName(for: coordinate)?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-            !geocoded.isEmpty
+              let identity = await geocodingService.areaIdentity(for: coordinate)
         else {
-            return nil
+            return storedNeighborhood.map { AreaContext(neighborhood: $0, areaId: nil) }
         }
 
         if let userId = currentUser?.id {
             do {
-                try await firestoreService.updateUserNeighborhood(userId: userId, neighborhood: geocoded)
+                try await firestoreService.updateUserNeighborhood(
+                    userId: userId,
+                    neighborhood: identity.displayName,
+                    areaId: identity.areaId
+                )
             } catch {
                 AppLogger.firebase.warning("Failed to persist user neighborhood: \(error.localizedDescription)")
             }
         }
 
-        return geocoded
+        return AreaContext(neighborhood: identity.displayName, areaId: identity.areaId)
     }
 }
