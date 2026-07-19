@@ -12,7 +12,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let providerFactory = RunDomAppCheckProviderFactory()
         AppCheck.setAppCheckProviderFactory(providerFactory)
 
+        #if DEBUG
+        guard
+            let stagingConfigPath = Bundle.main.path(
+                forResource: "GoogleService-Info-Staging",
+                ofType: "plist"
+            ),
+            let stagingOptions = FirebaseOptions(contentsOfFile: stagingConfigPath)
+        else {
+            fatalError("GoogleService-Info-Staging.plist is missing from the Debug build.")
+        }
+        FirebaseApp.configure(options: stagingOptions)
+        #else
         FirebaseApp.configure()
+        #endif
 
         // FCM delegate
         Messaging.messaging().delegate = self

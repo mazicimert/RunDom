@@ -765,6 +765,7 @@
 "social.follow" = "Folgen";
 "social.unfollow" = "Folge ich";
 "social.userprofile.posts.title" = "Letzte Beiträge";
+"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "Noch keine Beiträge.";
 "social.followlist.empty.followers" = "Noch keine Follower.";
 "social.followlist.empty.following" = "Folgt noch niemandem.";

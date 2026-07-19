@@ -622,9 +622,22 @@ struct TerritoryMapView: UIViewRepresentable {
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, MKMapViewDelegate {
+        private static let selectedTerritoryVicinityRing = 2
+
         let parent: TerritoryMapView
         var territories: [Territory] = []
-        var selectedTerritoryId: String?
+        var selectedTerritoryId: String? {
+            didSet {
+                guard selectedTerritoryId != oldValue else { return }
+                selectedVicinityIds = selectedTerritoryId.map {
+                    H3GridService.shared.kRingIndices(
+                        forIndex: $0,
+                        ring: Self.selectedTerritoryVicinityRing
+                    )
+                } ?? []
+            }
+        }
+        private var selectedVicinityIds: Set<String> = []
         var currentUserId: String?
         var dropzones: [Dropzone] = []
         var heatmapCells: [String: Int] = [:]
@@ -674,12 +687,14 @@ struct TerritoryMapView: UIViewRepresentable {
                 return MKOverlayRenderer(overlay: overlay)
             }
 
-            overlayStyleCache[h3Index] = OverlayStyle(
+            let style = OverlayStyle(
                 ownerColor: territory.ownerColor,
                 isDecaying: territory.isDecaying,
                 isSelected: h3Index == selectedTerritoryId,
-                isOwnedByCurrentUser: territory.ownerId == currentUserId
+                isOwnedByCurrentUser: territory.ownerId == currentUserId,
+                isDimmed: isTerritoryDimmed(h3Index)
             )
+            overlayStyleCache[h3Index] = style
 
             let uiColor = UIColor(Color(hex: territory.ownerColor) ?? .blue)
             let renderer = TerritoryOverlayRenderer(
@@ -688,9 +703,9 @@ struct TerritoryMapView: UIViewRepresentable {
                 isDecaying: territory.isDecaying
             )
             renderer.applyStyle(
-                isSelected: h3Index == selectedTerritoryId,
-                isOwnedByCurrentUser: territory.ownerId == currentUserId,
-                isDimmed: selectedTerritoryId != nil && h3Index != selectedTerritoryId
+                isSelected: style.isSelected,
+                isOwnedByCurrentUser: style.isOwnedByCurrentUser,
+                isDimmed: style.isDimmed
             )
             return renderer
         }
@@ -744,7 +759,8 @@ struct TerritoryMapView: UIViewRepresentable {
                     ownerColor: territory.ownerColor,
                     isDecaying: territory.isDecaying,
                     isSelected: h3Index == selectedTerritoryId,
-                    isOwnedByCurrentUser: territory.ownerId == currentUserId
+                    isOwnedByCurrentUser: territory.ownerId == currentUserId,
+                    isDimmed: isTerritoryDimmed(h3Index)
                 )
 
                 guard overlayStyleCache[h3Index] != newStyle else { continue }
@@ -753,13 +769,17 @@ struct TerritoryMapView: UIViewRepresentable {
                 renderer.applyStyle(
                     isSelected: newStyle.isSelected,
                     isOwnedByCurrentUser: newStyle.isOwnedByCurrentUser,
-                    isDimmed: selectedTerritoryId != nil && !newStyle.isSelected
+                    isDimmed: newStyle.isDimmed
                 )
                 renderer.setNeedsDisplay()
             }
 
             let liveIds = Set(territories.map(\.h3Index))
             overlayStyleCache = overlayStyleCache.filter { liveIds.contains($0.key) }
+        }
+
+        private func isTerritoryDimmed(_ h3Index: String) -> Bool {
+            selectedTerritoryId != nil && !selectedVicinityIds.contains(h3Index)
         }
 
         // MARK: - Tap Handling
@@ -803,6 +823,7 @@ struct TerritoryMapView: UIViewRepresentable {
             let isDecaying: Bool
             let isSelected: Bool
             let isOwnedByCurrentUser: Bool
+            let isDimmed: Bool
         }
     }
 }

@@ -8,7 +8,9 @@ final class RealtimeDBService {
     private let iso8601 = ISO8601DateFormatter()
 
     init() {
-        db = Database.database(url: AppConstants.Firebase.realtimeDBURL).reference()
+        // Resolve the database URL from the active Firebase app. Debug builds use
+        // GoogleService-Info-Staging.plist; Release uses GoogleService-Info.plist.
+        db = Database.database().reference()
     }
 
     // MARK: - Territory References

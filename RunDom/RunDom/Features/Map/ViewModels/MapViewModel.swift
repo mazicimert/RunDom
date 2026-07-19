@@ -443,7 +443,7 @@ final class MapViewModel: ObservableObject {
     }
 
     var shouldRenderOverlays: Bool {
-        h3Service.estimatedCellCount(in: region) < 5000
+        h3Service.estimatedCellCount(in: region) < H3GridService.maxVisibleCellIndices
     }
 
     var filteredTerritories: [Territory] {
@@ -551,4 +551,3 @@ final class MapViewModel: ObservableObject {
         }
     }
 }
-

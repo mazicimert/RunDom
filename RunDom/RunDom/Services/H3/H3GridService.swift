@@ -9,6 +9,7 @@ final class H3GridService {
     // MARK: - Singleton
 
     static let shared = H3GridService()
+    static let maxVisibleCellIndices = 30_000
     private init() {}
 
     // MARK: - Resolution
@@ -89,8 +90,11 @@ final class H3GridService {
         let startLon = Int(floor(minLon * factor))
         let endLon = Int(floor(maxLon * factor))
 
+        let cellCount = estimatedCellCount(in: region, resolution: res)
+        guard cellCount > 0, cellCount <= Self.maxVisibleCellIndices else { return [] }
+
         var indices: [String] = []
-        indices.reserveCapacity((endLat - startLat + 1) * (endLon - startLon + 1))
+        indices.reserveCapacity(cellCount)
 
         for qLat in startLat...endLat {
             for qLon in startLon...endLon {

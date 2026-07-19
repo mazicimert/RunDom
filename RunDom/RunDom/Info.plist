@@ -5,7 +5,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundleDisplayName</key>
-	<string>RunPire</string>
+	<string>$(APP_DISPLAY_NAME)</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save run gallery images to your photo library.</string>
 	<key>CFBundleURLTypes</key>
@@ -15,17 +15,17 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.880324401621-58v4bo4ceg7dt861gcs30gq230p2vg8v</string>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.mertmazici.RunDom.deeplink</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).deeplink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>rundom</string>
+				<string>$(APP_DEEP_LINK_SCHEME)</string>
 			</array>
 		</dict>
 	</array>

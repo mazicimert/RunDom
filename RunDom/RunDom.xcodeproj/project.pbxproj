@@ -327,6 +327,7 @@
 		841F61542F9CEDB400D666A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_GROUP_IDENTIFIER = group.com.mertmazici.RunDom.staging;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = RunDomWidgetExtension.entitlements;
@@ -335,7 +336,7 @@
 				DEVELOPMENT_TEAM = DDAHQ489DT;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RunDomWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = RunDomWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = "RunPire Staging Widget";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -344,7 +345,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom.RunDomWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom.staging.RunDomWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -356,6 +357,7 @@
 		841F61552F9CEDB400D666A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_GROUP_IDENTIFIER = group.com.mertmazici.RunDom;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = RunDomWidgetExtension.entitlements;
@@ -506,14 +508,18 @@
 		84B499E82F547470007F0B30 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_DEEP_LINK_SCHEME = "rundom-staging";
+				APP_DISPLAY_NAME = "RunPire Staging";
+				APP_GROUP_IDENTIFIER = group.com.mertmazici.RunDom.staging;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = RunDom/RunDom.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = DDAHQ489DT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = "runpire-staging-google-disabled";
 				INFOPLIST_FILE = RunDom/Info.plist;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "RunPire koşu sırasında konumunuzu kullanır.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RunPire haritada konumunuzu göstermek için kullanır.";
@@ -528,8 +534,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom;
+				MARKETING_VERSION = 1.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom.staging;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -544,14 +550,18 @@
 		84B499E92F547470007F0B30 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_DEEP_LINK_SCHEME = rundom;
+				APP_DISPLAY_NAME = RunPire;
+				APP_GROUP_IDENTIFIER = group.com.mertmazici.RunDom;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = RunDom/RunDom.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = DDAHQ489DT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.880324401621-58v4bo4ceg7dt861gcs30gq230p2vg8v";
 				INFOPLIST_FILE = RunDom/Info.plist;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "RunPire koşu sırasında konumunuzu kullanır.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RunPire haritada konumunuzu göstermek için kullanır.";
@@ -566,7 +576,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mertmazici.RunDom;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

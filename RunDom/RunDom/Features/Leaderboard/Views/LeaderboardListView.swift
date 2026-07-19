@@ -19,11 +19,17 @@ struct LeaderboardListView: View {
                 LazyVStack(spacing: 10) {
                     ForEach(Array(entries.enumerated()).dropFirst(3), id: \.element.id) { index, entry in
                         let isCurrentUser = entry.userId == currentUserId
-                        LeaderboardRowView(
-                            entry: entry,
-                            isCurrentUser: isCurrentUser,
-                            pointsToPass: isCurrentUser ? gapToRankAbove(at: index) : nil
-                        )
+                        NavigationLink {
+                            UserProfileView(userId: entry.userId)
+                        } label: {
+                            LeaderboardRowView(
+                                entry: entry,
+                                isCurrentUser: isCurrentUser,
+                                pointsToPass: isCurrentUser ? gapToRankAbove(at: index) : nil
+                            )
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                         .background {
                             // Report the current user's row frame so the parent can
                             // hide the pinned card while this row is on-screen.
@@ -109,77 +115,83 @@ private struct PodiumView: View {
         let isCurrentUser = entry.userId == currentUserId
         let color = Color(hex: entry.color) ?? .accentColor
 
-        return VStack(spacing: 8) {
-            if isChampion {
-                Image(systemName: "crown.fill")
-                    .font(.title2)
-                    .foregroundStyle(
-                        LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)
-                    )
-                    .shadow(color: .yellow.opacity(0.5), radius: 6)
-                    .symbolEffect(.pulse, options: .repeating)
-            }
-
-            // Avatar — only the champion carries a halo glow
-            ZStack {
+        return NavigationLink {
+            UserProfileView(userId: entry.userId)
+        } label: {
+            VStack(spacing: 8) {
                 if isChampion {
-                    Circle()
-                        .fill(color)
-                        .frame(width: 88, height: 88)
-                        .blur(radius: 26)
-                        .opacity(0.6)
+                    Image(systemName: "crown.fill")
+                        .font(.title2)
+                        .foregroundStyle(
+                            LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)
+                        )
+                        .shadow(color: .yellow.opacity(0.5), radius: 6)
+                        .symbolEffect(.pulse, options: .repeating)
                 }
 
-                AvatarView(
-                    photoURL: entry.photoURL,
-                    userColor: entry.color,
-                    size: isChampion ? 70 : 54
-                )
+                // Avatar — only the champion carries a halo glow
+                ZStack {
+                    if isChampion {
+                        Circle()
+                            .fill(color)
+                            .frame(width: 88, height: 88)
+                            .blur(radius: 26)
+                            .opacity(0.6)
+                    }
 
-                // Rank badge clinging to the avatar
-                rankBadge(for: entry.rank)
-                    .offset(y: isChampion ? 40 : 30)
-            }
+                    AvatarView(
+                        photoURL: entry.photoURL,
+                        userColor: entry.color,
+                        size: isChampion ? 70 : 54
+                    )
 
-            Text(entry.displayName)
-                .font(isChampion ? .subheadline.bold() : .caption.bold())
-                .lineLimit(1)
-                .padding(.top, isChampion ? 6 : 2)
-
-            if isChampion {
-                Text("leaderboard.champion".localized)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(championColor)
-                    .textCase(.uppercase)
-                    .tracking(1)
-            } else if isCurrentUser {
-                Text("leaderboard.you".localized)
-                    .font(.caption2.bold())
-                    .foregroundStyle(Color.accentColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.accentColor.opacity(0.16), in: Capsule())
-            }
-
-            HStack(spacing: 4) {
-                Text(entry.trail.formattedTrail)
-                    .font(.caption.bold().monospacedDigit())
-                Text("trail.unit".localized)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-
-            if entry.territoriesOwned > 0 {
-                HStack(spacing: 3) {
-                    Image(systemName: "hexagon.fill").font(.system(size: 7))
-                    Text("leaderboard.territories".localized(with: entry.territoriesOwned))
+                    // Rank badge clinging to the avatar
+                    rankBadge(for: entry.rank)
+                        .offset(y: isChampion ? 40 : 30)
                 }
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(color)
-            }
 
-            pedestal(height: pedestalHeight, rank: entry.rank, color: color)
+                Text(entry.displayName)
+                    .font(isChampion ? .subheadline.bold() : .caption.bold())
+                    .lineLimit(1)
+                    .padding(.top, isChampion ? 6 : 2)
+
+                if isChampion {
+                    Text("leaderboard.champion".localized)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(championColor)
+                        .textCase(.uppercase)
+                        .tracking(1)
+                } else if isCurrentUser {
+                    Text("leaderboard.you".localized)
+                        .font(.caption2.bold())
+                        .foregroundStyle(Color.accentColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.accentColor.opacity(0.16), in: Capsule())
+                }
+
+                HStack(spacing: 4) {
+                    Text(entry.trail.formattedTrail)
+                        .font(.caption.bold().monospacedDigit())
+                    Text("trail.unit".localized)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                if entry.territoriesOwned > 0 {
+                    HStack(spacing: 3) {
+                        Image(systemName: "hexagon.fill").font(.system(size: 7))
+                        Text("leaderboard.territories".localized(with: entry.territoriesOwned))
+                    }
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(color)
+                }
+
+                pedestal(height: pedestalHeight, rank: entry.rank, color: color)
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .center)
     }
 

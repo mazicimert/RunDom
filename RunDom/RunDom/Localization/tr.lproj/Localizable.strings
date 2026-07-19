@@ -804,6 +804,7 @@
 "social.follow" = "Takip Et";
 "social.unfollow" = "Takip Ediliyor";
 "social.userprofile.posts.title" = "Son Paylaşımlar";
+"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "Henüz paylaşım yok.";
 "social.followlist.empty.followers" = "Henüz takipçi yok.";
 "social.followlist.empty.following" = "Henüz kimseyi takip etmiyor.";

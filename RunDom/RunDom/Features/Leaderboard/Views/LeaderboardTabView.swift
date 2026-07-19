@@ -71,10 +71,16 @@ struct LeaderboardTabView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if let pinnedEntry = pinnedCurrentUserEntry {
-                LeaderboardPinnedCurrentUserCard(entry: pinnedEntry)
-                    .screenPadding()
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                NavigationLink {
+                    UserProfileView(userId: pinnedEntry.userId)
+                } label: {
+                    LeaderboardPinnedCurrentUserCard(entry: pinnedEntry)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .screenPadding()
+                .padding(.top, 8)
+                .padding(.bottom, 8)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }

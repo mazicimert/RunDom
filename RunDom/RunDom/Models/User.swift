@@ -4,6 +4,7 @@ struct User: Codable, Identifiable, Equatable {
     let id: String
     var displayName: String
     var email: String
+    var username: String? = nil
     var photoURL: String?
     var color: String
     var isPremium: Bool = true

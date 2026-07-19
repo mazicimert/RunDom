@@ -2,12 +2,6 @@ import Foundation
 
 enum AppConstants {
 
-    // MARK: - Firebase
-
-    enum Firebase {
-        static let realtimeDBURL = "https://rundom-e7aad-default-rtdb.europe-west1.firebasedatabase.app"
-    }
-
     // MARK: - Game Parameters (defaults — overridden by Remote Config)
 
     enum Game {
