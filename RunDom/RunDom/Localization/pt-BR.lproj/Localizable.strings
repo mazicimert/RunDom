@@ -118,22 +118,22 @@
 // MARK: - Permissions
 "permission.location.title" = "Ativar Localização";
 "permission.location.subtitle" = "O RunPire precisa da sua localização para registrar corridas e conquistar territórios em tempo real.";
-"permission.location.button" = "Permitir Acesso à Localização";
+"permission.location.button" = "Continuar";
 "permission.notification.title" = "Continue no Jogo";
 "permission.notification.subtitle" = "Receba avisos quando seus territórios estiverem sob ataque.";
 "permission.notification.button" = "Ativar Notificações";
 
 // MARK: - Onboarding — Location Priming
-"onboarding.location.title" = "Não perca a sua corrida";
-"onboarding.location.subtitle" = "Precisamos da opção 'Sempre permitir' para continuar pintando o território enquanto o celular está no bolso.";
+"onboarding.location.title" = "Registre sua corrida com precisão";
+"onboarding.location.subtitle" = "O RunPire usa sua localização durante uma corrida ativa para registrar sua rota e conquistar territórios, mesmo com a tela apagada.";
 "onboarding.location.deniedTitle" = "A localização está desligada";
 "onboarding.location.deniedSubtitle" = "O acesso à localização foi negado antes. Abra os Ajustes do iOS para ativar — o sistema não vai perguntar de novo dentro do app.";
 "onboarding.location.bullet1" = "Funciona até com o celular no bolso";
 "onboarding.location.bullet2" = "Ativa só durante as suas corridas";
-"onboarding.location.bullet3" = "Necessária para conquistar território";
-"onboarding.location.allow" = "Permitir Acesso à Localização";
+"onboarding.location.bullet3" = "Mantém sua rota e seus territórios precisos";
+"onboarding.location.allow" = "Continuar";
 "onboarding.location.openSettings" = "Abrir Ajustes do iOS";
-"onboarding.location.skip" = "Agora não";
+"onboarding.location.skip" = "Continuar sem localização";
 
 // MARK: - Auth
 "auth.signInApple" = "Entrar com a Apple";
@@ -293,6 +293,8 @@
 "run.tilt.accessibility.on" = "Inclinação 3D ativada";
 "run.tilt.accessibility.off" = "Inclinação 3D desativada";
 "run.rivalOverlay.entered" = "Você entrou em território rival";
+"run.rivalDefense.title" = "Defesa Rival";
+"run.rivalDefense.remaining" = "%d restante";
 "run.boostSafe" = "Boost seguro";
 "run.boostApproaching" = "Chegando ao limite";
 "run.boostRequired" = "necessário";
@@ -312,6 +314,7 @@
 "run.dailyCapped" = "Limite diário atingido (15.000)";
 "run.territories" = "Territórios";
 "run.territoryConquered" = "Território Conquistado!";
+"run.conquest.streak" = "Sequência de conquistas ×%d";
 "run.startPoint" = "Início";
 "run.endPoint" = "Chegada";
 "run.delete.confirmTitle" = "Excluir essa corrida?";
@@ -451,15 +454,19 @@
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Bairro";
 "leaderboard.period.weekly" = "Semanal";
+"leaderboard.period.monthly" = "Mensal";
 "leaderboard.period.allTime" = "Todos os Tempos";
 "leaderboard.context.subtitle" = "%@ • %@";
 "leaderboard.context.description.weeklyGlobal" = "Você está vendo a corrida global desta semana.";
 "leaderboard.context.description.weeklyNeighborhood" = "Você está vendo a corrida do bairro desta semana.";
+"leaderboard.context.description.monthlyGlobal" = "Você está vendo a corrida global deste mês.";
+"leaderboard.context.description.monthlyNeighborhood" = "Você está vendo a corrida do bairro deste mês.";
 "leaderboard.context.description.allTimeGlobal" = "Você está vendo os líderes globais de todos os tempos.";
 "leaderboard.context.description.allTimeNeighborhood" = "Você está vendo os líderes do seu bairro de todos os tempos.";
 "leaderboard.you" = "Você";
 "leaderboard.pinned.title" = "Sua posição";
 "leaderboard.weekly.endsIn" = "A temporada termina em";
+"leaderboard.monthly.endsIn" = "O mês termina em";
 "leaderboard.weekly.remaining.daysHours" = "%dd %dh";
 "leaderboard.weekly.remaining.hoursMinutes" = "%dh %dm";
 "leaderboard.weekly.remaining.minutes" = "%dm";
@@ -765,7 +772,6 @@
 "social.follow" = "Seguir";
 "social.unfollow" = "Seguindo";
 "social.userprofile.posts.title" = "Publicações Recentes";
-"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "Nenhuma publicação ainda.";
 "social.followlist.empty.followers" = "Ainda sem seguidores.";
 "social.followlist.empty.following" = "Ainda não segue ninguém.";

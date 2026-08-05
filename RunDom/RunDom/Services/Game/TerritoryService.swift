@@ -25,8 +25,11 @@ final class TerritoryService {
     struct CaptureResult {
         let h3Index: String
         let captured: Bool
+        let ownershipChanged: Bool
         let isNewTerritory: Bool
         let previousOwnerId: String?
+        let previousOwnerColor: String?
+        let remainingDefense: Double
     }
 
     // MARK: - Territory Capture
@@ -48,15 +51,7 @@ final class TerritoryService {
             let cellDistance = distanceInCell(cellIndex: cellIndex, route: route)
             guard cellDistance > 0 else { continue }
 
-            let existingTerritory = try await realtimeDB.getTerritory(
-                seasonId: season.id,
-                h3Index: cellIndex
-            )
-
-            let isNewTerritory = existingTerritory == nil
-            let previousOwnerId = existingTerritory?.ownerId
-
-            let captured = try await realtimeDB.captureTerritory(
+            let transaction = try await realtimeDB.captureTerritory(
                 seasonId: season.id,
                 h3Index: cellIndex,
                 userId: userId,
@@ -66,9 +61,12 @@ final class TerritoryService {
 
             results.append(CaptureResult(
                 h3Index: cellIndex,
-                captured: captured,
-                isNewTerritory: isNewTerritory,
-                previousOwnerId: previousOwnerId
+                captured: transaction.captured,
+                ownershipChanged: transaction.ownershipChanged,
+                isNewTerritory: transaction.isNewTerritory,
+                previousOwnerId: transaction.previousOwnerId,
+                previousOwnerColor: transaction.previousOwnerColor,
+                remainingDefense: transaction.remainingDefense
             ))
         }
 
@@ -88,15 +86,7 @@ final class TerritoryService {
         distance: Double,
         seasonId: String
     ) async throws -> CaptureResult {
-        let existingTerritory = try await realtimeDB.getTerritory(
-            seasonId: seasonId,
-            h3Index: h3Index
-        )
-
-        let isNewTerritory = existingTerritory == nil
-        let previousOwnerId = existingTerritory?.ownerId
-
-        let captured = try await realtimeDB.captureTerritory(
+        let transaction = try await realtimeDB.captureTerritory(
             seasonId: seasonId,
             h3Index: h3Index,
             userId: userId,
@@ -106,9 +96,12 @@ final class TerritoryService {
 
         return CaptureResult(
             h3Index: h3Index,
-            captured: captured,
-            isNewTerritory: isNewTerritory,
-            previousOwnerId: previousOwnerId
+            captured: transaction.captured,
+            ownershipChanged: transaction.ownershipChanged,
+            isNewTerritory: transaction.isNewTerritory,
+            previousOwnerId: transaction.previousOwnerId,
+            previousOwnerColor: transaction.previousOwnerColor,
+            remainingDefense: transaction.remainingDefense
         )
     }
 

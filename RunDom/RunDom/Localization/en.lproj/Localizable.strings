@@ -120,22 +120,22 @@
 // MARK: - Permissions
 "permission.location.title" = "Enable Location";
 "permission.location.subtitle" = "RunPire needs your location to track runs and conquer territories in real time.";
-"permission.location.button" = "Allow Location Access";
+"permission.location.button" = "Continue";
 "permission.notification.title" = "Stay in the Game";
 "permission.notification.subtitle" = "Get notified when your territories are under attack.";
 "permission.notification.button" = "Enable Notifications";
 
 // MARK: - Onboarding — Location Priming
-"onboarding.location.title" = "Don't lose your run";
-"onboarding.location.subtitle" = "RunPire needs 'Always Allow' to keep capturing territory in the background — it never uses your location outside a run.";
+"onboarding.location.title" = "Track your run accurately";
+"onboarding.location.subtitle" = "RunPire uses your location during an active run to record your route and capture territory, including when the screen is off.";
 "onboarding.location.deniedTitle" = "Location is off";
 "onboarding.location.deniedSubtitle" = "Location access was turned down before. Open iOS Settings to enable it — the system won't ask again from inside the app.";
 "onboarding.location.bullet1" = "No need to keep your screen on";
 "onboarding.location.bullet2" = "Active only while you run";
-"onboarding.location.bullet3" = "Required to capture territory";
-"onboarding.location.allow" = "Allow Location Access";
+"onboarding.location.bullet3" = "Keeps your route and territory accurate";
+"onboarding.location.allow" = "Continue";
 "onboarding.location.openSettings" = "Open iOS Settings";
-"onboarding.location.skip" = "Not now";
+"onboarding.location.skip" = "Continue without location";
 
 // MARK: - Auth
 "auth.signInApple" = "Sign in with Apple";
@@ -301,6 +301,8 @@
 "run.tilt.accessibility.on" = "3D tilt on";
 "run.tilt.accessibility.off" = "3D tilt off";
 "run.rivalOverlay.entered" = "You entered rival territory";
+"run.rivalDefense.title" = "Rival Defense";
+"run.rivalDefense.remaining" = "%d remaining";
 "run.boostSafe" = "Boost safe";
 "run.boostApproaching" = "Approaching threshold";
 "run.boostRequired" = "required";
@@ -320,6 +322,7 @@
 "run.dailyCapped" = "Daily cap reached (15,000)";
 "run.territories" = "Territories";
 "run.territoryConquered" = "Territory Conquered!";
+"run.conquest.streak" = "Conquest Streak ×%d";
 "run.startPoint" = "Start";
 "run.endPoint" = "Finish";
 "run.delete.confirmTitle" = "Delete this run?";
@@ -459,15 +462,19 @@
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Neighborhood";
 "leaderboard.period.weekly" = "Weekly";
+"leaderboard.period.monthly" = "Monthly";
 "leaderboard.period.allTime" = "All Time";
 "leaderboard.context.subtitle" = "%@ • %@";
 "leaderboard.context.description.weeklyGlobal" = "You're viewing this week's global race.";
 "leaderboard.context.description.weeklyNeighborhood" = "You're viewing this week's neighborhood race.";
+"leaderboard.context.description.monthlyGlobal" = "You're viewing this month's global race.";
+"leaderboard.context.description.monthlyNeighborhood" = "You're viewing this month's neighborhood race.";
 "leaderboard.context.description.allTimeGlobal" = "You're viewing the all-time global leaders.";
 "leaderboard.context.description.allTimeNeighborhood" = "You're viewing the all-time leaders in your neighborhood.";
 "leaderboard.you" = "You";
 "leaderboard.pinned.title" = "Your position";
 "leaderboard.weekly.endsIn" = "Season ends in";
+"leaderboard.monthly.endsIn" = "Month resets in";
 "leaderboard.weekly.remaining.daysHours" = "%dd %dh";
 "leaderboard.weekly.remaining.hoursMinutes" = "%dh %dm";
 "leaderboard.weekly.remaining.minutes" = "%dm";
@@ -804,7 +811,6 @@
 "social.follow" = "Follow";
 "social.unfollow" = "Following";
 "social.userprofile.posts.title" = "Recent Posts";
-"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "No posts yet.";
 "social.followlist.empty.followers" = "No followers yet.";
 "social.followlist.empty.following" = "Not following anyone yet.";

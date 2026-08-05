@@ -1,0 +1,4 @@
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "RunPire verwendet deinen Standort während aktiver Läufe, um deine Route auch im Hintergrund weiter aufzuzeichnen.";
+"NSLocationWhenInUseUsageDescription" = "RunPire verwendet deinen Standort, um während eines Laufs deine Route aufzuzeichnen und Gebiete zu erobern.";
+"NSMotionUsageDescription" = "RunPire verwendet Bewegungsdaten während aktiver Läufe, um die Aufzeichnungsgenauigkeit zu verbessern.";
+"NSPhotoLibraryAddUsageDescription" = "RunPire fügt die Laufbilder, die du speichern möchtest, deiner Fotomediathek hinzu.";

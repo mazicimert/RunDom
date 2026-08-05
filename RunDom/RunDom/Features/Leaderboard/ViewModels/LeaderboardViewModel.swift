@@ -56,6 +56,8 @@ final class LeaderboardViewModel: ObservableObject {
         switch period {
         case .weekly:
             return "leaderboard.period.weekly".localized
+        case .monthly:
+            return "leaderboard.period.monthly".localized
         case .allTime:
             return "leaderboard.period.allTime".localized
         }
@@ -78,6 +80,10 @@ final class LeaderboardViewModel: ObservableObject {
             return "leaderboard.context.description.weeklyGlobal".localized
         case (.weekly, .neighborhood):
             return "leaderboard.context.description.weeklyNeighborhood".localized
+        case (.monthly, .global):
+            return "leaderboard.context.description.monthlyGlobal".localized
+        case (.monthly, .neighborhood):
+            return "leaderboard.context.description.monthlyNeighborhood".localized
         case (.allTime, .global):
             return "leaderboard.context.description.allTimeGlobal".localized
         case (.allTime, .neighborhood):

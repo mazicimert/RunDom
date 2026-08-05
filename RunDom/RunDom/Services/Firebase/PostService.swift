@@ -106,11 +106,18 @@ final class PostService {
 
     func getPosts(
         byUser userId: String,
+        visibility: PostVisibility? = nil,
         limit: Int = 20,
         after: DocumentSnapshot? = nil
     ) async throws -> (posts: [Post], lastDocument: DocumentSnapshot?) {
         var query: Query = postsCollection
             .whereField("authorId", isEqualTo: userId)
+
+        if let visibility {
+            query = query.whereField("visibility", isEqualTo: visibility.rawValue)
+        }
+
+        query = query
             .order(by: "createdAt", descending: true)
             .limit(to: limit)
 

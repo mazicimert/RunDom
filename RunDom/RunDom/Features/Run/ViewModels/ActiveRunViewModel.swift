@@ -5,6 +5,24 @@ import CoreLocation
 @MainActor
 final class ActiveRunViewModel: ObservableObject {
 
+    struct TerritoryConquestEvent: Identifiable, Equatable {
+        let id = UUID()
+        let h3Index: String
+        let opponentColorHex: String?
+    }
+
+    struct RivalDefenseStatus: Equatable {
+        let h3Index: String
+        var ownerColorHex: String
+        var initialDefense: Double
+        var remainingDefense: Double
+
+        var remainingFraction: Double {
+            guard initialDefense > 0 else { return 0 }
+            return min(max(remainingDefense / initialDefense, 0), 1)
+        }
+    }
+
     // MARK: - Run State
 
     enum RunState: Equatable {
@@ -31,7 +49,7 @@ final class ActiveRunViewModel: ObservableObject {
     @Published var uniqueZones: Set<String> = []
     @Published var wonZones: Set<String> = []
     @Published var territoriesCaptured: Int = 0
-    @Published var territoryConquestAnimationTrigger: Int = 0
+    @Published private(set) var territoryConquestEvents: [TerritoryConquestEvent] = []
     @Published var isBoostActive: Bool = true
     @Published var gpsSignalLost = false
     @Published var hasAlwaysLocationPermission = false
@@ -39,6 +57,7 @@ final class ActiveRunViewModel: ObservableObject {
     @Published var isRivalOverlayEnabled = false
     @Published private(set) var nearbyRivalTerritories: [Territory] = []
     @Published private(set) var currentRivalTerritoryState: RivalTerritoryState = .outside
+    @Published private(set) var rivalDefenseStatus: RivalDefenseStatus?
     @Published var rivalTerritoryEntryTrigger: Int = 0
 
     // MARK: - Configuration
@@ -82,6 +101,8 @@ final class ActiveRunViewModel: ObservableObject {
     private var rivalTerritoryObserverSeasonId: String?
     private var observedSeasonTerritories: [Territory] = []
     private var lastAnnouncedRivalTerritoryId: String?
+    private var announcedConquestZones: Set<String> = []
+    private var defenseBreakInProgressH3Index: String?
 
     // MARK: - Init
 
@@ -256,6 +277,14 @@ final class ActiveRunViewModel: ObservableObject {
             applyCapture(h3Index: h3Index, rawDistance: AppConstants.Game.cellClaimSeedDistance)
         }
 
+        // Keep the rival defense HUD live while the runner remains in the same cell.
+        // The remainder is still flushed on exit, pause, or stop.
+        if case .inside(let territory) = currentRivalTerritoryState,
+           territory.h3Index == h3Index,
+           currentCellDistance >= AppConstants.Game.rivalDefenseSyncDistance {
+            flushCell(index: h3Index, distance: currentCellDistance)
+        }
+
         // Boost speed check
         if mode == .boost && isBoostActive {
             if !antiCheatService.isBoostSpeedMet(currentSpeedKmh: avgSpeed) && elapsedTime > 120 {
@@ -329,21 +358,53 @@ final class ActiveRunViewModel: ObservableObject {
                     seasonId: seasonId
                 )
 
+                // TEMPORARY DIAGNOSTIC — remove once the conquest trigger is understood.
+                AppLogger.run.info(
+                    """
+                    TerritoryDiag \(h3Index) attempt=\(distance, format: .fixed(precision: 1))m \
+                    captured=\(captured.captured) \
+                    changed=\(captured.ownershipChanged) \
+                    isNew=\(captured.isNewTerritory) \
+                    prevOwner=\(captured.previousOwnerId ?? "<nil>", privacy: .public) \
+                    prevColor=\(captured.previousOwnerColor ?? "<nil>", privacy: .public) \
+                    me=\(self.userId, privacy: .public)
+                    """
+                )
+
+                updateRivalDefenseAfterCapture(
+                    h3Index: h3Index,
+                    remainingDefense: captured.remainingDefense,
+                    ownershipChanged: captured.ownershipChanged
+                )
+
                 guard captured.captured else { return }
 
-                // A cell is only "newly won" the first time it flips to us this run.
-                // Guarding on this dedupes counts, paint, animation, and loss events
-                // across the multiple capture attempts a single run makes per cell.
-                let isNewlyWon = !wonZones.contains(h3Index)
+                // The set keeps the score and painted-cell state stable across the
+                // multiple capture attempts a single run can make for the same cell.
                 wonZones.insert(h3Index)
                 territoriesCaptured = wonZones.count
 
-                let conqueredFromOpponent = isNewlyWon
-                    && (captured.previousOwnerId?.isEmpty == false)
-                    && captured.previousOwnerId != userId
+                // Present only owner transitions confirmed by the transaction. The set
+                // is an additional per-run guard against duplicate presentation.
+                let shouldAnnounceConquest = captured.ownershipChanged
+                    && announcedConquestZones.insert(h3Index).inserted
 
-                if conqueredFromOpponent {
-                    territoryConquestAnimationTrigger += 1
+                if shouldAnnounceConquest {
+                    // Let the defense HUD visibly reach zero before it hands the scene
+                    // over to the full conquest celebration.
+                    try? await Task.sleep(for: .milliseconds(90))
+                    if rivalDefenseStatus?.h3Index == h3Index {
+                        rivalDefenseStatus = nil
+                    }
+                    defenseBreakInProgressH3Index = nil
+
+                    territoryConquestEvents.append(
+                        TerritoryConquestEvent(
+                            h3Index: h3Index,
+                            opponentColorHex: captured.previousOwnerColor
+                        )
+                    )
+                    AppLogger.run.info("Territory conquest animation queued for \(h3Index)")
                     syncObservedTerritoryAfterCapture(h3Index: h3Index)
 
                     if let previousOwnerId = captured.previousOwnerId {
@@ -361,6 +422,19 @@ final class ActiveRunViewModel: ObservableObject {
             }
         }
     }
+
+#if DEBUG
+    /// Queues a synthetic conquest so the celebration can be reviewed inside a real
+    /// run, over the live map, without needing a rival-owned cell on the route.
+    func debugSimulateConquest(opponentColorHex: String = "#D0483F") {
+        territoryConquestEvents.append(
+            TerritoryConquestEvent(
+                h3Index: "debug_\(UUID().uuidString)",
+                opponentColorHex: opponentColorHex
+            )
+        )
+    }
+#endif
 
     // MARK: - Pause / Resume
 
@@ -471,17 +545,12 @@ final class ActiveRunViewModel: ObservableObject {
         guard enabled != isRivalOverlayEnabled else { return }
 
         isRivalOverlayEnabled = enabled
-
-        if enabled {
-            startRivalTerritoryObservationIfNeeded()
-            refreshNearbyRivalTerritories()
-        } else {
-            stopRivalTerritoryObservation(clearToggleState: false)
-        }
+        startRivalTerritoryObservationIfNeeded()
+        refreshNearbyRivalTerritories()
     }
 
     private func startRivalTerritoryObservationIfNeeded() {
-        guard isRivalOverlayEnabled, let seasonId = currentSeasonId else { return }
+        guard let seasonId = currentSeasonId else { return }
 
         if rivalTerritoryObserverId != nil, rivalTerritoryObserverSeasonId == seasonId {
             refreshNearbyRivalTerritories()
@@ -511,6 +580,7 @@ final class ActiveRunViewModel: ObservableObject {
         observedSeasonTerritories = []
         nearbyRivalTerritories = []
         currentRivalTerritoryState = .outside
+        rivalDefenseStatus = nil
         lastAnnouncedRivalTerritoryId = nil
 
         if clearToggleState {
@@ -519,9 +589,10 @@ final class ActiveRunViewModel: ObservableObject {
     }
 
     private func refreshNearbyRivalTerritories() {
-        guard isRivalOverlayEnabled, let currentH3Index else {
+        guard let currentH3Index else {
             nearbyRivalTerritories = []
             currentRivalTerritoryState = .outside
+            rivalDefenseStatus = nil
             lastAnnouncedRivalTerritoryId = nil
             return
         }
@@ -542,11 +613,28 @@ final class ActiveRunViewModel: ObservableObject {
     private func updateCurrentRivalTerritoryState(using territories: [Territory], currentH3Index: String) {
         guard let territory = territories.first(where: { $0.h3Index == currentH3Index }) else {
             currentRivalTerritoryState = .outside
+            if defenseBreakInProgressH3Index != currentH3Index {
+                rivalDefenseStatus = nil
+            }
             lastAnnouncedRivalTerritoryId = nil
             return
         }
 
         currentRivalTerritoryState = .inside(territory: territory)
+        let remainingDefense = max(territory.decayedDefenseLevel, 0)
+        if var status = rivalDefenseStatus, status.h3Index == territory.h3Index {
+            status.ownerColorHex = territory.ownerColor
+            status.initialDefense = max(status.initialDefense, max(remainingDefense, 1))
+            status.remainingDefense = remainingDefense
+            rivalDefenseStatus = status
+        } else {
+            rivalDefenseStatus = RivalDefenseStatus(
+                h3Index: territory.h3Index,
+                ownerColorHex: territory.ownerColor,
+                initialDefense: max(remainingDefense, 1),
+                remainingDefense: remainingDefense
+            )
+        }
 
         if lastAnnouncedRivalTerritoryId != territory.h3Index {
             lastAnnouncedRivalTerritoryId = territory.h3Index
@@ -560,6 +648,22 @@ final class ActiveRunViewModel: ObservableObject {
         observedSeasonTerritories[index].ownerColor = userColor
         observedSeasonTerritories[index].lastRunDate = Date()
         refreshNearbyRivalTerritories()
+    }
+
+    private func updateRivalDefenseAfterCapture(
+        h3Index: String,
+        remainingDefense: Double,
+        ownershipChanged: Bool
+    ) {
+        if ownershipChanged {
+            defenseBreakInProgressH3Index = h3Index
+        }
+        guard var status = rivalDefenseStatus, status.h3Index == h3Index else { return }
+        let normalizedRemaining = max(remainingDefense, 0)
+        status.remainingDefense = ownershipChanged
+            ? 0
+            : min(status.remainingDefense, normalizedRemaining)
+        rivalDefenseStatus = status
     }
 
     // MARK: - Cleanup

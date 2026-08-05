@@ -120,22 +120,22 @@
 // MARK: - Permissions
 "permission.location.title" = "Konum Erişimi";
 "permission.location.subtitle" = "RunPire, koşularını takip etmek ve bölgeleri fethetmek için konumuna ihtiyaç duyar.";
-"permission.location.button" = "Konum Erişimine İzin Ver";
+"permission.location.button" = "Devam";
 "permission.notification.title" = "Oyunda Kal";
 "permission.notification.subtitle" = "Bölgelerin saldırı altındayken bildirim al.";
 "permission.notification.button" = "Bildirimleri Aç";
 
 // MARK: - Onboarding — Location Priming
-"onboarding.location.title" = "Koşunu kaybetmeyelim";
-"onboarding.location.subtitle" = "Arka planda bölge fethetmeye devam edebilmemiz için 'Her zaman izin ver' gerekiyor; konumunu koşu dışında asla kullanmayız.";
+"onboarding.location.title" = "Koşunu doğru şekilde kaydet";
+"onboarding.location.subtitle" = "RunPire, aktif koşu sırasında rotanı kaydetmek ve ekran kapalıyken de bölgeleri fethetmek için konumunu kullanır.";
 "onboarding.location.deniedTitle" = "Konum kapalı";
 "onboarding.location.deniedSubtitle" = "Konum erişimi daha önce reddedilmiş. Açmak için iOS Ayarları'na git — sistem uygulama içinden tekrar sormaz.";
 "onboarding.location.bullet1" = "Ekranı açık tutmana gerek yok";
 "onboarding.location.bullet2" = "Yalnızca koşarken aktif";
-"onboarding.location.bullet3" = "Bölge fethetmek için zorunlu";
-"onboarding.location.allow" = "Konum Erişimine İzin Ver";
+"onboarding.location.bullet3" = "Rotanı ve bölgelerini doğru kaydeder";
+"onboarding.location.allow" = "Devam";
 "onboarding.location.openSettings" = "iOS Ayarları'nı Aç";
-"onboarding.location.skip" = "Şimdi değil";
+"onboarding.location.skip" = "Konum olmadan devam et";
 
 // MARK: - Auth
 "auth.signInApple" = "Apple ile Giriş Yap";
@@ -301,6 +301,8 @@
 "run.tilt.accessibility.on" = "3B eğim açık";
 "run.tilt.accessibility.off" = "3B eğim kapalı";
 "run.rivalOverlay.entered" = "Rakip bölgeye girdin";
+"run.rivalDefense.title" = "Rakip Savunması";
+"run.rivalDefense.remaining" = "Kalan: %d";
 "run.boostSafe" = "Boost güvende";
 "run.boostApproaching" = "Eşiğe yaklaşıyor";
 "run.boostRequired" = "gerekli";
@@ -320,6 +322,7 @@
 "run.dailyCapped" = "Günlük limit aşıldı (15.000)";
 "run.territories" = "Bölgeler";
 "run.territoryConquered" = "Bölge Fethedildi!";
+"run.conquest.streak" = "Fetih Serisi ×%d";
 "run.startPoint" = "Başlangıç";
 "run.endPoint" = "Bitiş";
 "run.delete.confirmTitle" = "Koşuyu silmek istiyor musun?";
@@ -459,15 +462,19 @@
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Mahalle";
 "leaderboard.period.weekly" = "Haftalık";
+"leaderboard.period.monthly" = "Aylık";
 "leaderboard.period.allTime" = "Tüm Zamanlar";
 "leaderboard.context.subtitle" = "%@ • %@";
 "leaderboard.context.description.weeklyGlobal" = "Bu haftanın global yarışını görüyorsun.";
 "leaderboard.context.description.weeklyNeighborhood" = "Mahallendeki haftalık yarışı görüyorsun.";
+"leaderboard.context.description.monthlyGlobal" = "Bu ayın global yarışını görüyorsun.";
+"leaderboard.context.description.monthlyNeighborhood" = "Mahallendeki aylık yarışı görüyorsun.";
 "leaderboard.context.description.allTimeGlobal" = "Tüm zamanların global liderlerini görüyorsun.";
 "leaderboard.context.description.allTimeNeighborhood" = "Mahallendeki tüm zamanlar liderlerini görüyorsun.";
 "leaderboard.you" = "Sen";
 "leaderboard.pinned.title" = "Sıralaman";
 "leaderboard.weekly.endsIn" = "Hafta bitimine";
+"leaderboard.monthly.endsIn" = "Ay bitimine";
 "leaderboard.weekly.remaining.daysHours" = "%dg %dsa";
 "leaderboard.weekly.remaining.hoursMinutes" = "%dsa %ddk";
 "leaderboard.weekly.remaining.minutes" = "%ddk";
@@ -804,7 +811,6 @@
 "social.follow" = "Takip Et";
 "social.unfollow" = "Takip Ediliyor";
 "social.userprofile.posts.title" = "Son Paylaşımlar";
-"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "Henüz paylaşım yok.";
 "social.followlist.empty.followers" = "Henüz takipçi yok.";
 "social.followlist.empty.following" = "Henüz kimseyi takip etmiyor.";

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="RunDom Gelibolu Simulator Route" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Gelibolu Territories 300 m</name>
+    <desc>A 300 metre east-to-west route through both territory centres near Edirne-Canakkale Yolu and Gul Sokak.</desc>
+  </metadata>
+  <trk>
+    <name>Gelibolu Territories 300 m</name>
+    <trkseg>
+      <trkpt lat="40.41810343" lon="26.66384083"><time>2026-08-03T14:00:00Z</time><name>start east</name></trkpt>
+      <trkpt lat="40.41810345" lon="26.66293103"><time>2026-08-03T14:00:26Z</time><name>turquoise territory centre</name></trkpt>
+      <trkpt lat="40.41810345" lon="26.66120690"><time>2026-08-03T14:01:14Z</time><name>pink territory centre</name></trkpt>
+      <trkpt lat="40.41810343" lon="26.66029710"><time>2026-08-03T14:01:40Z</time><name>finish west</name></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

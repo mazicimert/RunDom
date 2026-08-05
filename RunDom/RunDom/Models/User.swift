@@ -14,6 +14,10 @@ struct User: Codable, Identifiable, Equatable {
     var totalRuns: Int = 0
     var currentSeasonTrail: Double = 0
     var currentSeasonId: String?
+    /// UTC calendar-month aggregate used by the monthly leaderboard.
+    /// Optional so user documents created by older app versions still decode.
+    var currentMonthTrail: Double?
+    var currentMonthId: String?
     var neighborhood: String?
     /// Stable, normalized neighborhood key used for grouping. The localized
     /// `neighborhood` string remains display-only and supports legacy docs.

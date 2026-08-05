@@ -26,6 +26,9 @@ enum AppConstants {
         /// Max distance (meters) a single cell can contribute — to its own defense or as
         /// attack power against an enemy — within one run. Caps loop-farming a fortress.
         static let maxCellDistancePerRun: Double = 1_000
+        /// Sends accumulated attack distance while the runner remains inside a rival
+        /// cell so the defense HUD and conquest result update without waiting for exit.
+        static let rivalDefenseSyncDistance: Double = 20
         static let dropzoneRewardMultiplier: Double = 2.0
         static let dropzoneRewardDays: Int = 3
         static let dropzoneMaxClaimants: Int = 3

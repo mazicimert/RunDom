@@ -5,8 +5,8 @@ import MapKit
 /// Used by the MapKit coordinator to draw filled hex polygons with owner colors.
 final class TerritoryOverlayRenderer: MKPolygonRenderer {
 
-    let territoryColor: UIColor
-    let isDecaying: Bool
+    private var territoryColor: UIColor
+    private var isDecaying: Bool
     private var separatorColor = UIColor.territorySeparator(alpha: 0.32)
     private var separatorLineWidth: CGFloat = 0
 
@@ -17,6 +17,12 @@ final class TerritoryOverlayRenderer: MKPolygonRenderer {
 
         lineJoin = .round
         lineCap = .round
+    }
+
+    /// Updates ownership-dependent colors without replacing the MapKit polygon.
+    func updateTerritoryAppearance(color: UIColor, isDecaying: Bool) {
+        territoryColor = color
+        self.isDecaying = isDecaying
     }
 
     func applyStyle(isSelected: Bool, isOwnedByCurrentUser: Bool, isDimmed: Bool) {

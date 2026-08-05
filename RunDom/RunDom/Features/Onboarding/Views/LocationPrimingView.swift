@@ -57,15 +57,17 @@ struct LocationPrimingView: View {
                     }
                     .buttonStyle(PrimaryButtonStyle())
 
-                    Button {
-                        onSkip()
-                    } label: {
-                        Text("onboarding.location.skip".localized)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white.opacity(0.55))
-                            .padding(.vertical, 6)
+                    if canContinueWithoutOpeningPermissionPrompt {
+                        Button {
+                            onSkip()
+                        } label: {
+                            Text("onboarding.location.skip".localized)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.white.opacity(0.55))
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, AppConstants.UI.screenPadding)
                 .padding(.bottom, 32)
@@ -81,7 +83,7 @@ struct LocationPrimingView: View {
     }
 
     /// CTA / copy adapt to the current iOS auth state.
-    /// - notDetermined: standard "Allow Location Access" → triggers system prompt
+    /// - notDetermined: neutral "Continue" → triggers system prompt
     /// - denied/restricted: "Open iOS Settings" → deep links (system can't re-prompt)
     /// - authorized: handled by ViewModel by skipping this step entirely
     private var titleKey: String {
@@ -108,6 +110,18 @@ struct LocationPrimingView: View {
             return "onboarding.location.openSettings"
         default:
             return "onboarding.location.allow"
+        }
+    }
+
+    /// Apple's pre-alert guidance requires a single neutral action that always
+    /// opens the system permission prompt. A secondary action is only shown
+    /// after iOS has already denied or restricted access and can't re-prompt.
+    private var canContinueWithoutOpeningPermissionPrompt: Bool {
+        switch viewModel.locationAuthStatus {
+        case .denied, .restricted:
+            return true
+        default:
+            return false
         }
     }
 

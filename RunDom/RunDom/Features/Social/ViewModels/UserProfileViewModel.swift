@@ -54,12 +54,21 @@ final class UserProfileViewModel: ObservableObject {
             }
         }
 
-        // Tolerate failure: post visibility opens up in a later phase. Empty
-        // list is the correct state until then.
         do {
-            let result = try await postService.getPosts(byUser: targetUserId, limit: 10)
+            // Firestore rules only allow non-followers to list public posts.
+            // Owners and followers may request the complete author timeline.
+            let visibility: PostVisibility? =
+                (currentUserId == targetUserId || isFollowing) ? nil : .public
+            let result = try await postService.getPosts(
+                byUser: targetUserId,
+                visibility: visibility,
+                limit: 10
+            )
             posts = result.posts
         } catch {
+            AppLogger.firebase.error(
+                "Failed to load profile posts for \(self.targetUserId): \(error.localizedDescription)"
+            )
             posts = []
         }
 

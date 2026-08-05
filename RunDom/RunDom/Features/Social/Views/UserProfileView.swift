@@ -146,17 +146,6 @@ struct UserProfileView: View {
                 AvatarView(photoURL: user.photoURL, userColor: user.color, size: 100)
                 Text(user.displayName)
                     .font(.title2.bold())
-                if user.isBotAccount {
-                    Text("profile.runpireRunner".localized)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(Color.secondary.opacity(0.12))
-                        )
-                }
                 if let neighborhood = user.neighborhood {
                     Label(neighborhood, systemImage: "mappin.circle.fill")
                         .font(.subheadline)

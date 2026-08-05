@@ -167,16 +167,38 @@ final class FirestoreService {
 
     func syncUserSeasonState(_ user: User) async throws -> User {
         let expectedSeasonId = generatedSeasonIdForCurrentWeek()
-        guard user.currentSeasonId != expectedSeasonId else { return user }
+        let expectedMonthId = generatedMonthId()
+        let shouldResetSeason = user.currentSeasonId != expectedSeasonId
+        let shouldBackfillMonth = user.currentMonthId != expectedMonthId
 
-        try await usersCollection.document(user.id).updateData([
-            "currentSeasonId": expectedSeasonId,
-            "currentSeasonTrail": 0
-        ])
+        guard shouldResetSeason || shouldBackfillMonth else { return user }
+
+        var updates: [String: Any] = [:]
+        if shouldResetSeason {
+            updates["currentSeasonId"] = expectedSeasonId
+            updates["currentSeasonTrail"] = 0
+        }
+
+        var monthlyTrail = user.currentMonthTrail ?? 0
+        if shouldBackfillMonth {
+            let bounds = currentMonthBounds()
+            let runs = try await getRuns(userId: user.id, from: bounds.start, to: bounds.end)
+            monthlyTrail = runs.reduce(0) { $0 + $1.trail }
+            updates["currentMonthId"] = expectedMonthId
+            updates["currentMonthTrail"] = monthlyTrail
+        }
+
+        try await usersCollection.document(user.id).updateData(updates)
 
         var syncedUser = user
-        syncedUser.currentSeasonId = expectedSeasonId
-        syncedUser.currentSeasonTrail = 0
+        if shouldResetSeason {
+            syncedUser.currentSeasonId = expectedSeasonId
+            syncedUser.currentSeasonTrail = 0
+        }
+        if shouldBackfillMonth {
+            syncedUser.currentMonthId = expectedMonthId
+            syncedUser.currentMonthTrail = monthlyTrail
+        }
         return syncedUser
     }
 
@@ -312,6 +334,9 @@ final class FirestoreService {
         if run.seasonId == generatedSeasonIdForCurrentWeek() {
             userUpdates["currentSeasonTrail"] = FieldValue.increment(-run.trail)
         }
+        if generatedMonthId(for: run.startDate) == generatedMonthId() {
+            userUpdates["currentMonthTrail"] = FieldValue.increment(-run.trail)
+        }
 
         if let latestRunDate = try await latestRunStartDate(userId: run.userId) {
             userUpdates["lastRunDate"] = latestRunDate
@@ -431,6 +456,7 @@ final class FirestoreService {
         let snapshot = try await usersCollection.getDocuments()
         let users = try snapshot.documents.compactMap { try $0.data(as: User.self) }
         let effectiveSeasonId = seasonId.isEmpty ? generatedSeasonIdForCurrentWeek() : seasonId
+        let effectiveMonthId = generatedMonthId()
 
         let filteredUsers: [User]
         switch period {
@@ -438,6 +464,25 @@ final class FirestoreService {
             filteredUsers = users.filter { user in
                 guard user.currentSeasonId == effectiveSeasonId,
                       user.currentSeasonTrail > 0 else {
+                    return false
+                }
+
+                if scope == .neighborhood {
+                    if let normalizedAreaId, !normalizedAreaId.isEmpty {
+                        return user.areaId?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedAreaId
+                    }
+                    return user.neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines) == normalizedNeighborhood
+                }
+                return true
+            }
+        case .monthly:
+            filteredUsers = users.filter { user in
+                guard leaderboardScore(
+                    for: user,
+                    period: period,
+                    effectiveSeasonId: effectiveSeasonId,
+                    effectiveMonthId: effectiveMonthId
+                ) > 0 else {
                     return false
                 }
 
@@ -467,8 +512,18 @@ final class FirestoreService {
         }
 
         let sortedUsers = filteredUsers.sorted { lhs, rhs in
-            let lhsScore = period == .weekly ? lhs.currentSeasonTrail : lhs.totalTrail
-            let rhsScore = period == .weekly ? rhs.currentSeasonTrail : rhs.totalTrail
+            let lhsScore = leaderboardScore(
+                for: lhs,
+                period: period,
+                effectiveSeasonId: effectiveSeasonId,
+                effectiveMonthId: effectiveMonthId
+            )
+            let rhsScore = leaderboardScore(
+                for: rhs,
+                period: period,
+                effectiveSeasonId: effectiveSeasonId,
+                effectiveMonthId: effectiveMonthId
+            )
 
             if lhsScore != rhsScore {
                 return lhsScore > rhsScore
@@ -484,13 +539,45 @@ final class FirestoreService {
                 displayName: user.displayName,
                 photoURL: user.photoURL,
                 color: user.color,
-                trail: period == .weekly ? user.currentSeasonTrail : user.totalTrail,
+                trail: leaderboardScore(
+                    for: user,
+                    period: period,
+                    effectiveSeasonId: effectiveSeasonId,
+                    effectiveMonthId: effectiveMonthId
+                ),
                 rank: index + 1,
                 neighborhood: user.neighborhood,
                 areaId: user.areaId,
                 seasonId: effectiveSeasonId,
                 territoriesOwned: 0
             )
+        }
+    }
+
+    private func leaderboardScore(
+        for user: User,
+        period: LeaderboardPeriod,
+        effectiveSeasonId: String,
+        effectiveMonthId: String
+    ) -> Double {
+        switch period {
+        case .weekly:
+            return user.currentSeasonTrail
+        case .monthly:
+            let monthlyTrail = user.currentMonthTrail ?? 0
+            if user.currentMonthId == effectiveMonthId, monthlyTrail > 0 {
+                return monthlyTrail
+            }
+
+            // Older production bot documents predate monthly aggregates. Their
+            // current-week score is the safest bounded fallback until the next
+            // bot run writes the canonical monthly fields.
+            if user.isBotAccount, user.currentSeasonId == effectiveSeasonId {
+                return max(0, user.currentSeasonTrail)
+            }
+            return 0
+        case .allTime:
+            return user.totalTrail
         }
     }
 
@@ -575,6 +662,25 @@ final class FirestoreService {
         let weekNumber = calendar.component(.weekOfYear, from: now)
         let year = calendar.component(.yearForWeekOfYear, from: now)
         return "season_\(year)_w\(weekNumber)"
+    }
+
+    private func generatedMonthId(for date: Date = Date()) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let year = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
+        return String(format: "month_%04d_%02d", year, month)
+    }
+
+    private func currentMonthBounds() -> (start: Date, end: Date) {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let now = Date()
+        let start = calendar.date(
+            from: calendar.dateComponents([.year, .month], from: now)
+        ) ?? now
+        let end = calendar.date(byAdding: .month, value: 1, to: start) ?? now
+        return (start, end)
     }
 
     // MARK: - Seasons
@@ -678,18 +784,22 @@ final class FirestoreService {
         areaId: String? = nil
     ) async throws {
         let currentSeasonId = generatedSeasonIdForCurrentWeek()
+        let currentMonthId = generatedMonthId()
         let currentUser = try await getUser(id: userId)
         let isCurrentSeason = currentUser?.currentSeasonId == currentSeasonId
+        let isCurrentMonth = currentUser?.currentMonthId == currentMonthId
 
         var updates: [String: Any] = [
             "totalTrail": FieldValue.increment(trail),
             "totalDistance": FieldValue.increment(distance),
             "totalRuns": FieldValue.increment(Int64(1)),
             "currentSeasonId": currentSeasonId,
+            "currentMonthId": currentMonthId,
             "lastRunDate": Date()
         ]
 
         updates["currentSeasonTrail"] = isCurrentSeason ? FieldValue.increment(trail) : trail
+        updates["currentMonthTrail"] = isCurrentMonth ? FieldValue.increment(trail) : trail
 
         if let neighborhood = neighborhood?.trimmingCharacters(in: .whitespacesAndNewlines),
            !neighborhood.isEmpty {
@@ -705,13 +815,17 @@ final class FirestoreService {
 
     func grantDailyChallengeReward(userId: String, bonusTrail: Double) async throws {
         let currentSeasonId = generatedSeasonIdForCurrentWeek()
+        let currentMonthId = generatedMonthId()
         let currentUser = try await getUser(id: userId)
         let isCurrentSeason = currentUser?.currentSeasonId == currentSeasonId
+        let isCurrentMonth = currentUser?.currentMonthId == currentMonthId
 
         try await usersCollection.document(userId).updateData([
             "totalTrail": FieldValue.increment(bonusTrail),
             "currentSeasonId": currentSeasonId,
-            "currentSeasonTrail": isCurrentSeason ? FieldValue.increment(bonusTrail) : bonusTrail
+            "currentSeasonTrail": isCurrentSeason ? FieldValue.increment(bonusTrail) : bonusTrail,
+            "currentMonthId": currentMonthId,
+            "currentMonthTrail": isCurrentMonth ? FieldValue.increment(bonusTrail) : bonusTrail
         ])
     }
 }

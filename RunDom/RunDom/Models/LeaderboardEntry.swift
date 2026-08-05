@@ -7,6 +7,7 @@ enum LeaderboardScope: String, Codable, CaseIterable {
 
 enum LeaderboardPeriod: String, Codable, CaseIterable {
     case weekly
+    case monthly
     case allTime
 }
 

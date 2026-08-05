@@ -2,6 +2,53 @@ import Foundation
 import FirebaseDatabase
 
 final class RealtimeDBService {
+    struct CaptureTransactionResult {
+        let captured: Bool
+        let ownershipChanged: Bool
+        let isNewTerritory: Bool
+        let previousOwnerId: String?
+        let previousOwnerColor: String?
+        let remainingDefense: Double
+    }
+
+    private final class CaptureTransactionMetadata: @unchecked Sendable {
+        private let lock = NSLock()
+        private var isNewTerritory = false
+        private var previousOwnerId: String?
+        private var previousOwnerColor: String?
+        private var ownershipChanged = false
+
+        func update(
+            isNewTerritory: Bool,
+            previousOwnerId: String?,
+            previousOwnerColor: String?,
+            ownershipChanged: Bool
+        ) {
+            lock.lock()
+            self.isNewTerritory = isNewTerritory
+            self.previousOwnerId = previousOwnerId
+            self.previousOwnerColor = previousOwnerColor
+            self.ownershipChanged = ownershipChanged
+            lock.unlock()
+        }
+
+        func snapshot() -> (
+            isNewTerritory: Bool,
+            previousOwnerId: String?,
+            previousOwnerColor: String?,
+            ownershipChanged: Bool
+        ) {
+            lock.lock()
+            defer { lock.unlock() }
+            return (
+                isNewTerritory,
+                previousOwnerId,
+                previousOwnerColor,
+                ownershipChanged
+            )
+        }
+    }
+
     private let db: DatabaseReference
 
     private var territoryObservers: [String: DatabaseHandle] = [:]
@@ -65,20 +112,32 @@ final class RealtimeDBService {
         userId: String,
         userColor: String,
         distance: Double
-    ) async throws -> Bool {
+    ) async throws -> CaptureTransactionResult {
         let appliedDistance = sanitizedCellDistance(distance)
-        guard appliedDistance > 0 else { return false }
+        guard appliedDistance > 0 else {
+            return CaptureTransactionResult(
+                captured: false,
+                ownershipChanged: false,
+                isNewTerritory: false,
+                previousOwnerId: nil,
+                previousOwnerColor: nil,
+                remainingDefense: 0
+            )
+        }
 
         let ref = territoryRef(seasonId: seasonId, h3Index: h3Index)
+        let metadata = CaptureTransactionMetadata()
 
         let result = try await ref.runTransactionBlock { currentData in
             if var existingDict = currentData.value as? [String: Any] {
                 let currentOwner = existingDict["ownerId"] as? String ?? ""
+                let currentOwnerColor = existingDict["ownerColor"] as? String
                 let storedDefense = self.numberAsDouble(existingDict["defenseLevel"]) ?? 0
                 let lastRunDate = self.parseDate(existingDict["lastRunDate"]) ?? Date()
                 let now = Date()
                 let decayFactor = self.defenseDecayFactor(lastRunDate: lastRunDate, asOf: now)
                 let effectiveDefense = storedDefense * decayFactor
+                var ownershipChanged = false
 
                 if currentOwner == userId {
                     // Reinforcement starts a fresh decay window from the already
@@ -99,13 +158,26 @@ final class RealtimeDBService {
                         existingDict["defenseLevel"] = abs(remainingEffectiveDefense)
                         existingDict["totalDistance"] = appliedDistance
                         existingDict["lastRunDate"] = ISO8601DateFormatter().string(from: now)
+                        ownershipChanged = !currentOwner.isEmpty
                     } else {
                         existingDict["defenseLevel"] = remainingEffectiveDefense / decayFactor
                     }
                 }
+                metadata.update(
+                    isNewTerritory: false,
+                    previousOwnerId: currentOwner.isEmpty ? nil : currentOwner,
+                    previousOwnerColor: currentOwnerColor,
+                    ownershipChanged: ownershipChanged
+                )
                 currentData.value = existingDict
             } else {
                 // New territory
+                metadata.update(
+                    isNewTerritory: true,
+                    previousOwnerId: nil,
+                    previousOwnerColor: nil,
+                    ownershipChanged: false
+                )
                 currentData.value = [
                     "h3Index": h3Index,
                     "ownerId": userId,
@@ -119,15 +191,37 @@ final class RealtimeDBService {
         }
 
         let captured: Bool
-        let (_, snapshot) = result
+        let remainingDefense: Double
+        let (committed, snapshot) = result
         if let dict = snapshot.value as? [String: Any] {
-            captured = (dict["ownerId"] as? String) == userId
+            captured = committed && (dict["ownerId"] as? String) == userId
+            if captured {
+                remainingDefense = 0
+            } else {
+                let storedDefense = numberAsDouble(dict["defenseLevel"]) ?? 0
+                let lastRunDate = parseDate(dict["lastRunDate"]) ?? Date()
+                remainingDefense = storedDefense * defenseDecayFactor(
+                    lastRunDate: lastRunDate,
+                    asOf: Date()
+                )
+            }
         } else {
             captured = false
+            remainingDefense = 0
         }
+        let transactionMetadata = metadata.snapshot()
 
-        AppLogger.firebase.info("Territory \(h3Index): captured=\(captured) by \(userId)")
-        return captured
+        AppLogger.firebase.info(
+            "Territory \(h3Index): captured=\(captured) ownershipChanged=\(captured && transactionMetadata.ownershipChanged) by \(userId)"
+        )
+        return CaptureTransactionResult(
+            captured: captured,
+            ownershipChanged: captured && transactionMetadata.ownershipChanged,
+            isNewTerritory: transactionMetadata.isNewTerritory,
+            previousOwnerId: transactionMetadata.previousOwnerId,
+            previousOwnerColor: transactionMetadata.previousOwnerColor,
+            remainingDefense: remainingDefense
+        )
     }
 
     // MARK: - Observe Territories in Region

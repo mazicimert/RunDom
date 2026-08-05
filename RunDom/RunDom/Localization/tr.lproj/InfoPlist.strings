@@ -1,0 +1,4 @@
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "RunPire, aktif koşu sırasında uygulama arka plandayken rotanı kaydetmeye devam etmek için konumunu kullanır.";
+"NSLocationWhenInUseUsageDescription" = "RunPire, koşu sırasında rotanı kaydetmek ve bölgeleri fethetmek için konumunu kullanır.";
+"NSMotionUsageDescription" = "RunPire, aktif koşu sırasında takip doğruluğunu artırmak için hareket verilerini kullanır.";
+"NSPhotoLibraryAddUsageDescription" = "RunPire, kaydetmeyi seçtiğin koşu görsellerini fotoğraf arşivine ekler.";

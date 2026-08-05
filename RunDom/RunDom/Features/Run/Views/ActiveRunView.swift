@@ -2,12 +2,22 @@ import SwiftUI
 import MapKit
 
 struct ActiveRunView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private struct ConquestPresentation: Identifiable {
+        let event: ActiveRunViewModel.TerritoryConquestEvent
+        let comboCount: Int
+
+        var id: UUID { event.id }
+    }
+
     @StateObject var viewModel: ActiveRunViewModel
     let onFinish: (RunSession) -> Void
     @State private var hasStartedRun = false
-    @State private var showTerritoryConquestAnimation = false
-    @State private var pendingTerritoryConquestAnimations = 0
-    @State private var territoryAnimationId = 0
+    @State private var territoryConquestPresentation: ConquestPresentation?
+    @State private var pendingTerritoryConquests: [ConquestPresentation] = []
+    @State private var territoryConquestCombo = 0
+    @State private var lastTerritoryConquestAt: Date?
     @State private var statsDetent: PresentationDetent = RunStatsOverlayView.compactDetent
     @State private var showStatsSheet = true
     @State private var showRivalTerritoryBanner = false
@@ -63,6 +73,10 @@ struct ActiveRunView: View {
 
                     tiltToggle
 
+                    #if DEBUG
+                    debugConquestButton
+                    #endif
+
                     if !isFollowingUser {
                         recenterButton
                             .transition(.scale.combined(with: .opacity))
@@ -74,38 +88,16 @@ struct ActiveRunView: View {
             }
         }
         .overlay {
-            if showTerritoryConquestAnimation {
-                ZStack {
-                    Color.black.opacity(0.22)
-                        .ignoresSafeArea()
-
-                    VStack(spacing: 12) {
-                        LottieView(
-                            animationName: "Unlocked",
-                            loopMode: .playOnce,
-                            contentMode: .scaleAspectFit,
-                            animationSpeed: 1.0,
-                            onCompletion: { finishTerritoryConquestAnimation() }
-                        )
-                        .id(territoryAnimationId)
-                        .frame(width: 220, height: 220)
-
-                        Text("run.territoryConquered".localized)
-                            .font(.headline.bold())
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.2))
-                            .clipShape(Capsule())
-                    }
-                }
-                .allowsHitTesting(false)
+            if let presentation = territoryConquestPresentation {
+                TerritoryConquestView(
+                    userColor: Color(hex: viewModel.userColor) ?? .territoryBlue,
+                    opponentColor: presentation.event.opponentColorHex
+                        .flatMap(Color.init(hex:)) ?? .territoryRed,
+                    comboCount: presentation.comboCount,
+                    onFinished: finishTerritoryConquestAnimation
+                )
+                .id(presentation.id)
                 .transition(.opacity)
-                .task(id: territoryAnimationId) {
-                    try? await Task.sleep(for: .seconds(4))
-                    if !Task.isCancelled && showTerritoryConquestAnimation {
-                        finishTerritoryConquestAnimation()
-                    }
-                }
             }
         }
         .sheet(isPresented: $showStatsSheet) {
@@ -156,12 +148,11 @@ struct ActiveRunView: View {
         .onChange(of: viewModel.gpsSignalLost) { _, isLost in
             if isLost { Haptics.notification(.warning) }
         }
-        .onChange(of: viewModel.territoriesCaptured) { oldValue, newValue in
-            if newValue > oldValue { Haptics.notification(.success) }
-        }
-        .onChange(of: viewModel.territoryConquestAnimationTrigger) { oldValue, newValue in
-            guard newValue > oldValue else { return }
-            enqueueTerritoryConquestAnimation(count: newValue - oldValue)
+        .onChange(of: viewModel.territoryConquestEvents) { oldValue, newValue in
+            guard newValue.count > oldValue.count else { return }
+            enqueueTerritoryConquestAnimations(
+                events: Array(newValue.dropFirst(oldValue.count))
+            )
         }
         .onChange(of: viewModel.rivalTerritoryEntryTrigger) { oldValue, newValue in
             guard newValue > oldValue else { return }
@@ -173,6 +164,7 @@ struct ActiveRunView: View {
         .onDisappear {
             rivalTerritoryBannerTask?.cancel()
             introTimeoutTask?.cancel()
+            TerritoryConquestFeedback.shared.stop()
         }
         .statusBarHidden(viewModel.runState == .running)
     }
@@ -196,6 +188,7 @@ struct ActiveRunView: View {
     private var shouldShowTopStatusStack: Bool {
         viewModel.gpsSignalLost
             || showRivalTerritoryBanner
+            || viewModel.rivalDefenseStatus != nil
             || (!viewModel.hasAlwaysLocationPermission && !isTrophyRunDemo)
     }
 
@@ -212,7 +205,13 @@ struct ActiveRunView: View {
             if showRivalTerritoryBanner {
                 rivalTerritoryBanner
             }
+
+            if let defense = viewModel.rivalDefenseStatus {
+                rivalDefenseBar(defense)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
+        .animation(.spring(response: 0.34, dampingFraction: 0.84), value: viewModel.rivalDefenseStatus)
     }
 
     private var isTrophyRunDemo: Bool {
@@ -267,6 +266,81 @@ struct ActiveRunView: View {
         .clipShape(Capsule())
     }
 
+    private func rivalDefenseBar(_ status: ActiveRunViewModel.RivalDefenseStatus) -> some View {
+        let rivalColor = Color(hex: status.ownerColorHex) ?? .territoryRed
+        let remaining = Int(ceil(status.remainingDefense))
+        let isCritical = status.remainingFraction <= 0.25
+        let isDark = colorScheme == .dark
+        let accentColor = isCritical
+            ? Color(red: 0.94, green: 0.43, blue: 0.40)
+            : rivalColor
+
+        return VStack(spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(accentColor.opacity(isDark ? 0.90 : 1.0))
+
+                Text("run.rivalDefense.title".localized)
+                    .font(.caption2.weight(.semibold))
+                    .tracking(0.65)
+                    .textCase(.uppercase)
+                    .foregroundStyle(Color.primary.opacity(isDark ? 0.76 : 0.88))
+
+                Spacer(minLength: 12)
+
+                Text("\(remaining)")
+                    .font(.system(size: 21, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(isCritical ? accentColor : Color.primary.opacity(0.94))
+                    .contentTransition(.numericText())
+            }
+
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.primary.opacity(isDark ? 0.09 : 0.14))
+
+                    Capsule()
+                        .fill(accentColor.opacity(isDark ? 0.82 : 1.0))
+                        .frame(width: proxy.size.width * CGFloat(status.remainingFraction))
+                        .shadow(color: accentColor.opacity(isDark ? 0.20 : 0.28), radius: 3)
+                }
+            }
+            .frame(height: 6)
+        }
+        .padding(.horizontal, 15)
+        .padding(.vertical, 12)
+        .padding(.leading, 3)
+        .frame(maxWidth: 248)
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.regularMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(isDark ? Color.black.opacity(0.16) : Color.white.opacity(0.82))
+                }
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(
+                    isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.13),
+                    lineWidth: 0.75
+                )
+        }
+        .overlay(alignment: .leading) {
+            Capsule()
+                .fill(accentColor.opacity(isDark ? 0.86 : 1.0))
+                .frame(width: 3, height: 35)
+                .padding(.leading, 1)
+        }
+        .shadow(color: .black.opacity(isDark ? 0.18 : 0.14), radius: 14, y: 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            "\("run.rivalDefense.title".localized), \("run.rivalDefense.remaining".localized(with: remaining))"
+        )
+    }
+
     private var recenterButton: some View {
         Button {
             Haptics.selection()
@@ -311,6 +385,30 @@ struct ActiveRunView: View {
         )
     }
 
+    #if DEBUG
+    /// Debug-only: plays the conquest celebration on demand so it can be reviewed
+    /// in context during a real run. Never ships — the whole button is DEBUG-gated.
+    private var debugConquestButton: some View {
+        Button {
+            Haptics.selection()
+            viewModel.debugSimulateConquest()
+        } label: {
+            Image(systemName: "hexagon.fill")
+                .font(.body.bold())
+                .foregroundStyle(Color.orange)
+                .frame(width: 44, height: 44)
+                .background(.thinMaterial, in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.orange.opacity(0.55), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: 4)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Debug: play conquest animation")
+    }
+    #endif
+
     private var rivalOverlayToggle: some View {
         Button {
             Haptics.selection()
@@ -335,33 +433,41 @@ struct ActiveRunView: View {
         )
     }
 
-    private func enqueueTerritoryConquestAnimation(count: Int) {
-        guard count > 0 else { return }
+    private func enqueueTerritoryConquestAnimations(
+        events: [ActiveRunViewModel.TerritoryConquestEvent]
+    ) {
+        guard !events.isEmpty else { return }
 
-        if showTerritoryConquestAnimation {
-            pendingTerritoryConquestAnimations += count
-            return
+        let now = Date()
+        let continuesCombo = lastTerritoryConquestAt.map {
+            now.timeIntervalSince($0) <= 8
+        } ?? false
+        var nextCombo = continuesCombo ? territoryConquestCombo : 0
+
+        let presentations = events.map { event in
+            nextCombo += 1
+            return ConquestPresentation(event: event, comboCount: nextCombo)
         }
 
-        territoryAnimationId += 1
-        showTerritoryConquestAnimation = true
-        if count > 1 {
-            pendingTerritoryConquestAnimations += (count - 1)
+        territoryConquestCombo = nextCombo
+        lastTerritoryConquestAt = now
+
+        if territoryConquestPresentation == nil {
+            territoryConquestPresentation = presentations[0]
+            pendingTerritoryConquests.append(contentsOf: presentations.dropFirst())
+        } else {
+            pendingTerritoryConquests.append(contentsOf: presentations)
         }
     }
 
     private func finishTerritoryConquestAnimation() {
-        if pendingTerritoryConquestAnimations > 0 {
-            pendingTerritoryConquestAnimations -= 1
-            showTerritoryConquestAnimation = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                territoryAnimationId += 1
-                showTerritoryConquestAnimation = true
-            }
+        if let next = pendingTerritoryConquests.first {
+            pendingTerritoryConquests.removeFirst()
+            territoryConquestPresentation = next
             return
         }
 
-        showTerritoryConquestAnimation = false
+        territoryConquestPresentation = nil
     }
 
     private func finishIntro() {
@@ -443,6 +549,31 @@ struct RunMapView: UIViewRepresentable {
     /// Effective camera pitch for every framing below — the cinematic descent, touchdown, and
     /// live follow all read this so toggling 2D/3D flows through a single value.
     var followPitch: CGFloat { isTiltEnabled ? Self.followPitchTilted : 0 }
+
+    /// Direction of the runner's latest meaningful route segment. This is more stable than
+    /// the instantaneous compass/course sample and exactly matches the line visible on map.
+    private var latestRouteDirection: CLLocationDirection? {
+        guard let endPoint = routePoints.last else { return nil }
+        let endLocation = CLLocation(
+            latitude: endPoint.latitude,
+            longitude: endPoint.longitude
+        )
+        guard let startPoint = routePoints.dropLast().reversed().first(where: { point in
+            let location = CLLocation(latitude: point.latitude, longitude: point.longitude)
+            return endLocation.distance(from: location) >= 2
+        }) else {
+            return nil
+        }
+
+        let latitude1 = startPoint.latitude * .pi / 180
+        let latitude2 = endPoint.latitude * .pi / 180
+        let longitudeDelta = (endPoint.longitude - startPoint.longitude) * .pi / 180
+        let y = sin(longitudeDelta) * cos(latitude2)
+        let x = cos(latitude1) * sin(latitude2)
+            - sin(latitude1) * cos(latitude2) * cos(longitudeDelta)
+        let degrees = atan2(y, x) * 180 / .pi
+        return (degrees + 360).truncatingRemainder(dividingBy: 360)
+    }
     private static let introHoldDuration: TimeInterval = 0.3               // beat at altitude before descending
     // The descent runs at an (almost) constant perceived zoom speed — geometric altitude
     // interpolation paced over this duration. The duration is chosen so the per-second zoom
@@ -458,6 +589,10 @@ struct RunMapView: UIViewRepresentable {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
+        mapView.register(
+            RunDomUserLocationAnnotationView.self,
+            forAnnotationViewWithReuseIdentifier: RunDomUserLocationAnnotationView.reuseIdentifier
+        )
         mapView.userTrackingMode = .none
         mapView.mapType = .standard
         mapView.isPitchEnabled = true
@@ -510,6 +645,7 @@ struct RunMapView: UIViewRepresentable {
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let coordinator = context.coordinator
         coordinator.parent = self
+        coordinator.refreshUserLocationAppearance(on: mapView)
 
         // Kick off the space→ground descent as soon as we have a coordinate to aim at.
         coordinator.startIntroIfReady(on: mapView)
@@ -560,7 +696,8 @@ struct RunMapView: UIViewRepresentable {
 
         mapView.removeOverlays(mapView.overlays)
 
-        // Rival territories (dim) sit underneath the user's own painted cells.
+        // Rival territories sit underneath the user's own painted cells. They use the
+        // standard territory contrast so owner colors remain readable while running.
         if showsRivalOverlay {
             for territory in rivalTerritories.sorted(by: { $0.h3Index < $1.h3Index }) {
                 if let polygon = MKPolygon.fromH3Index(territory.h3Index) {
@@ -636,6 +773,28 @@ struct RunMapView: UIViewRepresentable {
 
         // MARK: - User Location & Cinematic Intro
 
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard let userLocation = annotation as? MKUserLocation else { return nil }
+            let view = mapView.dequeueReusableAnnotationView(
+                withIdentifier: RunDomUserLocationAnnotationView.reuseIdentifier,
+                for: userLocation
+            ) as? RunDomUserLocationAnnotationView
+            view?.apply(
+                userLocation: userLocation,
+                preferredCourse: parent.latestRouteDirection,
+                mapHeading: mapView.camera.heading
+            )
+            return view
+        }
+
+        func refreshUserLocationAppearance(on mapView: MKMapView) {
+            (mapView.view(for: mapView.userLocation) as? RunDomUserLocationAnnotationView)?.apply(
+                userLocation: mapView.userLocation,
+                preferredCourse: parent.latestRouteDirection,
+                mapHeading: mapView.camera.heading
+            )
+        }
+
         /// Starts the descent from the already-known runner coordinate (preferred —
         /// it's available immediately). Called from `updateUIView`.
         func startIntroIfReady(on mapView: MKMapView) {
@@ -653,6 +812,7 @@ struct RunMapView: UIViewRepresentable {
         /// the descent on the first usable fix; afterwards it keeps the camera locked onto the
         /// runner (when follow is active and we aren't mid-animation).
         func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+            refreshUserLocationAppearance(on: mapView)
             if !hasPlayedIntro {
                 guard let location = userLocation.location,
                       location.horizontalAccuracy > 0,
@@ -672,6 +832,12 @@ struct RunMapView: UIViewRepresentable {
                 return
             }
             followCamera(on: mapView, location: location)
+        }
+
+        /// Annotation views remain screen-aligned while MapKit rotates the camera. Refresh the
+        /// pointer during that rotation so its on-screen angle keeps matching the route.
+        func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
+            refreshUserLocationAppearance(on: mapView)
         }
 
         /// Drives the camera from a "from space" altitude straight down onto the runner.
@@ -998,7 +1164,7 @@ struct RunMapView: UIViewRepresentable {
                 renderer.applyStyle(
                     isSelected: false,
                     isOwnedByCurrentUser: territory.ownerId == currentUserId,
-                    isDimmed: true
+                    isDimmed: false
                 )
                 return renderer
             }

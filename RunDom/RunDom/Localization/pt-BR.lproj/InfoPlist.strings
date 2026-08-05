@@ -1,0 +1,4 @@
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "O RunPire usa sua localização durante corridas ativas para continuar registrando sua rota quando o app está em segundo plano.";
+"NSLocationWhenInUseUsageDescription" = "O RunPire usa sua localização para registrar sua rota e conquistar territórios durante uma corrida.";
+"NSMotionUsageDescription" = "O RunPire usa dados de movimento durante corridas ativas para melhorar a precisão do acompanhamento.";
+"NSPhotoLibraryAddUsageDescription" = "O RunPire adiciona à sua fototeca as imagens de corrida que você escolher salvar.";

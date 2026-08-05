@@ -440,6 +440,10 @@ struct TerritoryMapView: UIViewRepresentable {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
+        mapView.register(
+            RunDomUserLocationAnnotationView.self,
+            forAnnotationViewWithReuseIdentifier: RunDomUserLocationAnnotationView.reuseIdentifier
+        )
         mapView.setRegion(region, animated: false)
         mapView.showsCompass = true
         mapView.isRotateEnabled = false
@@ -468,6 +472,7 @@ struct TerritoryMapView: UIViewRepresentable {
         context.coordinator.dropzones = dropzones
         context.coordinator.heatmapCells = heatmapCells
         context.coordinator.userColor = userColor
+        context.coordinator.refreshUserLocationAppearance(on: mapView)
         context.coordinator.inspectedH3Index = inspectedH3Index
         context.coordinator.onTerritoryTapped = onTerritoryTapped
         context.coordinator.onMapBackgroundTapped = onMapBackgroundTapped
@@ -713,6 +718,18 @@ struct TerritoryMapView: UIViewRepresentable {
         // MARK: - Annotation Views
 
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            if let userLocation = annotation as? MKUserLocation {
+                let view = mapView.dequeueReusableAnnotationView(
+                    withIdentifier: RunDomUserLocationAnnotationView.reuseIdentifier,
+                    for: userLocation
+                ) as? RunDomUserLocationAnnotationView
+                view?.apply(
+                    userLocation: userLocation,
+                    mapHeading: mapView.camera.heading
+                )
+                return view
+            }
+
             guard let dropzoneAnnotation = annotation as? DropzoneAnnotation else { return nil }
 
             let identifier = "DropzoneAnnotation"
@@ -735,6 +752,17 @@ struct TerritoryMapView: UIViewRepresentable {
             annotationView.centerOffset = CGPoint(x: 0, y: -35)
 
             return annotationView
+        }
+
+        func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+            refreshUserLocationAppearance(on: mapView)
+        }
+
+        func refreshUserLocationAppearance(on mapView: MKMapView) {
+            (mapView.view(for: mapView.userLocation) as? RunDomUserLocationAnnotationView)?.apply(
+                userLocation: mapView.userLocation,
+                mapHeading: mapView.camera.heading
+            )
         }
 
         // MARK: - Region Change
@@ -766,6 +794,10 @@ struct TerritoryMapView: UIViewRepresentable {
                 guard overlayStyleCache[h3Index] != newStyle else { continue }
 
                 overlayStyleCache[h3Index] = newStyle
+                renderer.updateTerritoryAppearance(
+                    color: UIColor(Color(hex: newStyle.ownerColor) ?? .blue),
+                    isDecaying: newStyle.isDecaying
+                )
                 renderer.applyStyle(
                     isSelected: newStyle.isSelected,
                     isOwnedByCurrentUser: newStyle.isOwnedByCurrentUser,

@@ -68,6 +68,8 @@ struct PauseRunView: View {
 }
 
 struct SlideToFinishControl: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let onComplete: () -> Void
 
     @State private var dragOffset: CGFloat = 0
@@ -75,6 +77,7 @@ struct SlideToFinishControl: View {
 
     private let knobSize: CGFloat = 54
     private let horizontalInset: CGFloat = 6
+    private let finishColor = Color(red: 1.0, green: 0.27, blue: 0.30)
 
     var body: some View {
         GeometryReader { proxy in
@@ -82,7 +85,7 @@ struct SlideToFinishControl: View {
 
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(Color.red.opacity(0.88))
+                    .fill(finishColor)
 
                 HStack {
                     Spacer()
@@ -103,13 +106,26 @@ struct SlideToFinishControl: View {
                 .padding(.trailing, 20)
 
                 Circle()
-                    .fill(.white)
+                    .fill(Color.white)
                     .frame(width: knobSize, height: knobSize)
+                    .overlay {
+                        Circle()
+                            .stroke(
+                                finishColor.opacity(colorScheme == .dark ? 0.30 : 0.14),
+                                lineWidth: 1
+                            )
+                    }
                     .overlay {
                         Image(systemName: "stop.fill")
                             .font(.headline.bold())
-                            .foregroundStyle(Color.red)
+                            .symbolRenderingMode(.monochrome)
+                            .foregroundStyle(finishColor)
                     }
+                    .shadow(
+                        color: finishColor.opacity(colorScheme == .dark ? 0.22 : 0.10),
+                        radius: 5,
+                        y: 2
+                    )
                     .offset(x: horizontalInset + dragOffset)
                     .gesture(
                         DragGesture(minimumDistance: 0)

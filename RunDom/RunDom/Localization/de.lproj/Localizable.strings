@@ -118,22 +118,22 @@
 // MARK: - Permissions
 "permission.location.title" = "Standort Aktivieren";
 "permission.location.subtitle" = "RunPire braucht deinen Standort, um Läufe zu erfassen und Gebiete in Echtzeit zu erobern.";
-"permission.location.button" = "Standortzugriff Erlauben";
+"permission.location.button" = "Weiter";
 "permission.notification.title" = "Bleib Im Spiel";
 "permission.notification.subtitle" = "Erhalte Nachrichten, wenn deine Gebiete angegriffen werden.";
 "permission.notification.button" = "Mitteilungen Aktivieren";
 
 // MARK: - Onboarding — Location Priming
-"onboarding.location.title" = "Verliere deinen Lauf nicht";
-"onboarding.location.subtitle" = "Wir brauchen 'Immer erlauben', damit wir Gebiet weiter markieren können, während dein Handy in der Tasche steckt.";
+"onboarding.location.title" = "Zeichne deinen Lauf genau auf";
+"onboarding.location.subtitle" = "RunPire verwendet deinen Standort während eines aktiven Laufs, um Route und Gebiete aufzuzeichnen – auch bei ausgeschaltetem Bildschirm.";
 "onboarding.location.deniedTitle" = "Standort ist aus";
 "onboarding.location.deniedSubtitle" = "Der Standortzugriff wurde zuvor abgelehnt. Öffne die iOS-Einstellungen, um ihn zu aktivieren — das System fragt aus der App nicht erneut.";
 "onboarding.location.bullet1" = "Funktioniert auch, wenn das Handy in der Tasche ist";
 "onboarding.location.bullet2" = "Nur während deiner Läufe aktiv";
-"onboarding.location.bullet3" = "Erforderlich, um Gebiet zu erobern";
-"onboarding.location.allow" = "Standortzugriff Erlauben";
+"onboarding.location.bullet3" = "Hält Route und Gebiete präzise";
+"onboarding.location.allow" = "Weiter";
 "onboarding.location.openSettings" = "iOS-Einstellungen Öffnen";
-"onboarding.location.skip" = "Jetzt nicht";
+"onboarding.location.skip" = "Ohne Standort fortfahren";
 
 // MARK: - Auth
 "auth.signInApple" = "Mit Apple anmelden";
@@ -293,6 +293,8 @@
 "run.tilt.accessibility.on" = "3D-Neigung an";
 "run.tilt.accessibility.off" = "3D-Neigung aus";
 "run.rivalOverlay.entered" = "Du hast Rivalen-Gebiet betreten";
+"run.rivalDefense.title" = "Rivalen-Verteidigung";
+"run.rivalDefense.remaining" = "%d verbleibend";
 "run.boostSafe" = "Boost sicher";
 "run.boostApproaching" = "Annäherung an Grenzwert";
 "run.boostRequired" = "erforderlich";
@@ -312,6 +314,7 @@
 "run.dailyCapped" = "Tageslimit erreicht (15.000)";
 "run.territories" = "Gebiete";
 "run.territoryConquered" = "Gebiet Erobert!";
+"run.conquest.streak" = "Eroberungsserie ×%d";
 "run.startPoint" = "Start";
 "run.endPoint" = "Ziel";
 "run.delete.confirmTitle" = "Diesen Lauf löschen?";
@@ -451,15 +454,19 @@
 "leaderboard.global" = "Global";
 "leaderboard.neighborhood" = "Viertel";
 "leaderboard.period.weekly" = "Wöchentlich";
+"leaderboard.period.monthly" = "Monatlich";
 "leaderboard.period.allTime" = "Allzeit";
 "leaderboard.context.subtitle" = "%@ • %@";
 "leaderboard.context.description.weeklyGlobal" = "Du siehst das globale Rennen dieser Woche.";
 "leaderboard.context.description.weeklyNeighborhood" = "Du siehst das Viertel-Rennen dieser Woche.";
+"leaderboard.context.description.monthlyGlobal" = "Du siehst das globale Rennen dieses Monats.";
+"leaderboard.context.description.monthlyNeighborhood" = "Du siehst das Viertel-Rennen dieses Monats.";
 "leaderboard.context.description.allTimeGlobal" = "Du siehst die globalen Bestenliste über alle Zeiten.";
 "leaderboard.context.description.allTimeNeighborhood" = "Du siehst die Bestenliste deines Viertels über alle Zeiten.";
 "leaderboard.you" = "Du";
 "leaderboard.pinned.title" = "Deine Position";
 "leaderboard.weekly.endsIn" = "Saison endet in";
+"leaderboard.monthly.endsIn" = "Monat endet in";
 "leaderboard.weekly.remaining.daysHours" = "%dT %dh";
 "leaderboard.weekly.remaining.hoursMinutes" = "%dh %dm";
 "leaderboard.weekly.remaining.minutes" = "%dm";
@@ -765,7 +772,6 @@
 "social.follow" = "Folgen";
 "social.unfollow" = "Folge ich";
 "social.userprofile.posts.title" = "Letzte Beiträge";
-"profile.runpireRunner" = "RunPire Runner";
 "social.userprofile.posts.empty" = "Noch keine Beiträge.";
 "social.followlist.empty.followers" = "Noch keine Follower.";
 "social.followlist.empty.following" = "Folgt noch niemandem.";

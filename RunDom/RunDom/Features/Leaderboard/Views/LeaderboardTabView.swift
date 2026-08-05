@@ -143,8 +143,8 @@ private struct LeaderboardFilterCard: View {
 
                 Spacer(minLength: 8)
 
-                if selectedPeriod == .weekly {
-                    WeeklySeasonCountdownPill()
+                if selectedPeriod != .allTime {
+                    LeaderboardCountdownPill(period: selectedPeriod)
                         .transition(.opacity.combined(with: .scale))
                 }
             }
@@ -182,6 +182,7 @@ private struct LeaderboardFilterCard: View {
     private func title(for period: LeaderboardPeriod) -> String {
         switch period {
         case .weekly: return "leaderboard.period.weekly".localized
+        case .monthly: return "leaderboard.period.monthly".localized
         case .allTime: return "leaderboard.period.allTime".localized
         }
     }
@@ -189,6 +190,7 @@ private struct LeaderboardFilterCard: View {
     private func icon(for period: LeaderboardPeriod) -> String {
         switch period {
         case .weekly: return "calendar"
+        case .monthly: return "calendar.circle"
         case .allTime: return "infinity"
         }
     }
@@ -265,12 +267,13 @@ private struct LeaderboardSegmentedControl<Option: Hashable>: View {
 
 // MARK: - Countdown Pill
 
-private struct WeeklySeasonCountdownPill: View {
+private struct LeaderboardCountdownPill: View {
+    let period: LeaderboardPeriod
     private let seasonService = SeasonService()
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
-            let remaining = max(seasonService.generateCurrentSeason().endDate.timeIntervalSince(context.date), 0)
+            let remaining = max(endDate(from: context.date).timeIntervalSince(context.date), 0)
 
             HStack(spacing: 6) {
                 Image(systemName: "timer")
@@ -278,7 +281,7 @@ private struct WeeklySeasonCountdownPill: View {
                     .foregroundStyle(Color.accentColor)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("leaderboard.weekly.endsIn".localized)
+                    Text(titleKey.localized)
                         .font(.system(size: 8, weight: .semibold))
                         .foregroundStyle(.secondary)
                     Text(formatRemaining(remaining))
@@ -290,6 +293,29 @@ private struct WeeklySeasonCountdownPill: View {
             .padding(.vertical, 7)
             .background(Color.accentColor.opacity(0.14), in: Capsule())
             .overlay(Capsule().stroke(Color.accentColor.opacity(0.3), lineWidth: 1))
+        }
+    }
+
+    private var titleKey: String {
+        switch period {
+        case .weekly: return "leaderboard.weekly.endsIn"
+        case .monthly: return "leaderboard.monthly.endsIn"
+        case .allTime: return ""
+        }
+    }
+
+    private func endDate(from now: Date) -> Date {
+        switch period {
+        case .weekly:
+            return seasonService.generateCurrentSeason().endDate
+        case .monthly:
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+            let components = calendar.dateComponents([.year, .month], from: now)
+            let monthStart = calendar.date(from: components) ?? now
+            return calendar.date(byAdding: .month, value: 1, to: monthStart) ?? now
+        case .allTime:
+            return now
         }
     }
 
